@@ -53,6 +53,7 @@ const PropertySearch = ({ properties, onResults, placeholder, compact = false })
                     />
                 <input
                     type="text"
+                    autoComplete="off"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                     onKeyDown={(event) => event.key === "Enter" && applyFilters()}

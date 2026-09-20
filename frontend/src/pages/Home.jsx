@@ -1,11 +1,14 @@
 import DiscoverProperty from "../components/DiscoverProperty";
 import PropertySearch from "../components/PropertySearch";
-import { properties } from "../../data";
 import realestate from "../assets/realestate.jpg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const Home = ({ favorites, setFavorites }) => {
+const Home = ({ properties, favorites, onToggleFavorite }) => {
   const [visibleProperties, setVisibleProperties] = useState(properties);
+
+  useEffect(() => {
+    setVisibleProperties(properties);
+  }, [properties]);
 
   return (
     <main className="bg-white">
@@ -66,10 +69,10 @@ const Home = ({ favorites, setFavorites }) => {
           </div>
 
           <div className="mt-6">
-            <DiscoverProperty          
+            <DiscoverProperty
               properties={visibleProperties}
               favorites={favorites}
-              setFavorites={setFavorites}
+              onToggleFavorite={onToggleFavorite}
             />
           </div>
 

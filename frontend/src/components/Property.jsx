@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
+import houseImage from "../assets/house1.jpg";
 
-const Property = ({ property, favorites, setFavorites }) => {
+const Property = ({ property, favorites, onToggleFavorite }) => {
     const isFavorite = favorites.includes(property.id);
-    const { image, address, city, price, size, listingType } = property;
+    const { address, city, price, size, listingType } = property;
     const isRental = listingType === "rent" || listingType === "forRent";
+
+    const image = property.image
+        || (property.images && property.images.length > 0 ? property.images[0].url : houseImage);
 
     return (
         <div className="property-card w-52.5 overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
@@ -13,6 +17,7 @@ const Property = ({ property, favorites, setFavorites }) => {
             <Link to="/propertyInfo" state={{ property }}>
                 <img
                     src={image}
+                    onError={(event) => { event.target.src = houseImage; }}
                     alt="house image"
                     className="h-28.75 w-full object-cover"
                 />
@@ -34,18 +39,7 @@ const Property = ({ property, favorites, setFavorites }) => {
                         ? "bg-[#17634f] text-white hover:bg-[#12503f]"
                         : "bg-white/90 text-[#17634f] hover:bg-white"
                 }`}
-                onClick={() => {
-                    if (isFavorite) {
-                        setFavorites(
-                            favorites.filter((id) => id !== property.id)
-                        );
-                    } else {
-                        setFavorites([
-                            ...favorites,
-                            property.id
-                        ]);
-                    }
-                }}
+                onClick={() => onToggleFavorite(property.id)}
             >
                 <Heart size={18} strokeWidth={2} fill={isFavorite ? "currentColor" : "none"} />
             </button>

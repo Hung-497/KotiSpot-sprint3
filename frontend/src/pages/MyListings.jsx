@@ -15,7 +15,7 @@ const MyListings = ({
 
 
     const handleEdit = (listing) => {
-        setSelectedListing({ ...listing });
+        setSelectedListing({ status: "active", ...listing });
         setEdit(true);
     };
 
@@ -140,6 +140,44 @@ const MyListings = ({
                             <h2 className="mb-6 text-xl font-semibold text-[#08243f]">
                                 Property information
                             </h2>
+
+
+                            <div className="mb-5">
+
+                                <label className="mb-2 block text-sm font-medium text-[#08243f]">
+                                    Listing status
+                                </label>
+
+                                <select
+                                    value={selectedListing.status || "active"}
+                                    onChange={(event) =>
+                                        setSelectedListing({
+                                            ...selectedListing,
+                                            status: event.target.value
+                                        })
+                                    }
+                                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-[#17634f] md:max-w-xs"
+                                >
+
+                                    <option value="active">
+                                        Active
+                                    </option>
+
+                                    <option value="inactive">
+                                        Inactive
+                                    </option>
+
+                                    <option value="sold">
+                                        Sold
+                                    </option>
+
+                                    <option value="rented">
+                                        Rented
+                                    </option>
+
+                                </select>
+
+                            </div>
 
 
                             <div className="mb-5">

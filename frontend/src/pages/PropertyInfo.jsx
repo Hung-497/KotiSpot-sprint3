@@ -1,31 +1,65 @@
 import { useLocation, Link } from "react-router-dom";
+import { useState } from "react";
 import { MapPin, Heart, Mail, BedDouble, Bath, Maximize } from "lucide-react";
+import houseImage from "../assets/house1.jpg";
 
-const PropertyInfo = ({ property, favorites, setFavorites }) => {
+const PropertyInfo = ({ property, favorites, onToggleFavorite }) => {
   const location = useLocation();
   const selectedProperty = property || location.state?.property;
+
+  const [isInquiryFormOpen, setIsInquiryFormOpen] = useState(false);
+  const [inquiryName, setInquiryName] = useState("");
+  const [inquiryEmail, setInquiryEmail] = useState("");
+  const [inquiryMessage, setInquiryMessage] = useState("");
+  const [inquirySent, setInquirySent] = useState(false);
+  const [formError, setFormError] = useState("");
 
   if (!selectedProperty) {
     return <p>Property information is unavailable.</p>;
   }
 
+  const image = selectedProperty.image
+    || (selectedProperty.images && selectedProperty.images.length > 0 ? selectedProperty.images[0].url : houseImage);
+
   const isFavorite = favorites.includes(selectedProperty.id);
 
-  const toggleFavorite = () => {
-    if (isFavorite) {
-      setFavorites(
-        favorites.filter((id) => id !== selectedProperty.id)
-      );
-    } else {
-      setFavorites([
-        ...favorites,
-        selectedProperty.id
-      ]);
-    }
-  };
+  const toggleFavorite = () => onToggleFavorite(selectedProperty.id);
 
   const contactSeller = () => {
-    console.log('You pressed the "contact seller or agent" button');
+    setInquirySent(false);
+    setFormError("");
+    setIsInquiryFormOpen(!isInquiryFormOpen);
+  };
+
+  const submitInquiry = (event) => {
+    event.preventDefault();
+
+    if (!inquiryName.trim() || !inquiryEmail.trim() || !inquiryMessage.trim()) {
+      setFormError("Please fill in your name, email, and message.");
+      return;
+    }
+
+    setFormError("");
+
+    fetch(`/api/inquiries/${selectedProperty.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: inquiryName,
+        email: inquiryEmail,
+        message: inquiryMessage,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to send your message. Please try again.");
+        }
+        setInquirySent(true);
+        setInquiryName("");
+        setInquiryEmail("");
+        setInquiryMessage("");
+      })
+      .catch((error) => setFormError(error.message));
   };
 
   return (
@@ -37,7 +71,8 @@ const PropertyInfo = ({ property, favorites, setFavorites }) => {
           <div className="lg:col-span-2">
 
             <img
-              src={selectedProperty.image}
+              src={image}
+              onError={(event) => { event.target.src = houseImage; }}
               alt={selectedProperty.title}
               className="h-105 w-full rounded-xl object-cover"
             />
@@ -45,25 +80,29 @@ const PropertyInfo = ({ property, favorites, setFavorites }) => {
             <div className="mt-4 grid grid-cols-4 gap-3">
 
               <img
-                src={selectedProperty.image}
+                src={image}
+                onError={(event) => { event.target.src = houseImage; }}
                 alt="property"
                 className="h-20 w-full rounded-lg border-2 border-blue-500 object-cover"
               />
 
               <img
-                src={selectedProperty.image}
+                src={image}
+                onError={(event) => { event.target.src = houseImage; }}
                 alt="property"
                 className="h-20 w-full rounded-lg object-cover opacity-70"
               />
 
               <img
-                src={selectedProperty.image}
+                src={image}
+                onError={(event) => { event.target.src = houseImage; }}
                 alt="property"
                 className="h-20 w-full rounded-lg object-cover opacity-70"
               />
 
               <img
-                src={selectedProperty.image}
+                src={image}
+                onError={(event) => { event.target.src = houseImage; }}
                 alt="property"
                 className="h-20 w-full rounded-lg object-cover opacity-70"
               />
@@ -158,6 +197,71 @@ const PropertyInfo = ({ property, favorites, setFavorites }) => {
               <Mail size={18} />
               Contact seller or agent
             </button>
+
+            {isInquiryFormOpen && (
+              <div className="mt-4 rounded-lg border border-gray-200 p-4">
+                {inquirySent ? (
+                  <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
+                    Your message has been sent. The seller or agent will get back to you soon.
+                  </p>
+                ) : (
+                  <form onSubmit={submitInquiry} className="space-y-3">
+                    {formError && (
+                      <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {formError}
+                      </p>
+                    )}
+
+                    <div>
+                      <label htmlFor="inquiry-name" className="mb-1 block text-xs font-medium text-[#08243f]">
+                        Your name
+                      </label>
+                      <input
+                        id="inquiry-name"
+                        type="text"
+                        value={inquiryName}
+                        onChange={(event) => setInquiryName(event.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="inquiry-email" className="mb-1 block text-xs font-medium text-[#08243f]">
+                        Your email
+                      </label>
+                      <input
+                        id="inquiry-email"
+                        type="email"
+                        value={inquiryEmail}
+                        onChange={(event) => setInquiryEmail(event.target.value)}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="inquiry-message" className="mb-1 block text-xs font-medium text-[#08243f]">
+                        Message
+                      </label>
+                      <textarea
+                        id="inquiry-message"
+                        value={inquiryMessage}
+                        onChange={(event) => setInquiryMessage(event.target.value)}
+                        rows="3"
+                        placeholder={`Hi, I'm interested in ${selectedProperty.title || "this property"}...`}
+                        className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full rounded-lg bg-[#17634f] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#12503f]"
+                    >
+                      Send message
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
 
           </div>
 

@@ -20,9 +20,9 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
 
     return (
         <nav className="flex h-20 items-center border-b border-gray-200 bg-white px-8 lg:px-16">
-            <Link to="/" className="flex items-center">
+            <a href="/" className="flex items-center">
                 <img className="w-45 h-auto" src={logo} alt="Kotispot" />
-            </Link>
+            </a>
 
             <ul className="mx-auto flex items-center gap-9">
                 {navLinks.map((link) => (

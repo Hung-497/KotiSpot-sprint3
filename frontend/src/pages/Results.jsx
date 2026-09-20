@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import Property from "../components/Property";
 
-const Results = ({ favorites, setFavorites }) => {
+const Results = ({ favorites, onToggleFavorite }) => {
     const location = useLocation();
     const results = location.state?.properties || [];
 
@@ -14,7 +14,7 @@ const Results = ({ favorites, setFavorites }) => {
                     <p>No results found</p>
                 ) : (
                     results.map((property) => (
-                        <Property key={property.id} property={property} favorites={favorites} setFavorites={setFavorites} />
+                        <Property key={property.id} property={property} favorites={favorites} onToggleFavorite={onToggleFavorite} />
                     ))
                 )}
             </div>

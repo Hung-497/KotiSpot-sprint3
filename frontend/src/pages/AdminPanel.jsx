@@ -1,5 +1,12 @@
 import { useState } from "react";
 import { Check, Flag, MapPin, ShieldCheck, Trash2, X } from "lucide-react";
+import houseImage from "../assets/house1.jpg";
+
+const getImage = (property) => {
+    if (property.image) return property.image;
+    if (property.images && property.images.length > 0) return property.images[0].url;
+    return houseImage;
+};
 
 const statusStyles = {
     active: "bg-green-50 text-green-700",
@@ -68,7 +75,7 @@ const AdminPanel = ({ properties, moderationStatuses, onModerate }) => {
                                 onClick={() => setSelectedProperty(property)}
                                 className="overflow-hidden rounded-xl border border-gray-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#17634f] hover:shadow-md"
                             >
-                                <img src={property.image} alt={property.title} className="h-48 w-full object-cover" />
+                                <img src={getImage(property)} onError={(event) => { event.target.src = houseImage; }} alt={property.title} className="h-48 w-full object-cover" />
                                 <div className="p-5">
                                     <div className="flex items-start justify-between gap-3">
                                         <h2 className="font-semibold text-[#08243f]">{property.title}</h2>
@@ -103,7 +110,7 @@ const AdminPanel = ({ properties, moderationStatuses, onModerate }) => {
                         </div>
 
                         <div className="grid gap-6 p-6 md:grid-cols-[220px_1fr]">
-                            <img src={selectedProperty.image} alt={selectedProperty.title} className="h-48 w-full rounded-lg object-cover" />
+                            <img src={getImage(selectedProperty)} onError={(event) => { event.target.src = houseImage; }} alt={selectedProperty.title} className="h-48 w-full rounded-lg object-cover" />
                             <div className="space-y-3 text-sm text-gray-600">
                                 <p className="text-xl font-semibold text-[#08243f]">{selectedProperty.price} €{(selectedProperty.listingType === "rent" || selectedProperty.listingType === "forRent") ? " / month" : ""}</p>
                                 <p><strong className="text-[#08243f]">Address:</strong> {selectedProperty.address}, {selectedProperty.city}</p>

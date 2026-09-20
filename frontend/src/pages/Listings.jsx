@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
-const Listings = ({ propertyListings, setPropertyListings }) => {
+// there is no real login yet, so every listing is posted as user 1
+const userId = 1;
+
+const Listings = ({ propertyListings, setPropertyListings, onListingPublished }) => {
     const [listingType, setListingType] = useState("");
     const [formMessage, setFormMessage] = useState("");
     const [formError, setFormError] = useState("");
@@ -93,29 +96,70 @@ const Listings = ({ propertyListings, setPropertyListings }) => {
             return;
         }
 
-        {
-            const listingToAdd = {
-                ...newListing,
-                listingType: listingType,
-                id: Date.now()
+        const listingToAdd = {
+            ...newListing,
+            listingType: listingType,
+            id: Date.now()
+        };
+
+        setPropertyListings((prevListings) => [
+            ...prevListings,
+            listingToAdd
+        ]);
+
+        const propertyToPost = {
+            ownerId: userId,
+            title: newListing.title,
+            description: newListing.description,
+            listingType: listingType === "forRent" ? "rent" : "sale",
+            propertyType: "residential",
+            propertySubType: newListing.propertyType,
+            currency: "EUR",
+            city: newListing.location,
+            address: newListing.address,
+            postalCode: newListing.postalCode,
+            rooms: Number(newListing.rooms),
+            bedrooms: Number(newListing.bedrooms),
+            bathrooms: Number(newListing.bathrooms),
+            size: Number(newListing.size),
+            features: {
+                balcony: newListing.features.includes("balcony"),
+                elevator: newListing.features.includes("elevator"),
+                parking: newListing.features.includes("parking"),
+                furnished: newListing.features.includes("furnished"),
+                petsAllowed: newListing.features.includes("petsAllowed"),
+                sauna: newListing.features.includes("sauna"),
+            },
+            status: "active",
+        };
+
+        if (listingType === "forRent") {
+            propertyToPost.price = Number(newListing.monthlyRent);
+            propertyToPost.rentalDetails = {
+                availableFrom: newListing.availableFrom,
+                deposit: Number(newListing.securityDeposit),
+                minimumRentalPeriod: parseInt(newListing.minimumRentalPeriod, 10) || 1,
+                additionalCosts: newListing.additionalCosts,
             };
-
-            if (listingType === "forRent") {
-                setPropertyListings((prevListings) => [
-                    ...prevListings,
-                    listingToAdd
-                ]);
-            }
-
-            if (listingType === "forSale") {
-                setPropertyListings((prevListings) => [
-                    ...prevListings,
-                    listingToAdd
-                ]);
-            }
+        } else {
+            propertyToPost.price = Number(newListing.price);
         }
 
-        setFormMessage("Listing published successfully.");
+        fetch("/api/properties", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(propertyToPost),
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error("Failed to publish listing to the server. It was saved locally only.");
+                }
+                setFormMessage("Listing published successfully.");
+                if (onListingPublished) {
+                    onListingPublished();
+                }
+            })
+            .catch((error) => setFormError(error.message));
 
         setNewListing({
             title: "",

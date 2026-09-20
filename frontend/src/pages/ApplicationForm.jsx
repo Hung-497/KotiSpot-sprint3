@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+// there is no real login yet, so every application is submitted as user 1
+const userId = 1;
+
 const ApplicationForm = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -31,6 +34,34 @@ const ApplicationForm = () => {
     setRole(event.target.value);
   };
 
+  const submitApplication = () => {
+    const applicationData = {
+      role,
+      fullName,
+      companyName: role === "agent" ? companyName : undefined,
+      phone: phoneNumber,
+      email,
+      areas: role === "agent" ? location : undefined,
+      licenseNumber: role === "agent" ? licenseNumber : undefined,
+      bio: about,
+      idDocument: governmentId ? governmentId.name : "",
+      licenseDocument: role === "agent" && realEstateLicense ? realEstateLicense.name : undefined,
+    };
+
+    fetch(`/api/verifications/${userId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(applicationData),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to submit application. Please try again.");
+        }
+        navigate("/applicationthankmessage");
+      })
+      .catch((error) => setFormError(error.message));
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const commonFields = [[fullName, "full name"], [email, "email"], [phoneNumber, "phone number"], [role, "account type"]];
@@ -47,7 +78,7 @@ const ApplicationForm = () => {
     }
 
     const roleFields = role === "seller"
-      ? [[governmentId, "government ID"]]
+      ? [[about, "about yourself"], [governmentId, "government ID"]]
       : [[location, "operating location"], [licenseNumber, "licence number"], [about, "about yourself"], [governmentId, "government ID"], [realEstateLicense, "real estate licence"]];
     const missingRoleField = roleFields.find(([value]) => !value || !String(value).trim());
 
@@ -57,7 +88,16 @@ const ApplicationForm = () => {
     }
 
     setFormError("");
-    navigate("/applicationthankmessage");
+
+    // the verification endpoint needs a real user to exist first, and there is no
+    // real login system yet, so just try to create the user before submitting
+    fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, email, firstName: fullName.split(" ")[0] }),
+    })
+      .then(() => submitApplication())
+      .catch(() => submitApplication());
   };
 
   return (
@@ -144,7 +184,21 @@ const ApplicationForm = () => {
           {role === "seller" && (
             <div className="mt-7">
 
-              <h2 className="mb-4 text-sm font-medium text-[#08243f]">
+              <div className="grid grid-cols-1 gap-2">
+                <label className="text-sm text-gray-700">
+                  Tell us about yourself:
+                </label>
+
+                <textarea
+                  value={about}
+                  onChange={(event) => setAbout(event.target.value)}
+                  placeholder="A short introduction..."
+                  rows="4"
+                  className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                />
+              </div>
+
+              <h2 className="mb-4 mt-7 text-sm font-medium text-[#08243f]">
                 Verification
               </h2>
 

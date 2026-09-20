@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const connectDB = require("./config/db");
 const { unknownEndpoint, errorHandler } = require("./middleware/customMiddleware");
@@ -11,6 +12,9 @@ const verificationRouter = require("./routes/verificationRouter");
 const inquiryRouter = require("./routes/inquiryRouter");
 
 require("dotenv").config();
+
+// Allow the frontend dev server to call this API
+app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
 
 // Middleware to parse JSON
 app.use(express.json());

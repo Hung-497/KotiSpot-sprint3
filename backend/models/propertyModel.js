@@ -266,6 +266,7 @@ const propertySchema = new Schema(
       type: String,
       required: true,
       enum: ["active", "inactive", "sold", "rented"],
+      default: "active",
     },
   },
   { timestamps: true },

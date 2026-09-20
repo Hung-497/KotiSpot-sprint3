@@ -1,13 +1,16 @@
 import Properties from "../components/properties";
-import { properties } from "../../data";
 import PropertySearch from "../components/PropertySearch";
 import { Star, Heart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const Rent = ( {favorites, setFavorites} ) => {
+const Rent = ( {properties, favorites, onToggleFavorite} ) => {
     const forRentProperties = properties.filter((property) => property.listingType === "rent")
     const [visibleProperties, setVisibleProperties] = useState(forRentProperties);
     const [activeTab, setActiveTab] = useState("recommendations");
+
+    useEffect(() => {
+      setVisibleProperties(forRentProperties);
+    }, [properties]);
     const displayedProperties = activeTab === "favorites"
       ? visibleProperties.filter((property) => favorites.includes(property.id))
       : visibleProperties;
@@ -82,7 +85,7 @@ const Rent = ( {favorites, setFavorites} ) => {
             <Properties
               properties={displayedProperties}
               favorites={favorites}
-              setFavorites={setFavorites}
+              onToggleFavorite={onToggleFavorite}
             />
           )}
         </div>
