@@ -28,7 +28,7 @@ The original Product Backlog remains the source of product scope. The table belo
 | 16 | PBI-16 | Admin listing moderation | MongoDB-backed moderation routes exist; the admin UI uses mock local state | Commit: integrate in S3-US-08 |
 | 17 | PBI-09 | Upload and manage property images | Preview and image metadata exist; no upload service | Start with existing image references; expand to file storage if the team chooses |
 | 18 | PBI-15 | Display properties on a map | Not implemented | Commit: implement in S3-US-09 |
-| 19 | PBI-17 | Report suspicious listings | Partial backend foundation: moderation supports flagged status and reasons, but no user-report resource or route exists | Commit: complete and integrate in S3-US-10 |
+| 19 | PBI-17 | Report suspicious listings | Partial backend foundation: moderation supports flagged status and reasons, where flagged means under administrator investigation, but no user-report resource or route exists. | Commit: complete and integrate in S3-US-10 |
 | 20 | PBI-18 | Inquiry notifications | Not implemented | Commit: implement in S3-US-11 |
 | 21 | PBI-19 | Compare selected properties | Not implemented | Commit: implement in S3-US-12 |
 | 22 | PBI-20 | Mortgage and affordability calculator | Not implemented | Commit: implement in S3-US-13 |
@@ -293,7 +293,7 @@ As an administrator, I want to review seller or agent verification applications 
 2. The administrator can approve or reject an application with the required reason, and the decision persists.
 3. Approval updates the user's permitted role or verification state through a server-controlled operation.
 4. An authenticated administrator can retrieve moderation candidates and change moderation status with a reason.
-5. Removed or flagged listings no longer appear in public results according to the agreed moderation rules.
+5. A flagged listing means an administrator has placed the listing under further investigation; flagged and removed listings do not appear in public results.
 6. Non-administrators receive a forbidden response and cannot perform either workflow by calling the API directly.
 7. Private verification information is not exposed through public responses.
 8. Approval, rejection, moderation, invalid input, unauthenticated, and forbidden-role cases are tested.
