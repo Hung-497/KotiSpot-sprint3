@@ -43,7 +43,7 @@ const requestCode = async (req, res) => {
 
     if (existingAuthCode) {
       if (
-        existingAuthCode.requestWindowStartedAt &&
+        existingAuthCode.lastSentAt &&
         now - existingAuthCode.lastSentAt < RESEND_COOLDOWN_MS
       ) {
         return res.status(429).json({
@@ -52,7 +52,7 @@ const requestCode = async (req, res) => {
       }
 
       if (
-        existingAuthCode.lastSentAt &&
+        existingAuthCode.requestWindowStartedAt &&
         now - existingAuthCode.requestWindowStartedAt < REQUEST_WINDOW_MS
       ) {
         requestCount = existingAuthCode.requestCount;
