@@ -59,7 +59,7 @@ const ROLE_ACTIONS = {
 const userSchema = new mongoose.Schema({
   userId: {
     type: Number,
-    required: true,
+    sparse: true,
     unique: true,
     min: [1, "userId must be a positive integer"],
     validate: {

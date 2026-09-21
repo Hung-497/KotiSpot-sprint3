@@ -8,4 +8,5 @@ const MONGO_URI =
 module.exports = {
   MONGO_URI,
   PORT: process.env.PORT || 4000,
+  OTP_SECRET: process.env.OTP_SECRET,
 };

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const {
+  requestCode,
+  verifyCode,
   simulateLogin,
   simulateRegistration,
   simulateLogout,
@@ -14,5 +16,11 @@ router.post('/register', simulateRegistration);
 
 // POST /logout
 router.post('/logout', simulateLogout);
+
+// POST /request-code
+router.post('/request-code', requestCode);
+
+// POST /verify-code
+router.post('/verify-code', verifyCode);
 
 module.exports = router;
