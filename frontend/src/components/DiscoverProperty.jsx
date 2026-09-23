@@ -35,11 +35,17 @@ const DiscoverProperty = ({ properties, favorites, onToggleFavorite }) => {
                 </div>
                 
                 {activeTab === "recommendations" ? (
+                    properties.length === 0 ? (
+                        <p className="rounded-xl border border-gray-200 bg-[#f8faf9] px-6 py-8 text-center text-sm text-gray-500">
+                            No properties found. Try a different search or change the filters.
+                        </p>
+                    ) : (
                     <Properties
                         properties={properties}
                         favorites={favorites}
                         onToggleFavorite={onToggleFavorite}
                     />
+                    )
                 ) : (
                     favoriteProperties.length === 0 ? (
                         <p>No favourite properties yet.</p>

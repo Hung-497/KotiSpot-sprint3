@@ -21,6 +21,7 @@ const getAllUsers = async (req, res) => {
       })),
     );
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to retrieve users" });
   }
 };
@@ -44,6 +45,7 @@ const createUser = async (req, res) => {
       .status(201)
       .json({ user, permittedActions: User.ROLE_ACTIONS[user.role] });
   } catch (error) {
+    console.error(error);
     if (error.code === 11000) {
       return res.status(409).json({
         message: "User ID or email already exists",
@@ -79,6 +81,7 @@ const getUserById = async (req, res) => {
       .status(200)
       .json({ user, permittedActions: User.ROLE_ACTIONS[user.role] });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to retrieve user" });
   }
 };
@@ -124,6 +127,7 @@ const updateUser = async (req, res) => {
       permittedActions: User.ROLE_ACTIONS[updatedUser.role],
     });
   } catch (error) {
+    console.error(error);
     if (error.code === 11000) {
       return res.status(409).json({
         message: "User ID or email already exists",
@@ -158,6 +162,7 @@ const deleteUser = async (req, res) => {
 
     return res.status(204).send();
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to delete user" });
   }
 };

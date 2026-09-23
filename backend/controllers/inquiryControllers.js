@@ -43,6 +43,7 @@ const createInquiry = async (req, res) => {
 
     res.status(201).json(inquiry);
   } catch (error) {
+    console.error(error);
     if (error.name === "ValidationError") {
       return res.status(400).json({
         message: "Invalid inquiry data",

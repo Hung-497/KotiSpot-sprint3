@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import defaultPfp from "../assets/default-pfp.png";
 
 const Profile = () => {

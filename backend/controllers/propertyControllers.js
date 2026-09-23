@@ -28,6 +28,7 @@ const getActiveProperties = async (req, res) => {
     const properties = await Property.find(publicPropertyScope);
     res.json(properties);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to retrieve properties" });
   }
 };
@@ -37,6 +38,7 @@ const getAllProperties = async (req, res) => {
     const properties = await Property.find({});
     res.json(properties);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to retrieve properties" });
   }
 };
@@ -59,6 +61,7 @@ const createProperty = async (req, res) => {
     const newProperty = await Property.create({ ...req.body });
     res.status(201).json(newProperty);
   } catch (error) {
+    console.error(error);
     if (error.name === "ValidationError" || error.name === "CastError") {
       res.status(400).json({ message: "Invalid property data" });
     } else {
@@ -86,6 +89,7 @@ const getPropertyById = async (req, res) => {
       res.status(404).json({ message: "Property not found" });
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to retrieve property" });
   }
 };
@@ -122,6 +126,7 @@ const updateProperty = async (req, res) => {
       res.status(404).json({ message: "Property not found" });
     }
   } catch (error) {
+    console.error(error);
     if (error.name === "ValidationError" || error.name === "CastError") {
       res.status(400).json({ message: "Invalid property data" });
     } else {
@@ -147,6 +152,7 @@ const deleteProperty = async (req, res) => {
       res.status(404).json({ message: "Property not found" });
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to delete property" });
   }
 };
@@ -297,6 +303,7 @@ const filterProperties = async (req, res) => {
 
     res.status(200).json(properties);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to filter properties" });
   }
 };
@@ -339,6 +346,7 @@ const getPropertyByKeyword = async (req, res) => {
     const properties = await Property.find(query);
     res.status(200).json(properties);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Failed to search properties",
     });

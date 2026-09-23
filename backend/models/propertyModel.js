@@ -229,7 +229,19 @@ const propertySchema = new Schema(
       },
       validate: {
         validator: function (value) {
-          return this.listingType === "rent" || value === undefined;
+
+          let listingType = this.listingType;
+
+          if (listingType === undefined && typeof this.getUpdate === "function") {
+            const update = this.getUpdate() || {};
+            if (update.listingType !== undefined) {
+              listingType = update.listingType;
+            } else if (update.$set && update.$set.listingType !== undefined) {
+              listingType = update.$set.listingType;
+            }
+          }
+
+          return listingType === "rent" || value === undefined;
         },
         message: "rentalDetails are only valid for rental properties",
       },

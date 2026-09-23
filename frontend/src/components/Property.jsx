@@ -7,14 +7,18 @@ const Property = ({ property, favorites, onToggleFavorite }) => {
     const { address, city, price, size, listingType } = property;
     const isRental = listingType === "rent" || listingType === "forRent";
 
-    const image = property.image
-        || (property.images && property.images.length > 0 ? property.images[0].url : houseImage);
+    let image = houseImage;
+    if (property.image) {
+        image = property.image;
+    } else if (property.images && property.images.length > 0) {
+        image = property.images[0].url;
+    }
 
     return (
         <div className="property-card w-52.5 overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
             <div className="relative">
 
-            <Link to="/propertyInfo" state={{ property }}>
+            <Link to={`/properties/${property.id}`}>
                 <img
                     src={image}
                     onError={(event) => { event.target.src = houseImage; }}

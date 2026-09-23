@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 import Listing from "../components/Listing";
-import ListingDetails from "../components/ListingDetails";
 
 
 const MyListings = ({
@@ -211,11 +210,11 @@ const MyListings = ({
 
                                     <input
                                         type="text"
-                                        value={selectedListing.location}
+                                        value={selectedListing.city}
                                         onChange={(event) =>
                                             setSelectedListing({
                                                 ...selectedListing,
-                                                location: event.target.value
+                                                city: event.target.value
                                             })
                                         }
                                         className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
@@ -277,11 +276,11 @@ const MyListings = ({
                                     </label>
 
                                     <select
-                                        value={selectedListing.propertyType}
+                                        value={selectedListing.propertySubType}
                                         onChange={(event) =>
                                             setSelectedListing({
                                                 ...selectedListing,
-                                                propertyType: event.target.value
+                                                propertySubType: event.target.value
                                             })
                                         }
                                         className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-[#17634f]"
@@ -508,11 +507,11 @@ const MyListings = ({
 
                                             <input
                                                 type="text"
-                                                value={selectedListing.monthlyRent}
+                                                value={selectedListing.price}
                                                 onChange={(event) =>
                                                     setSelectedListing({
                                                         ...selectedListing,
-                                                        monthlyRent: event.target.value
+                                                        price: event.target.value
                                                     })
                                                 }
                                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
@@ -529,11 +528,11 @@ const MyListings = ({
 
                                             <input
                                                 type="text"
-                                                value={selectedListing.securityDeposit}
+                                                value={selectedListing.deposit}
                                                 onChange={(event) =>
                                                     setSelectedListing({
                                                         ...selectedListing,
-                                                        securityDeposit: event.target.value
+                                                        deposit: event.target.value
                                                     })
                                                 }
                                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"

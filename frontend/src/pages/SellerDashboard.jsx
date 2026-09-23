@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import Listing from "../components/Listing";
-import ListingDetails from "../components/ListingDetails";
 
 const SellerDashboard = ({
     propertyListings,
@@ -100,10 +99,7 @@ const SellerDashboard = ({
                                     key={listing.id}
                                     className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg"
                                 >
-                                    <Listing
-                                        listing={listing}
-                                        onClick={setSelectedListing}
-                                    />
+                                    <Listing listing={listing} />
 
                                     <div className="flex gap-3 border-t border-slate-200 p-4">
                                         <button
@@ -175,11 +171,11 @@ const SellerDashboard = ({
                                 </label>
                                 <input
                                     type="text"
-                                    value={selectedListing.location}
+                                    value={selectedListing.city}
                                     onChange={(event) =>
                                         setSelectedListing({
                                             ...selectedListing,
-                                            location: event.target.value
+                                            city: event.target.value
                                         })
                                     }
                                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#17634f] focus:bg-white"
@@ -225,11 +221,11 @@ const SellerDashboard = ({
                                     Property type
                                 </label>
                                 <select
-                                    value={selectedListing.propertyType}
+                                    value={selectedListing.propertySubType}
                                     onChange={(event) =>
                                         setSelectedListing({
                                             ...selectedListing,
-                                            propertyType: event.target.value
+                                            propertySubType: event.target.value
                                         })
                                     }
                                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#17634f] focus:bg-white"
@@ -379,11 +375,11 @@ const SellerDashboard = ({
                                         </label>
                                         <input
                                             type="text"
-                                            value={selectedListing.monthlyRent}
+                                            value={selectedListing.price}
                                             onChange={(event) =>
                                                 setSelectedListing({
                                                     ...selectedListing,
-                                                    monthlyRent: event.target.value
+                                                    price: event.target.value
                                                 })
                                             }
                                             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#17634f]"
@@ -396,11 +392,11 @@ const SellerDashboard = ({
                                         </label>
                                         <input
                                             type="text"
-                                            value={selectedListing.securityDeposit}
+                                            value={selectedListing.deposit}
                                             onChange={(event) =>
                                                 setSelectedListing({
                                                     ...selectedListing,
-                                                    securityDeposit: event.target.value
+                                                    deposit: event.target.value
                                                 })
                                             }
                                             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#17634f]"

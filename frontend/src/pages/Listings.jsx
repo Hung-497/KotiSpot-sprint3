@@ -1,29 +1,45 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
 
 // there is no real login yet, so every listing is posted as user 1
 const userId = 1;
 
-const Listings = ({ propertyListings, setPropertyListings, onListingPublished }) => {
+// turns an uploaded photo file into a data URL string the backend can store
+const readFileAsDataUrl = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            resolve(reader.result);
+        };
+
+        reader.onerror = () => {
+            reject(new Error(`Could not read the photo "${file.name}". Please try another file.`));
+        };
+
+        reader.readAsDataURL(file);
+    });
+};
+
+const Listings = ({ setPropertyListings, onListingPublished }) => {
     const [listingType, setListingType] = useState("");
     const [formMessage, setFormMessage] = useState("");
     const [formError, setFormError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [newListing, setNewListing] = useState({
         title: "",
-        location: "",
+        city: "",
         address: "",
         postalCode: "",
-        propertyType: "",
+        propertySubType: "",
         bedrooms: "",
         bathrooms: "",
         size: "",
         rooms: "",
         features: [],
         description: "",
-        monthlyRent: "",
         availableFrom: "",
-        securityDeposit: "",
+        deposit: "",
         minimumRentalPeriod: "",
         additionalCosts: "",
         photos: [],
@@ -64,7 +80,7 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
         }));
     };
 
-    const addListing = () => {
+    const addListing = async () => {
         setFormError("");
         setFormMessage("");
 
@@ -74,8 +90,8 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
         }
 
         const requiredFields = [
-            ["title", "title"], ["location", "location"], ["address", "address"],
-            ["postalCode", "postal code"], ["propertyType", "property type"],
+            ["title", "title"], ["city", "location"], ["address", "address"],
+            ["postalCode", "postal code"], ["propertySubType", "property type"],
             ["bedrooms", "bedrooms"], ["bathrooms", "bathrooms"], ["size", "size"],
             ["rooms", "rooms"], ["description", "description"], ["availableFrom", "available date"],
             ["condition", "condition"],
@@ -88,7 +104,7 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
         }
 
         const listingSpecificFields = listingType === "forRent"
-            ? [["monthlyRent", "monthly rent"], ["securityDeposit", "security deposit"], ["minimumRentalPeriod", "minimum rental period"], ["additionalCosts", "additional costs"]]
+            ? [["price", "monthly rent"], ["deposit", "security deposit"], ["minimumRentalPeriod", "minimum rental period"], ["additionalCosts", "additional costs"]]
             : [["price", "price"]];
         const missingListingField = listingSpecificFields.find(([field]) => !String(newListing[field]).trim());
         if (missingListingField) {
@@ -96,10 +112,11 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
             return;
         }
 
+        const localId = Date.now();
         const listingToAdd = {
             ...newListing,
             listingType: listingType,
-            id: Date.now()
+            id: localId
         };
 
         setPropertyListings((prevListings) => [
@@ -113,15 +130,16 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
             description: newListing.description,
             listingType: listingType === "forRent" ? "rent" : "sale",
             propertyType: "residential",
-            propertySubType: newListing.propertyType,
+            propertySubType: newListing.propertySubType,
             currency: "EUR",
-            city: newListing.location,
+            city: newListing.city,
             address: newListing.address,
             postalCode: newListing.postalCode,
             rooms: Number(newListing.rooms),
             bedrooms: Number(newListing.bedrooms),
             bathrooms: Number(newListing.bathrooms),
             size: Number(newListing.size),
+            price: Number(newListing.price),
             features: {
                 balcony: newListing.features.includes("balcony"),
                 elevator: newListing.features.includes("elevator"),
@@ -134,48 +152,32 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
         };
 
         if (listingType === "forRent") {
-            propertyToPost.price = Number(newListing.monthlyRent);
             propertyToPost.rentalDetails = {
                 availableFrom: newListing.availableFrom,
-                deposit: Number(newListing.securityDeposit),
+                deposit: Number(newListing.deposit),
                 minimumRentalPeriod: parseInt(newListing.minimumRentalPeriod, 10) || 1,
                 additionalCosts: newListing.additionalCosts,
             };
-        } else {
-            propertyToPost.price = Number(newListing.price);
         }
 
-        fetch("/api/properties", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(propertyToPost),
-        })
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error("Failed to publish listing to the server. It was saved locally only.");
-                }
-                setFormMessage("Listing published successfully.");
-                if (onListingPublished) {
-                    onListingPublished();
-                }
-            })
-            .catch((error) => setFormError(error.message));
+        const photos = newListing.photos;
+        const photoDescription = newListing.title || "Property photo";
 
+        // the listing is already saved locally, so the form can be cleared right away
         setNewListing({
             title: "",
-            location: "",
+            city: "",
             address: "",
             postalCode: "",
-            propertyType: "",
+            propertySubType: "",
             bedrooms: "",
             bathrooms: "",
             size: "",
             rooms: "",
             features: [],
             description: "",
-            monthlyRent: "",
             availableFrom: "",
-            securityDeposit: "",
+            deposit: "",
             minimumRentalPeriod: "",
             additionalCosts: "",
             photos: [],
@@ -183,6 +185,68 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
             condition: ""
         });
         setListingType("");
+        setIsSubmitting(true);
+
+        try {
+            // read every uploaded photo file into a data URL before sending the listing
+            const photoPromises = [];
+            for (let i = 0; i < photos.length; i++) {
+                photoPromises.push(readFileAsDataUrl(photos[i]));
+            }
+            const photoUrls = await Promise.all(photoPromises);
+
+            const images = [];
+            for (let i = 0; i < photoUrls.length; i++) {
+                images.push({
+                    id: i + 1,
+                    url: photoUrls[i],
+                    description: photoDescription,
+                    isMain: i === 0
+                });
+            }
+            propertyToPost.images = images;
+
+            const res = await fetch("/api/properties", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(propertyToPost),
+            });
+
+            // 413 means the photos made the request bigger than the server accepts
+            if (res.status === 413) {
+                throw new Error("The photos are too large. It was saved locally only - try fewer or smaller photos.");
+            }
+
+            if (!res.ok) {
+                throw new Error("Failed to publish listing to the server. It was saved locally only.");
+            }
+
+            const createdProperty = await res.json();
+
+            // swap in the real database id so this listing can later be edited/deleted there
+            setPropertyListings((prevListings) => {
+                const updatedListings = [];
+                for (let i = 0; i < prevListings.length; i++) {
+                    const listing = prevListings[i];
+                    if (listing.id === localId) {
+                        updatedListings.push({ ...listing, id: createdProperty.id });
+                    } else {
+                        updatedListings.push(listing);
+                    }
+                }
+                return updatedListings;
+            });
+
+            setFormMessage("Listing published successfully.");
+            if (onListingPublished) {
+                onListingPublished();
+            }
+        } catch (error) {
+            console.error("Error publishing listing:", error);
+            setFormError(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleListingType = (event) => {
@@ -279,8 +343,8 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
 
                             <input
                                 type="text"
-                                name="location"
-                                value={newListing.location}
+                                name="city"
+                                value={newListing.city}
                                 onChange={handleInputChange}
                                 placeholder="e.g. Helsinki, Finland"
                                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
@@ -335,8 +399,8 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
                             </label>
 
                             <select
-                                name="propertyType"
-                                value={newListing.propertyType}
+                                name="propertySubType"
+                                value={newListing.propertySubType}
                                 onChange={handleInputChange}
                                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-sm"
                             >
@@ -546,8 +610,8 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
 
                                 <input
                                     type="text"
-                                    value={newListing.monthlyRent}
-                                    name="monthlyRent"
+                                    value={newListing.price}
+                                    name="price"
                                     onChange={handleInputChange}
                                     placeholder="e.g. 1200"
                                     className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
@@ -576,8 +640,8 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
 
                                 <input
                                     type="text"
-                                    value={newListing.securityDeposit}
-                                    name="securityDeposit"
+                                    value={newListing.deposit}
+                                    name="deposit"
                                     onChange={handleInputChange}
                                     placeholder="e.g. 2400"
                                     className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
@@ -731,6 +795,7 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
                     <button
                         type="button"
                         onClick={addListing}
+                        disabled={isSubmitting}
                         className="
                             rounded-lg
                             bg-[#17634f]
@@ -739,9 +804,11 @@ const Listings = ({ propertyListings, setPropertyListings, onListingPublished })
                             font-medium
                             text-white
                             hover:bg-[#12503f]
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
                         "
                     >
-                        Publish listing
+                        {isSubmitting ? "Publishing..." : "Publish listing"}
                     </button>
 
                 </div>

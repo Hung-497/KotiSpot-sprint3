@@ -7,9 +7,26 @@ const Contact = () => {
     const [subject, setSubject] = useState("")
     const [message, setMessage] = useState("")
     const [formError, setFormError] = useState("")
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleFullName = (event) => {
+      setFullName(event.target.value);
+    };
+
+    const handleEmail = (event) => {
+      setEmail(event.target.value);
+    };
+
+    const handleSubject = (event) => {
+      setSubject(event.target.value);
+    };
+
+    const handleMessage = (event) => {
+      setMessage(event.target.value);
+    };
+
+    const handleSubmit = async (event) => {
       event.preventDefault();
       const fields = [[fullName, "full name"], [email, "email"], [subject, "subject"], [message, "message"]];
       const missingField = fields.find(([value]) => !value.trim());
@@ -19,8 +36,32 @@ const Contact = () => {
         return;
       }
 
+      if (!email.includes("@")) {
+        setFormError("Please enter a valid email address.");
+        return;
+      }
+
       setFormError("");
-      navigate("/contactthankmessage");
+      setIsSubmitting(true);
+
+      try {
+        const res = await fetch("/api/contact-messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fullName, email, subject, message }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to send your message. Please try again.");
+        }
+
+        navigate("/contactthankmessage");
+      } catch (error) {
+        console.error("Error sending contact message:", error);
+        setFormError(error.message);
+      } finally {
+        setIsSubmitting(false);
+      }
     };
 
     return (
@@ -51,7 +92,7 @@ const Contact = () => {
             <input
               type="text"
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={handleFullName}
               placeholder="e.g. John Doe"
               className="
                 w-full
@@ -73,7 +114,7 @@ const Contact = () => {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmail}
               placeholder="e.g. john.doe@example.com"
               className="
                 w-full
@@ -94,7 +135,7 @@ const Contact = () => {
 
             <select
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={handleSubject}
               className="
                 w-full
                 rounded-lg
@@ -127,7 +168,7 @@ const Contact = () => {
 
             <textarea
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={handleMessage}
               placeholder="Type your message here..."
               rows="5"
               className="
@@ -145,6 +186,7 @@ const Contact = () => {
 
           <button
             type="submit"
+            disabled={isSubmitting}
             className="
               inline-block
               rounded-lg
@@ -154,9 +196,11 @@ const Contact = () => {
               text-white
               transition
               hover:bg-[#124f40]
+              disabled:cursor-not-allowed
+              disabled:opacity-60
             "
           >
-            Send message
+            {isSubmitting ? "Sending..." : "Send message"}
           </button>
 
         </form>

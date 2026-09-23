@@ -13,6 +13,13 @@ const errorHandler = (error, req, res, next) => {
     });
   }
 
+  // express.json() rejects bodies over its 15mb limit (e.g. too many listing photos)
+  if (error.type === "entity.too.large") {
+    return res.status(413).json({
+      message: "Request is too large. Try uploading fewer or smaller photos.",
+    });
+  }
+
   res.status(500).json({
     message: "Internal server error",
   });

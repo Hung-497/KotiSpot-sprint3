@@ -90,6 +90,7 @@ const createVerification = async (req, res) => {
 
     res.status(201).json(verificationRequest);
   } catch (error) {
+    console.error(error);
     if (error.name === "ValidationError") {
       return res
         .status(400)
@@ -120,6 +121,7 @@ const getUserVerification = async (req, res) => {
 
     res.status(200).json(verificationRequest);
   } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ message: "Failed to retrieve verification request" });
@@ -148,6 +150,7 @@ const getApplications = async (req, res) => {
 
     res.status(200).json(applications);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Failed to retrieve verification applications",
     });
@@ -216,6 +219,7 @@ const reviewApplication = async (req, res) => {
 
     res.status(200).json(verificationRequest);
   } catch (error) {
+    console.error(error);
     if (error.name === "CastError") {
       return res.status(400).json({
         message: "Invalid application ID",

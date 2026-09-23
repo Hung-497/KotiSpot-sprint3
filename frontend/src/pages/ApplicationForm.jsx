@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // there is no real login yet, so every application is submitted as user 1
 const userId = 1;
@@ -16,6 +16,7 @@ const ApplicationForm = () => {
   const [governmentId, setGovernmentId] = useState(null);
   const [realEstateLicense, setRealEstateLicense] = useState(null);
   const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleFullName = (event) => {
@@ -34,7 +35,7 @@ const ApplicationForm = () => {
     setRole(event.target.value);
   };
 
-  const submitApplication = () => {
+  const submitApplication = async () => {
     const applicationData = {
       role,
       fullName,
@@ -48,21 +49,25 @@ const ApplicationForm = () => {
       licenseDocument: role === "agent" && realEstateLicense ? realEstateLicense.name : undefined,
     };
 
-    fetch(`/api/verifications/${userId}`, {
+    const res = await fetch(`/api/verifications/${userId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(applicationData),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to submit application. Please try again.");
-        }
-        navigate("/applicationthankmessage");
-      })
-      .catch((error) => setFormError(error.message));
+    });
+
+    // 409 means this user already has an application waiting for review
+    if (res.status === 409) {
+      throw new Error("You already have an application waiting for review.");
+    }
+
+    if (!res.ok) {
+      throw new Error("Failed to submit application. Please try again.");
+    }
+
+    navigate("/applicationthankmessage");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const commonFields = [[fullName, "full name"], [email, "email"], [phoneNumber, "phone number"], [role, "account type"]];
     const missingCommonField = commonFields.find(([value]) => !value.trim());
@@ -88,16 +93,29 @@ const ApplicationForm = () => {
     }
 
     setFormError("");
+    setIsSubmitting(true);
 
-    // the verification endpoint needs a real user to exist first, and there is no
-    // real login system yet, so just try to create the user before submitting
-    fetch("/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, email, firstName: fullName.split(" ")[0] }),
-    })
-      .then(() => submitApplication())
-      .catch(() => submitApplication());
+    try {
+      // the verification endpoint needs a real user to exist first, and there is no
+      // real login system yet, so we just try to create the user before submitting
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, email, firstName: fullName.split(" ")[0] }),
+      });
+
+      // 409 means user 1 already exists from an earlier application, which is fine
+      if (!res.ok && res.status !== 409) {
+        throw new Error("Failed to create your account. Please try again.");
+      }
+
+      await submitApplication();
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      setFormError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -220,6 +238,7 @@ const ApplicationForm = () => {
               <div className="mt-8 flex justify-end">
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="
                     rounded-full
                     bg-[#08243f]
@@ -227,9 +246,11 @@ const ApplicationForm = () => {
                     text-sm font-medium
                     text-white
                     hover:bg-[#17634f]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
                   "
                 >
-                  Submit
+                  {isSubmitting ? "Submitting..." : "Submit"}
                 </button>
               </div>
 
@@ -381,6 +402,7 @@ const ApplicationForm = () => {
               <div className="mt-8 flex justify-end">
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="
                     rounded-full
                     bg-[#08243f]
@@ -388,9 +410,11 @@ const ApplicationForm = () => {
                     text-sm font-medium
                     text-white
                     hover:bg-[#17634f]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
                   "
                 >
-                  Submit
+                  {isSubmitting ? "Submitting..." : "Submit"}
                 </button>
               </div>
 

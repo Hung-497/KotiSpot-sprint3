@@ -20,9 +20,9 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
 
     return (
         <nav className="flex h-20 items-center border-b border-gray-200 bg-white px-8 lg:px-16">
-            <a href="/" className="flex items-center">
+            <Link to="/" className="flex items-center">
                 <img className="w-45 h-auto" src={logo} alt="Kotispot" />
-            </a>
+            </Link>
 
             <ul className="mx-auto flex items-center gap-9">
                 {navLinks.map((link) => (
@@ -137,7 +137,7 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
                                     </h2>
 
                                     <p className="mt-2 text-sm text-gray-500">
-                                        Are you sủe you want to log out?
+                                        Are you sure you want to log out?
                                         <br />
                                         You will need to log in again to access your account
                                     </p>

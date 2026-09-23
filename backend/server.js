@@ -10,14 +10,15 @@ const userRouter = require("./routes/userRouter");
 const loginRouter = require("./routes/loginRouter");
 const verificationRouter = require("./routes/verificationRouter");
 const inquiryRouter = require("./routes/inquiryRouter");
+const contactRouter = require("./routes/contactRouter");
 
 require("dotenv").config();
 
 // Allow the frontend dev server to call this API
 app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
 
-// Middleware to parse JSON
-app.use(express.json());
+// Middleware to parse JSON (raised from the 100kb default so listing photos, sent as base64, fit)
+app.use(express.json({ limit: "15mb" }));
 
 connectDB();
 
@@ -29,6 +30,7 @@ app.use("/api/users", userRouter);
 app.use("/api/account", loginRouter);
 app.use("/api/verifications", verificationRouter);
 app.use("/api/inquiries", inquiryRouter);
+app.use("/api/contact-messages", contactRouter);
 
 // Middleware for handling unknown endpoints
 app.use(unknownEndpoint);

@@ -48,6 +48,7 @@ const getModerationCandidates = async (req, res) => {
     const properties = await Property.find(query);
     res.status(200).json(properties);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Failed to retrieve moderation candidates",
     });
@@ -114,6 +115,7 @@ const updateModerationStatus = async (req, res) => {
 
     res.status(200).json(updatedProperty);
   } catch (error) {
+    console.error(error);
     if (error.name === "ValidationError" || error.name === "CastError") {
       return res.status(400).json({
         message: "Invalid moderation data",

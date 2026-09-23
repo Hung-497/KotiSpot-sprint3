@@ -89,6 +89,10 @@ const Buy = ({ properties, favorites, onToggleFavorite }) => {
         <div>
           {activeTab === "favorites" && displayedProperties.length === 0 ? (
             <p>No favourite properties yet.</p>
+          ) : displayedProperties.length === 0 ? (
+            <p className="rounded-xl border border-gray-200 bg-white px-6 py-8 text-center text-sm text-gray-500">
+              No properties found. Try a different search or change the filters.
+            </p>
           ) : (
             <Properties
               properties={displayedProperties}

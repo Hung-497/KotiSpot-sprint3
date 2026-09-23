@@ -32,6 +32,7 @@ const getAllFavourites = async (req, res) => {
       })),
     );
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to retrieve favourites" });
   }
 };
@@ -65,6 +66,7 @@ const addFavourite = async (req, res) => {
     const favourite = await Favourite.create({ userId, propertyId });
     res.status(201).json(favourite);
   } catch (error) {
+    console.error(error);
     if (error.code === 11000) {
       return res.status(409).json({ message: "Property already favourited" });
     }
@@ -95,6 +97,7 @@ const deleteFavourite = async (req, res) => {
 
     res.status(200).json({ message: "Favourite deleted successfully" });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to delete favourite" });
   }
 };
