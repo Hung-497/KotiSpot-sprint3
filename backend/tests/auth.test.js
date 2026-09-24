@@ -1,10 +1,11 @@
 const supertest = require("supertest");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const app = require("../app");
 const connectDB = require("../config/db");
 const AuthCode = require("../models/authCodeModel");
-const { OTP_SECRET } = require("../config/config");
+const { OTP_SECRET, JWT_SECRET } = require("../config/config");
 const User = require("../models/userModel");
 
 const api = supertest(app);
@@ -137,6 +138,12 @@ describe("POST /api/account/verify-code", () => {
     expect(response.body.message).toBe("Login code verified");
     expect(response.body.user.email).toBe("test@example.com");
     expect(response.body.user.role).toBe("buyer");
+    expect(response.body.token).toBeDefined();
+
+    const decodedToken = jwt.verify(response.body.token, JWT_SECRET);
+
+    expect(decodedToken._id).toBe(response.body.user._id);
+    expect(decodedToken.exp).toBeGreaterThan(decodedToken.iat); // Ensure the token has an expiration time
 
     const user = await User.findOne({ email: "test@example.com" });
     expect(user).not.toBeNull();
@@ -201,5 +208,57 @@ describe("POST /api/account/verify-code", () => {
       .post("/api/account/verify-code")
       .send({ email: "test@example.com", code: "123456" })
       .expect(400);
+  });
+  it("should return a JWT that cannot be verified with the wrong secret", async () => {
+    await createAuthCode();
+
+    const response = await api
+      .post("/api/account/verify-code")
+      .send({
+        email: "test@example.com",
+        code: "123456",
+      })
+      .expect(200);
+
+    expect(() => {
+      jwt.verify(response.body.token, "wrong-secret");
+    }).toThrow();
+  });
+});
+
+describe("GET /api/account/me", () => {
+  it("should reject a request without a token", async () => {
+    await api
+      .get("/api/account/me")
+      .expect(401);
+  });
+
+  it("should reject a request with an invalid token", async () => {
+    await api
+      .get("/api/account/me")
+      .set("Authorization", "Bearer invalid-token")
+      .expect(401);
+  });
+
+  it("should return the authenticated user with a valid token", async () => {
+    const user = await User.create({
+      email: "test@example.com",
+    });
+
+    const token = jwt.sign(
+      { _id: user._id },
+      JWT_SECRET,
+      { expiresIn: "3d" },
+    );
+
+    const response = await api
+      .get("/api/account/me")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    expect(response.body.user._id).toBe(user._id.toString());
+    expect(response.body.user.email).toBe("test@example.com");
+    expect(response.body.user.role).toBe("buyer");
   });
 });
