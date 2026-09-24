@@ -1,14 +1,11 @@
 const mongoose = require("mongoose");
 
 const verificationRequestSchema = new mongoose.Schema({
-  userId: {
-    type: Number,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
-    min: [1, "userId must be a positive integer"],
-    validate: {
-      validator: Number.isInteger,
-      message: "userId must be a positive integer",
-    },
+    index: true,
   },
   role: {
     type: String,
@@ -53,12 +50,8 @@ const verificationRequestSchema = new mongoose.Schema({
   },
 
   reviewedBy: {
-    type: Number,
-    min: [1, "reviewedBy must be a positive integer"],
-    validate: {
-      validator: Number.isInteger,
-      message: "reviewedBy must be a positive integer",
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
   reviewNote: { type: String, maxlength: 500 },
   rejectionReason: { type: String, trim: true, maxlength: 500 },

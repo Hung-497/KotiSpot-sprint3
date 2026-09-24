@@ -1,8 +1,7 @@
-import { properties } from "../../data";
 import Properties from "../components/Properties";
 
-const Favorites = ({ favorites, setFavorites }) => {
-    const favoriteProperties = properties.filter((property) =>
+const Favorites = ({ properties: visibleProperties, favorites, onToggleFavorite }) => {
+    const favoriteProperties = visibleProperties.filter((property) =>
         favorites.includes(property.id)
     );
 
@@ -15,7 +14,7 @@ const Favorites = ({ favorites, setFavorites }) => {
                 <Properties
                     properties={favoriteProperties}
                     favorites={favorites}
-                    setFavorites={setFavorites}
+                    onToggleFavorite={onToggleFavorite}
                 
                 />
             )}

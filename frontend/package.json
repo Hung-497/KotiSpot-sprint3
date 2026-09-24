@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
 
-  "homepage": "https://hung-497.github.io/KotiSpot-sprint2/",
+  "homepage": "https://hung-497.github.io/KotiSpot-sprint3/",
   "scripts": {
     "dev": "vite",
     "predeploy": "npm run build",

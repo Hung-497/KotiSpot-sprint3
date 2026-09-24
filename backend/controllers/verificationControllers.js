@@ -1,34 +1,10 @@
 const Verification = require("../models/verificationModel");
 const User = require("../models/userModel");
 
-const parseUserId = (value) => {
-  const userId = Number(value);
-
-  if (!Number.isInteger(userId) || userId <= 0) {
-    return null;
-  }
-
-  return userId;
-};
-
 const createVerification = async (req, res) => {
-  const userId = parseUserId(req.params.userId);
-
-  if (userId === null) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
   try {
-    const user = await User.findOne({ userId });
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
     const existingRequest = await Verification.findOne({
-      userId,
+      user: req.user._id,
       status: "pending",
     });
 
@@ -74,7 +50,7 @@ const createVerification = async (req, res) => {
     }
 
     const verificationRequest = await Verification.create({
-      userId,
+      user: req.user._id,
       role,
       fullName,
       companyName,
@@ -101,14 +77,10 @@ const createVerification = async (req, res) => {
 };
 
 const getUserVerification = async (req, res) => {
-  const userId = parseUserId(req.params.userId);
-
-  if (userId === null) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
   try {
-    const verificationRequest = await Verification.findOne({ userId }).sort({
+    const verificationRequest = await Verification.findOne({
+      user: req.user._id,
+    }).sort({
       createdAt: -1,
     });
 
@@ -157,19 +129,11 @@ const getApplications = async (req, res) => {
 const reviewApplication = async (req, res) => {
   const { applicationId } = req.params;
 
-  const { status, reviewedBy, reviewNote, rejectionReason } = req.body ?? {};
+  const { status, reviewNote, rejectionReason } = req.body ?? {};
 
   if (!["approved", "rejected"].includes(status)) {
     return res.status(400).json({
       message: 'Invalid status. Must be either "approved" or "rejected".',
-    });
-  }
-
-  const reviewerId = parseUserId(reviewedBy);
-
-  if (reviewerId === null) {
-    return res.status(400).json({
-      message: "Invalid reviewedBy user ID",
     });
   }
 
@@ -197,7 +161,7 @@ const reviewApplication = async (req, res) => {
     }
 
     verificationRequest.status = status;
-    verificationRequest.reviewedBy = reviewerId;
+    verificationRequest.reviewedBy = req.user._id;
     verificationRequest.reviewedAt = new Date();
     verificationRequest.reviewNote = reviewNote || undefined;
 
@@ -208,7 +172,7 @@ const reviewApplication = async (req, res) => {
 
     if (status === "approved") {
       await User.findOneAndUpdate(
-        { userId: verificationRequest.userId },
+        verificationRequest.user,
         { role: verificationRequest.role, verifiedAt: new Date() },
         { returnDocument: "after", runValidators: true },
       );

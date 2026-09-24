@@ -57,17 +57,6 @@ const ROLE_ACTIONS = {
 };
 
 const userSchema = new mongoose.Schema({
-  userId: {
-    type: Number,
-    required: true,
-    unique: true,
-    min: [1, "userId must be a positive integer"],
-    validate: {
-      validator: Number.isInteger,
-      message: "userId must be a positive integer",
-    },
-  },
-
   email: {
     type: String,
     required: true,
