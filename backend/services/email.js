@@ -32,12 +32,18 @@ const getTransporter = async () => {
 const sendLoginCode = async (email, code) => {
     const transporter = await getTransporter();
 
-    return transporter.sendMail({
+    const info = await transporter.sendMail({
         from: process.env.EMAIL_FROM || "KotiSpot <noreply@kotispot.app>",
         to: email,
         subject: "Your KotiSpot Login Code",
         text: `Your KotiSpot login code is ${code}. It will expire in 10 minutes.`,
     });
+
+    if (process.env.NODE_ENV !== "test") {
+        console.log("OTP email preview:", nodemailer.getTestMessageUrl(info));
+    }
+
+    return info;
 };
 
 module.exports = {

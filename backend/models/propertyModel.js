@@ -132,7 +132,7 @@ const moderationSchema = new Schema(
       type: String,
       required: true,
       enum: ["unreviewed", "flagged", "approved", "removed"],
-      default: "approved", // Default to "approved" for sprint 2, default to "unreviewed" for sprint 3
+      default: "unreviewed", 
     },
     reason: {
       type: String,
@@ -151,14 +151,10 @@ const moderationSchema = new Schema(
 
 const propertySchema = new Schema(
   {
-    ownerId: {
-      type: Number,
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
-      min: [1, "ownerId must be a positive integer"],
-      validate: {
-        validator: Number.isInteger,
-        message: "ownerId must be a positive integer",
-      },
     },
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
@@ -260,7 +256,7 @@ const propertySchema = new Schema(
     },
     moderation: {
       type: moderationSchema,
-      default: () => ({ status: "approved" }), // Default to "approved" for sprint 2, default to "unreviewed" for sprint 3
+      default: () => ({ status: "unreviewed" }), 
     },
     status: {
       type: String,

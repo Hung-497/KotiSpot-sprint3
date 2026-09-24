@@ -1,7 +1,6 @@
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
-import Results from "./pages/Results";
-import Footer from "../src/components/Footer"
+import Footer from "../src/components/Footer";
 import Navbar from "../src/components/Navbar";
 import Buy from "./pages/Buy";
 import Contact from "./pages/Contact";
@@ -12,109 +11,303 @@ import Register from "./pages/Register";
 import Rent from "./pages/Rent";
 import Sell from "./pages/Sell";
 import ApplicationForm from "./pages/ApplicationForm";
-import ApplicationThankMessage from "./pages/ApplicationThankMessage"
+import ApplicationThankMessage from "./pages/ApplicationThankMessage";
 import Favorites from "./pages/Favorites";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import MyListings from "./pages/MyListings";
-import SellerDashboard from "./pages/SellerDashboard";
 import Listings from "./pages/Listings";
 import AdminPanel from "./pages/AdminPanel";
-import { properties } from "../data";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getStoredAuth, saveAuth, clearAuth } from "./utils/authStorage";
+import { apiRequest } from "./services/api";
 
 function App() {
-    const [favorites, setFavorites] = useState([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [propertyListings, setPropertyListings] = useState([]);
-    const [moderationStatuses, setModerationStatuses] = useState(() =>
-        Object.fromEntries(properties.map((property) => [property.id, property.status || "active"]))
-    );
+  const [favorites, setFavorites] = useState([]);
+  const [auth, setAuth] = useState(() => getStoredAuth());
+  const isLoggedIn = Boolean(auth?.user && auth?.token);
 
-    const moderateProperty = (propertyId, status, reason) => {
-        setModerationStatuses((currentStatuses) => ({
-            ...currentStatuses,
-            [propertyId]: { status, reason, updatedAt: new Date().toISOString() },
-        }));
-    };
+  const isAdmin = auth?.user?.role === "administrator";
 
-    const deleteListing = (id) => {
-        setPropertyListings((prevListings) =>
-            prevListings.filter((listing) => listing.id !== id)
+  const canManageListings =
+    ["seller", "agent"].includes(auth?.user?.role) &&
+    Boolean(auth?.user?.verifiedAt);
+
+  const canApply =
+    isLoggedIn &&
+    !["seller", "agent", "administrator"].includes(auth?.user?.role);
+
+  const syncModeratedProperty = (updatedProperty) => {
+    setProperties((currentProperties) => {
+      const isPublic =
+        updatedProperty.status === "active" &&
+        updatedProperty.moderation?.status === "approved";
+
+      const alreadyExists = currentProperties.some(
+        (property) => property.id === updatedProperty.id,
+      );
+
+      if (!isPublic) {
+        return currentProperties.filter(
+          (property) => property.id !== updatedProperty.id,
         );
+      }
+
+      if (alreadyExists) {
+        return currentProperties.map((property) =>
+          property.id === updatedProperty.id ? updatedProperty : property,
+        );
+      }
+
+      return [...currentProperties, updatedProperty];
+    });
+  };
+
+  const [properties, setProperties] = useState([]);
+
+  useEffect(() => {
+    const validateStoredAuth = async () => {
+      const storedAuth = getStoredAuth();
+
+      if (!storedAuth?.token) {
+        return;
+      }
+
+      try {
+        const data = await apiRequest("/users/me");
+
+        const refreshedAuth = saveAuth(data.user, storedAuth.token);
+
+        setAuth(refreshedAuth);
+      } catch {
+        clearAuth();
+        setAuth(null);
+      }
     };
 
-    const updateListing = (updatedListing) => { 
-        setPropertyListings((prevListings) => 
-            prevListings.map((listing) => listing.id === updatedListing.id ? updatedListing : listing ) ); };
+    validateStoredAuth();
+  }, []);
 
-    const logIn = () => {
-        setIsLoggedIn(true);
+  useEffect(() => {
+    const loadProperties = async () => {
+      try {
+        const data = await apiRequest("/properties");
+        setProperties(data);
+      } catch (error) {
+        console.error("Failed to load properties:", error);
+      }
     };
 
-    const logOut = () => {
-        setIsLoggedIn(false);
+    loadProperties();
+  }, []);
+
+  useEffect(() => {
+    const loadFavorites = async () => {
+      if (!auth?.token) {
+        setFavorites([]);
+        return;
+      }
+
+      try {
+        const data = await apiRequest("/favourites");
+        const favouriteIds = data
+          .filter((item) => item.available && item.property)
+          .map((item) => item.property.id);
+
+        setFavorites(favouriteIds);
+      } catch (error) {
+        console.error("Failed to load favorites:", error);
+        setFavorites([]);
+      }
     };
 
-    return (
-        <>
-            <HashRouter>
-                <Navbar isLoggedIn={isLoggedIn} onLogout={logOut} />
-                <Routes>
-                    <Route path="/" element={<Home favorites={favorites} setFavorites={setFavorites} />}
-                    />
-                    <Route path="/results" element={<Results favorites={favorites} setFavorites={setFavorites} />}
-                    />
-                    <Route path="/favorites" element={<Favorites favorites={favorites} setFavorites={setFavorites} />}
-                    />
-                    <Route path="/buy" element={<Buy favorites={favorites} setFavorites={setFavorites} />}
-                    />
-                    <Route path="/propertyInfo" element={<PropertyInfo favorites={favorites} setFavorites={setFavorites} />}
-                    />
-                    <Route path="/contactthankmessage" element={<ContactThankMessage />}
-                    />
-                    <Route path="/sellerdashboard" element={<SellerDashboard propertyListings={propertyListings}deleteListing={deleteListing} updateListing={updateListing}/>}
-                    />
-                    <Route path="/applicationthankmessage" element={<ApplicationThankMessage />}
-                    />
-                    <Route path="/listings" element={<Listings propertyListings={propertyListings} setPropertyListings={setPropertyListings} />}
-                    />
-                    <Route path="/settings" element={<Settings />}
-                    />
-                    <Route path="/notifications" element={<Notifications />}
-                    />
-                    <Route path="/mylistings" element={<MyListings propertyListings={propertyListings} deleteListing={deleteListing} updateListing={updateListing}/>}
-                    />
-                    <Route path="/profile" element={<Profile />}
-                    />
-                    <Route
-                        path="/adminpanel"
-                        element={
-                            <AdminPanel
-                                properties={properties}
-                                moderationStatuses={moderationStatuses}
-                                onModerate={moderateProperty}
-                            />
-                        }
-                    />
-                    <Route path="/contact" element={<Contact />}
-                    />
-                    <Route path="/applicationform" element={<ApplicationForm />}
-                    />
-                    <Route path="/login" element={<Login onLogin={logIn} />}
-                    />
-                    <Route path="/register" element={<Register onRegister={logIn} />}
-                    />
-                    <Route path="/rent" element={<Rent favorites={favorites} setFavorites={setFavorites} />}
-                    />
-                    <Route path="/sell" element={<Sell />}
-                    />
-                </Routes>
-                <Footer />
-            </HashRouter>
-        </>
-    );
+    loadFavorites();
+  }, [auth?.token]);
+
+  const updateAuthUser = (user) => {
+    const storedAuth = getStoredAuth();
+
+    if (!storedAuth?.token) {
+      return;
+    }
+
+    const updatedAuth = saveAuth(user, storedAuth.token);
+    setAuth(updatedAuth);
+  };
+
+  const logIn = (user, token) => {
+    const storedAuth = saveAuth(user, token);
+    setAuth(storedAuth);
+  };
+
+  const logOut = () => {
+    clearAuth();
+    setAuth(null);
+    setFavorites([]);
+  };
+
+  const toggleFavourite = async (propertyId) => {
+    if (!isLoggedIn) {
+      window.alert("Please log in to manage favorites.");
+      return;
+    }
+
+    const isFavorite = favorites.includes(propertyId);
+
+    try {
+      await apiRequest(`/favourites/${propertyId}`, {
+        method: isFavorite ? "DELETE" : "POST",
+      });
+
+      setFavorites((currentFavorites) =>
+        isFavorite
+          ? currentFavorites.filter((id) => id !== propertyId)
+          : [...currentFavorites, propertyId],
+      );
+    } catch (error) {
+      window.alert(error.message);
+    }
+  };
+
+  return (
+    <>
+      <HashRouter>
+        <Navbar isLoggedIn={isLoggedIn} user={auth?.user} onLogout={logOut} />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                properties={properties}
+                favorites={favorites}
+                onToggleFavorite={toggleFavourite}
+              />
+            }
+          />
+          <Route
+            path="/favorites"
+            element={
+              isLoggedIn ? (
+                <Favorites
+                  properties={properties}
+                  favorites={favorites}
+                  onToggleFavorite={toggleFavourite}
+                />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/buy"
+            element={
+              <Buy
+                properties={properties}
+                favorites={favorites}
+                onToggleFavorite={toggleFavourite}
+              />
+            }
+          />
+          <Route
+            path="/propertyInfo"
+            element={
+              <PropertyInfo
+                favorites={favorites}
+                onToggleFavorite={toggleFavourite}
+              />
+            }
+          />
+          <Route
+            path="/contactthankmessage"
+            element={<ContactThankMessage />}
+          />
+          <Route
+            path="/applicationthankmessage"
+            element={<ApplicationThankMessage />}
+          />
+          <Route
+            path="/listings"
+            element={
+              canManageListings ? <Listings /> : <Navigate to="/sell" replace />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              isLoggedIn ? <Settings /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              isLoggedIn ? <Notifications /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/mylistings"
+            element={
+              canManageListings ? (
+                <MyListings />
+              ) : (
+                <Navigate to="/sell" replace />
+              )
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              isLoggedIn ? (
+                <Profile onProfileUpdate={updateAuthUser} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/adminpanel"
+            element={
+              isAdmin ? (
+                <AdminPanel onModerationUpdated={syncModeratedProperty} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
+          <Route path="/contact" element={<Contact />} />
+          <Route
+            path="/applicationform"
+            element={
+              canApply ? (
+                <ApplicationForm />
+              ) : (
+                <Navigate to={isLoggedIn ? "/sell" : "/login"} replace />
+              )
+            }
+          />
+          <Route path="/login" element={<Login onLogin={logIn} />} />
+          <Route path="/register" element={<Register onRegister={logIn} />} />
+          <Route
+            path="/rent"
+            element={
+              <Rent
+                properties={properties}
+                favorites={favorites}
+                onToggleFavorite={toggleFavourite}
+              />
+            }
+          />
+          <Route
+            path="/sell"
+            element={
+              canManageListings ? <Navigate to="/listings" replace /> : <Sell />
+            }
+          />
+        </Routes>
+        <Footer />
+      </HashRouter>
+    </>
+  );
 }
 
 export default App;

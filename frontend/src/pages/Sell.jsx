@@ -111,22 +111,6 @@ const Sell = () => {
               Apply as seller or agent
             </Link>
 
-            <Link
-              to="/sellerdashboard"
-              className="
-                mt-3 block
-                rounded-lg
-                border border-gray-300
-                px-4 py-3
-                text-center
-                text-sm
-                text-[#08243f]
-                hover:bg-gray-50
-              "
-            >
-              Just for now
-            </Link>
-
           </div>
 
         </div>

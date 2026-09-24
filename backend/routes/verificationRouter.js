@@ -6,17 +6,18 @@ const {
   getApplications,
   reviewApplication,
 } = require("../controllers/verificationControllers");
+const { requireAuth, requireRole } = require("../middleware/authMiddleware");
 
 // Route to create a new verification request
-router.post("/:userId", createVerification);
+router.post("/", requireAuth, createVerification);
 
-// Route to get the latest verification request for a specific user
-router.get("/user/:userId", getUserVerification);
+// Route to get the verification request for the authenticated user
+router.get("/me", requireAuth, getUserVerification);
 
 // Route to get all verification applications, optionally filtered by status
-router.get("/", getApplications);
+router.get("/", requireAuth, requireRole("administrator"), getApplications);
 
 // Route to review a specific verification application (approve/reject)
-router.patch("/:applicationId", reviewApplication);
+router.patch("/:applicationId", requireAuth, requireRole("administrator"), reviewApplication);
 
 module.exports = router;

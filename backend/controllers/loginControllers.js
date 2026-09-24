@@ -1,7 +1,8 @@
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const AuthCode = require("../models/authCodeModel");
 const { sendLoginCode } = require("../services/email");
-const { OTP_SECRET } = require("../config/config");
+const { OTP_SECRET, JWT_SECRET } = require("../config/config");
 const User = require("../models/userModel");
 
 const CODE_TTL_MS = 10 * 60 * 1000; // 10 minutes
@@ -27,6 +28,14 @@ const hashCode = (email, code) => {
     .createHmac("sha256", OTP_SECRET)
     .update(`${email}:${code}`)
     .digest("hex");
+};
+
+const createToken = (_id) => {
+  return jwt.sign( 
+    {_id},
+    JWT_SECRET,
+    {expiresIn: "3d"}
+  )
 };
 
 const requestCode = async (req, res) => {
@@ -144,6 +153,8 @@ const verifyCode = async (req, res) => {
       });
     }
 
+    const token = createToken(user._id);
+
     res.status(200).json({
       message: "Login code verified",
       user: {
@@ -152,12 +163,24 @@ const verifyCode = async (req, res) => {
         role: user.role,
         verifiedAt: user.verifiedAt,
       },
+      token,
     });
   } catch (error) {
     console.error(error);
 
     res.status(500).json({ message: "Failed to verify login code" });
   }
+};
+
+const getCurrentUser = async (req, res) => {
+  res.status(200).json({
+    user: {
+      _id: req.user._id,
+      email: req.user.email,
+      role: req.user.role,
+      verifiedAt: req.user.verifiedAt,
+    },
+  });
 };
 
 const simulateRegistration = (req, res) => {
@@ -221,6 +244,7 @@ const simulateLogout = (req, res) => {
 module.exports = {
   requestCode,
   verifyCode,
+  getCurrentUser,
   simulateRegistration,
   simulateLogin,
   simulateLogout,

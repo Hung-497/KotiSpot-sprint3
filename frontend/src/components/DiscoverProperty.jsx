@@ -1,9 +1,8 @@
 import { useState } from "react"
-import Properties from "./properties"
-import { properties } from "../../data";
+import Properties from "./Properties"
 import { Star, Heart } from "lucide-react";
 
-const DiscoverProperty = ({ properties: visibleProperties = properties, favorites, setFavorites }) => {
+const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFavorite }) => {
 
     const [activeTab, setActiveTab] = useState("recommendations")
     const favoriteProperties = visibleProperties.filter((property) =>
@@ -39,7 +38,7 @@ const DiscoverProperty = ({ properties: visibleProperties = properties, favorite
                     <Properties
                         properties={visibleProperties}
                         favorites={favorites}
-                        setFavorites={setFavorites}
+                        onToggleFavorite={onToggleFavorite}
                     />
                 ) : (
                     favoriteProperties.length === 0 ? (
@@ -48,7 +47,7 @@ const DiscoverProperty = ({ properties: visibleProperties = properties, favorite
                         <Properties
                             properties={favoriteProperties}
                             favorites={favorites}
-                            setFavorites={setFavorites}
+                            onToggleFavorite={onToggleFavorite}
                         />
                     )
                 )}

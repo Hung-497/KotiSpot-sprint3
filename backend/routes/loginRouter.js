@@ -1,8 +1,10 @@
 const express = require('express');
+const { requireAuth } = require('../middleware/authMiddleware');
 const router = express.Router();
 const {
   requestCode,
   verifyCode,
+  getCurrentUser,
   simulateLogin,
   simulateRegistration,
   simulateLogout,
@@ -22,5 +24,7 @@ router.post('/request-code', requestCode);
 
 // POST /verify-code
 router.post('/verify-code', verifyCode);
+
+router.get("/me", requireAuth, getCurrentUser);
 
 module.exports = router;

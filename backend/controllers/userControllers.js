@@ -1,15 +1,5 @@
 const User = require("../models/userModel");
 
-const parseUserId = (value) => {
-  const userId = Number(value);
-
-  if (!Number.isInteger(userId) || userId <= 0) {
-    return null;
-  }
-
-  return userId;
-};
-
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({});
@@ -25,71 +15,14 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-const createUser = async (req, res) => {
-  if (
-    !req.body ||
-    typeof req.body !== "object" ||
-    Array.isArray(req.body) ||
-    Object.keys(req.body).length === 0
-  ) {
-    return res.status(400).json({
-      message: "User data is required",
-    });
-  }
-
-  try {
-    const user = await User.create(req.body);
-
-    res
-      .status(201)
-      .json({ user, permittedActions: User.ROLE_ACTIONS[user.role] });
-  } catch (error) {
-    if (error.code === 11000) {
-      return res.status(409).json({
-        message: "User ID or email already exists",
-      });
-    }
-
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
-        message: "Invalid user data",
-      });
-    }
-
-    res.status(500).json({
-      message: "Failed to create user",
-    });
-  }
-};
-
-const getUserById = async (req, res) => {
-  const userId = parseUserId(req.params.userId);
-
-  if (userId === null) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
-  try {
-    const user = await User.findOne({ userId });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res
-      .status(200)
-      .json({ user, permittedActions: User.ROLE_ACTIONS[user.role] });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to retrieve user" });
-  }
+const getCurrentUser = async (req, res) => {
+  res.status(200).json({
+    user: req.user,
+    permittedActions: User.ROLE_ACTIONS[req.user.role],
+  });
 };
 
 const updateUser = async (req, res) => {
-  const userId = parseUserId(req.params.userId);
-
-  if (userId === null) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
   if (
     !req.body ||
     typeof req.body !== "object" ||
@@ -101,35 +34,29 @@ const updateUser = async (req, res) => {
     });
   }
 
-  const { userId: ignoredUserId, ...updates } = req.body;
+  const editableFields = ["firstName", "lastName", "phone", "bio"];
+
+  const updates = Object.fromEntries(
+    Object.entries(req.body).filter(([key]) => editableFields.includes(key)),
+  );
 
   if (Object.keys(updates).length === 0) {
     return res.status(400).json({
-      message: "At least one editable user field is required",
+      message: "At least one editable field is required",
     });
   }
 
   try {
-    const updatedUser = await User.findOneAndUpdate({ userId }, updates, {
+    const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
       runValidators: true,
     });
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
 
     res.status(200).json({
       user: updatedUser,
       permittedActions: User.ROLE_ACTIONS[updatedUser.role],
     });
   } catch (error) {
-    if (error.code === 11000) {
-      return res.status(409).json({
-        message: "User ID or email already exists",
-      });
-    }
-
     if (error.name === "ValidationError") {
       return res.status(400).json({
         message: "Invalid user data",
@@ -143,29 +70,28 @@ const updateUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  const userId = parseUserId(req.params.userId);
-
-  if (userId === null) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
   try {
-    const deletedUser = await User.findOneAndDelete({ userId });
+    const deletedUser = await User.findByIdAndDelete(req.user._id);
 
     if (!deletedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
-    return res.status(204).send();
+    res.status(200).json({
+      message: "User deleted successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete user" });
+    res.status(500).json({
+      message: "Failed to delete user",
+    });
   }
 };
 
 module.exports = {
   getAllUsers,
-  getUserById,
-  createUser,
+  getCurrentUser,
   updateUser,
   deleteUser,
 };

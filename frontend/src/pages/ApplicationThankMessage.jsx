@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 const ApplicationThankMessage = () => {
   return (
     <div className="min-h-screen bg-[#f8faf9] px-6 py-12">
