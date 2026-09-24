@@ -1,5 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { MapPin, Heart, Mail, BedDouble, Bath, Maximize } from "lucide-react";
+import PropertyMap from "../components/PropertyMap";
 
 const PropertyInfo = ({ property, favorites, setFavorites }) => {
   const location = useLocation();
@@ -260,6 +261,17 @@ const PropertyInfo = ({ property, favorites, setFavorites }) => {
             </div>
 
           </div>
+
+        </div>
+
+
+        <div className="mt-10">
+
+          <h2 className="mb-5 text-2xl font-semibold text-[#08243f]">
+            Location
+          </h2>
+
+          <PropertyMap />
 
         </div>
 
