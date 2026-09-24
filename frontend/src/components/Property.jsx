@@ -15,9 +15,12 @@ const Property = ({ property, favorites, onToggleFavorite }) => {
   return (
     <div className="property-card w-52.5 overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
       <div className="relative">
-        <Link to="/propertyInfo" state={{ property }}>
+        <Link to={`/properties/${property.id}`}>
           <img
             src={image}
+            onError={(event) => {
+              event.currentTarget.src = houseImage;
+            }}
             alt="house image"
             className="h-28.75 w-full object-cover"
           />

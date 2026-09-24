@@ -22,6 +22,7 @@ import AdminPanel from "./pages/AdminPanel";
 import { useState, useEffect } from "react";
 import { getStoredAuth, saveAuth, clearAuth } from "./utils/authStorage";
 import { apiRequest } from "./services/api";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const [favorites, setFavorites] = useState([]);
@@ -210,7 +211,7 @@ function App() {
             }
           />
           <Route
-            path="/propertyInfo"
+            path="/properties/:id"
             element={
               <PropertyInfo
                 favorites={favorites}
@@ -303,6 +304,7 @@ function App() {
               canManageListings ? <Navigate to="/listings" replace /> : <Sell />
             }
           />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </HashRouter>
