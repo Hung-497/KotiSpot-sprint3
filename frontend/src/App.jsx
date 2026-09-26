@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Footer from "../src/components/Footer";
 import Navbar from "../src/components/Navbar";
@@ -32,12 +32,13 @@ function App() {
   const isAdmin = auth?.user?.role === "administrator";
 
   const canManageListings =
-    ["seller", "agent"].includes(auth?.user?.role) &&
-    Boolean(auth?.user?.verifiedAt);
+    isAdmin ||
+    (["seller", "agent"].includes(auth?.user?.role) &&
+      Boolean(auth?.user?.verifiedAt));
 
+  // Sellers can still apply to become an agent
   const canApply =
-    isLoggedIn &&
-    !["seller", "agent", "administrator"].includes(auth?.user?.role);
+    isLoggedIn && !["agent", "administrator"].includes(auth?.user?.role);
 
   const syncModeratedProperty = (updatedProperty) => {
     setProperties((currentProperties) => {
@@ -66,6 +67,11 @@ function App() {
   };
 
   const [properties, setProperties] = useState([]);
+
+  // Listings made by other people (you don't see your own listings here)
+  const othersProperties = properties.filter(
+    (property) => property.owner !== auth?.user?._id,
+  );
 
   useEffect(() => {
     const validateStoredAuth = async () => {
@@ -101,7 +107,8 @@ function App() {
     };
 
     loadProperties();
-  }, []);
+    // Load again whenever someone logs in or out, so new listings show up
+  }, [auth?.user?._id]);
 
   useEffect(() => {
     const loadFavorites = async () => {
@@ -173,14 +180,14 @@ function App() {
 
   return (
     <>
-      <HashRouter>
+      <BrowserRouter>
         <Navbar isLoggedIn={isLoggedIn} user={auth?.user} onLogout={logOut} />
         <Routes>
           <Route
             path="/"
             element={
               <Home
-                properties={properties}
+                properties={othersProperties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
@@ -204,7 +211,7 @@ function App() {
             path="/buy"
             element={
               <Buy
-                properties={properties}
+                properties={othersProperties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
@@ -242,7 +249,11 @@ function App() {
           <Route
             path="/notifications"
             element={
-              isLoggedIn ? <Notifications /> : <Navigate to="/login" replace />
+              isLoggedIn ? (
+                <Notifications isAdmin={isAdmin} token={auth?.token} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
           <Route
@@ -280,7 +291,7 @@ function App() {
             path="/applicationform"
             element={
               canApply ? (
-                <ApplicationForm />
+                <ApplicationForm userRole={auth?.user?.role} />
               ) : (
                 <Navigate to={isLoggedIn ? "/sell" : "/login"} replace />
               )
@@ -292,7 +303,7 @@ function App() {
             path="/rent"
             element={
               <Rent
-                properties={properties}
+                properties={othersProperties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
@@ -307,7 +318,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
-      </HashRouter>
+      </BrowserRouter>
     </>
   );
 }

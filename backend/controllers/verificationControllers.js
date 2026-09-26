@@ -34,6 +34,19 @@ const createVerification = async (req, res) => {
       });
     }
 
+    // Sellers can only upgrade to agent; agents and admins can't apply
+    if (req.user.role === "seller" && role !== "agent") {
+      return res.status(400).json({
+        message: "You are already a seller. You can only apply to be an agent",
+      });
+    }
+
+    if (["agent", "administrator"].includes(req.user.role)) {
+      return res.status(400).json({
+        message: "Your account cannot apply for a new role",
+      });
+    }
+
     if (typeof idDocument !== "string" || idDocument.trim() === "") {
       return res.status(400).json({
         message: "ID document is required",
@@ -112,7 +125,11 @@ const getApplications = async (req, res) => {
   }
 
   try {
-    const filter = status ? { status } : {};
+    // Don't return applications the admin has deleted from notifications
+    const filter = { deletedByAdmin: { $ne: true } };
+    if (status) {
+      filter.status = status;
+    }
 
     const applications = await Verification.find(filter).sort({
       createdAt: -1,
@@ -171,7 +188,7 @@ const reviewApplication = async (req, res) => {
     await verificationRequest.save();
 
     if (status === "approved") {
-      await User.findOneAndUpdate(
+      await User.findByIdAndUpdate(
         verificationRequest.user,
         { role: verificationRequest.role, verifiedAt: new Date() },
         { returnDocument: "after", runValidators: true },
@@ -192,9 +209,35 @@ const reviewApplication = async (req, res) => {
   }
 };
 
+// DELETE /verifications/:applicationId (admin removes it from their notifications)
+const deleteApplicationNotification = async (req, res) => {
+  try {
+    const application = await Verification.findById(req.params.applicationId);
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    // Only this one field is saved (old data in the document can't block it)
+    await Verification.updateOne(
+      { _id: application._id },
+      { $set: { deletedByAdmin: true } },
+    );
+
+    res.status(200).json({ message: "Notification deleted" });
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid application ID" });
+    }
+
+    res.status(500).json({ message: "Failed to delete notification" });
+  }
+};
+
 module.exports = {
   createVerification,
   getUserVerification,
   getApplications,
   reviewApplication,
+  deleteApplicationNotification,
 };

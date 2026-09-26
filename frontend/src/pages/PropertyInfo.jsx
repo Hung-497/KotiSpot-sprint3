@@ -1,6 +1,15 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { MapPin, Heart, Mail, BedDouble, Bath, Maximize } from "lucide-react";
+import {
+  MapPin,
+  Heart,
+  Mail,
+  BedDouble,
+  Bath,
+  Maximize,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import houseImage from "../assets/house1.jpg";
 import { apiRequest } from "../services/api";
 
@@ -9,6 +18,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentImage, setCurrentImage] = useState(0);
 
   const [isInquiryFormOpen, setIsInquiryFormOpen] = useState(false);
   const [inquiryName, setInquiryName] = useState("");
@@ -22,6 +32,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
     const fetchProperty = async () => {
       setLoading(true);
       setError("");
+      setCurrentImage(0);
 
       try {
         const data = await apiRequest(`/properties/${id}`);
@@ -54,10 +65,22 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
     );
   }
 
+  // Main image first, then the rest in the order they were added
   const images =
     selectedProperty.images?.length > 0
-      ? selectedProperty.images.map((image) => image.url)
+      ? [
+          ...selectedProperty.images.filter((image) => image.isMain),
+          ...selectedProperty.images.filter((image) => !image.isMain),
+        ].map((image) => image.url)
       : [houseImage];
+
+  const showPreviousImage = () => {
+    setCurrentImage(currentImage === 0 ? images.length - 1 : currentImage - 1);
+  };
+
+  const showNextImage = () => {
+    setCurrentImage(currentImage === images.length - 1 ? 0 : currentImage + 1);
+  };
 
   const isFavorite = favorites.includes(selectedProperty.id);
   const isRental = selectedProperty.listingType === "rent";
@@ -114,27 +137,65 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
       <div className="mx-auto max-w-6xl">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <img
-              src={images[0]}
-              onError={(event) => {
-                event.target.src = houseImage;
-              }}
-              alt={selectedProperty.title}
-              className="h-105 w-full rounded-xl object-cover"
-            />
+            <div className="relative">
+              <img
+                src={images[currentImage] || images[0]}
+                onError={(event) => {
+                  event.target.src = houseImage;
+                }}
+                alt={selectedProperty.title}
+                className="h-105 w-full rounded-xl object-cover"
+              />
+
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Previous image"
+                    onClick={showPreviousImage}
+                    className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#08243f] shadow hover:bg-white"
+                  >
+                    <ChevronLeft size={22} />
+                  </button>
+
+                  <button
+                    type="button"
+                    aria-label="Next image"
+                    onClick={showNextImage}
+                    className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#08243f] shadow hover:bg-white"
+                  >
+                    <ChevronRight size={22} />
+                  </button>
+
+                  <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs text-white">
+                    {currentImage + 1} / {images.length}
+                  </span>
+                </>
+              )}
+            </div>
 
             {images.length > 1 && (
               <div className="mt-4 grid grid-cols-4 gap-3">
                 {images.map((imageUrl, index) => (
-                  <img
+                  <button
                     key={index}
-                    src={imageUrl}
-                    onError={(event) => {
-                      event.target.src = houseImage;
-                    }}
-                    alt="property"
-                    className="h-20 w-full rounded-lg object-cover"
-                  />
+                    type="button"
+                    onClick={() => setCurrentImage(index)}
+                    aria-label={`Show image ${index + 1}`}
+                  >
+                    <img
+                      src={imageUrl}
+                      onError={(event) => {
+                        event.target.src = houseImage;
+                      }}
+                      alt="property"
+                      className={`h-20 w-full rounded-lg object-cover ${
+                        index === currentImage
+                          ? "ring-2 ring-[#17634f]"
+                          : "opacity-70 hover:opacity-100"
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
             )}

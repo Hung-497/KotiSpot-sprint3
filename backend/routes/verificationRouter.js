@@ -5,6 +5,7 @@ const {
   getUserVerification,
   getApplications,
   reviewApplication,
+  deleteApplicationNotification,
 } = require("../controllers/verificationControllers");
 const { requireAuth, requireRole } = require("../middleware/authMiddleware");
 
@@ -19,5 +20,8 @@ router.get("/", requireAuth, requireRole("administrator"), getApplications);
 
 // Route to review a specific verification application (approve/reject)
 router.patch("/:applicationId", requireAuth, requireRole("administrator"), reviewApplication);
+
+// Route for the admin to delete an application from their notifications
+router.delete("/:applicationId", requireAuth, requireRole("administrator"), deleteApplicationNotification);
 
 module.exports = router;

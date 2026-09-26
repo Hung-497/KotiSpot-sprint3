@@ -33,6 +33,38 @@ const contactMessageSchema = new mongoose.Schema({
     },
   },
 
+  // The logged-in user who sent the message (empty for guests)
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+
+  // The replies after the first message. Both the admin and the user can
+  // reply as many times as they want. "from" says who wrote it.
+  replies: [
+    {
+      from: { type: String, enum: ["admin", "user"], required: true },
+      text: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: [1000, "Reply cannot exceed 1000 characters"],
+      },
+      sentAt: { type: Date, default: Date.now },
+    },
+  ],
+
+  // true when the user / admin deleted it from their notifications
+  deletedByUser: {
+    type: Boolean,
+    default: false,
+  },
+
+  deletedByAdmin: {
+    type: Boolean,
+    default: false,
+  },
+
   submittedAt: {
     type: Date,
     default: Date.now,

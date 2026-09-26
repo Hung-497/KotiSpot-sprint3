@@ -61,7 +61,10 @@ const createProperty = async (req, res) => {
       owner: req.user._id,
       status: "active", // Set default status to "active"
       moderation: {
-        status: req.user.role === "agent" ? "approved" : "unreviewed", // Set default moderation status to "unreviewed"
+        // Agents and administrators are auto-approved; sellers need review
+        status: ["agent", "administrator"].includes(req.user.role)
+          ? "approved"
+          : "unreviewed",
       },
     });
     res.status(201).json(newProperty);

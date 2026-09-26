@@ -9,7 +9,6 @@ import {
   Settings,
   Bell,
   BriefcaseBusiness,
-  ShieldCheck,
   LogOut,
 } from "lucide-react";
 
@@ -21,9 +20,12 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
   const isAdmin = user?.role === "administrator";
 
   const canManageListings =
-    ["seller", "agent"].includes(user?.role) && Boolean(user?.verifiedAt);
+    isAdmin ||
+    (["seller", "agent"].includes(user?.role) && Boolean(user?.verifiedAt));
 
-  const canApply = !["seller", "agent", "administrator"].includes(user?.role);
+  // Sellers can still apply to become an agent
+  const canApply = !["agent", "administrator"].includes(user?.role);
+  const isSeller = user?.role === "seller";
 
   const handleLogout = () => {
     setIsMenuOpen(false);
@@ -39,16 +41,28 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
       </Link>
 
       <ul className="mx-auto flex items-center gap-9">
-        {navLinks.map((link) => (
-          <li key={link.id}>
+        {navLinks
+          .filter((link) => !(isAdmin && link.href === "/contact"))
+          .map((link) => (
+            <li key={link.id}>
+              <Link
+                to={link.href}
+                className="text-[15px] font-medium text-[#08243f] transition-colors hover:text-[#1f7356]"
+              >
+                {link.text}
+              </Link>
+            </li>
+          ))}
+        {isAdmin && (
+          <li>
             <Link
-              to={link.href}
+              to="/adminpanel"
               className="text-[15px] font-medium text-[#08243f] transition-colors hover:text-[#1f7356]"
             >
-              {link.text}
+              Admin panel
             </Link>
           </li>
-        ))}
+        )}
       </ul>
 
       <ul className="flex items-center gap-3">
@@ -131,17 +145,6 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
                     <Settings size={20} strokeWidth={1.8} />
                     Settings
                   </Link>
-                  {isAdmin && (
-                    <Link
-                      to="/adminpanel"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-4 rounded-xl px-4 py-3 text-sm text-[#08243f] transition hover:bg-[#eef6f2] hover:text-[#17634f]"
-                    >
-                      <ShieldCheck size={20} strokeWidth={1.8} />
-                      Admin panel
-                    </Link>
-                  )}
-
                   {canApply && (
                     <Link
                       to="/applicationform"
@@ -154,11 +157,15 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
                         className="mt-0.5 shrink-0"
                       />
 
-                      <span>
-                        Apply for a Seller/Real-estate
-                        <br />
-                        Agent position
-                      </span>
+                      {isSeller ? (
+                        <span>Upgrade to Real-estate Agent</span>
+                      ) : (
+                        <span>
+                          Apply for a Seller/Real-estate
+                          <br />
+                          Agent position
+                        </span>
+                      )}
                     </Link>
                   )}
                 </div>

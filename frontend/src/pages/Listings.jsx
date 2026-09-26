@@ -5,6 +5,10 @@ import {
   validateListing,
   buildPropertyData,
 } from "../utils/listingForm";
+import { imageToText } from "../utils/imageUtils";
+
+// A listing can have up to 8 photos
+const MAX_PHOTOS = 8;
 
 const Listings = () => {
   const [listingType, setListingType] = useState("");
@@ -50,6 +54,16 @@ const Listings = () => {
 
     const propertyData = buildPropertyData(newListing, listingType);
 
+    // Add the photos to the listing. The first photo is the main photo.
+    propertyData.images = photoPreviews.map((photo, index) => {
+      return {
+        id: index + 1,
+        url: photo,
+        description: `Photo ${index + 1}`,
+        isMain: index === 0,
+      };
+    });
+
     setIsSubmitting(true);
 
     try {
@@ -63,10 +77,6 @@ const Listings = () => {
           ? "Listing published successfully."
           : "Listing submitted and is waiting for approval.",
       );
-
-      photoPreviews.forEach((preview) => {
-        URL.revokeObjectURL(preview);
-      });
 
       setPhotoPreviews([]);
       setNewListing(createEmptyListing());
@@ -82,14 +92,40 @@ const Listings = () => {
     setListingType(event.target.value);
   };
 
-  const handlePhotoChange = (event) => {
-    const files = Array.from(event.target.files).slice(0, 3);
+  const handlePhotoChange = async (e) => {
+    const chosenFiles = Array.from(e.target.files);
+    e.target.value = ""; // lets the user choose the same file again later
 
-    photoPreviews.forEach((preview) => {
-      URL.revokeObjectURL(preview);
-    });
+    // How many more photos can still be added
+    const freeSlots = MAX_PHOTOS - photoPreviews.length;
 
-    setPhotoPreviews(files.map((file) => URL.createObjectURL(file)));
+    if (chosenFiles.length > freeSlots) {
+      setFormError(`You can have up to ${MAX_PHOTOS} photos.`);
+    } else {
+      setFormError("");
+    }
+
+    try {
+      // Turn each chosen file into text so it can be saved with the listing
+      const newPhotos = [];
+
+      for (const file of chosenFiles.slice(0, freeSlots)) {
+        const photo = await imageToText(file);
+        newPhotos.push(photo);
+      }
+
+      // Add the new photos AFTER the ones already chosen
+      setPhotoPreviews([...photoPreviews, ...newPhotos]);
+    } catch (error) {
+      setFormError(error.message);
+    }
+  };
+
+  const removePhoto = (indexToRemove) => {
+    const remainingPhotos = photoPreviews.filter(
+      (photo, index) => index !== indexToRemove,
+    );
+    setPhotoPreviews(remainingPhotos);
   };
 
   return (
@@ -493,30 +529,56 @@ const Listings = () => {
                             hover:bg-gray-50
                         "
           >
-            + Upload photos
+            {photoPreviews.length >= MAX_PHOTOS
+              ? `Maximum of ${MAX_PHOTOS} photos reached`
+              : `+ Add photos (${photoPreviews.length}/${MAX_PHOTOS})`}
             <input
               type="file"
               accept="image/*"
               multiple
+              disabled={photoPreviews.length >= MAX_PHOTOS}
               onChange={handlePhotoChange}
               className="hidden"
             />
           </label>
 
-          {/* Image placeholders */}
-          <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-3">
+          <p className="mt-2 text-xs text-gray-500">
+            Choose up to {MAX_PHOTOS} photos. The first photo is the main
+            photo of the listing.
+          </p>
+
+          {/* Image previews */}
+          <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
             {photoPreviews.length > 0 ? (
               photoPreviews.map((preview, index) => (
-                <img
-                  key={preview}
-                  src={preview}
-                  alt={`Property preview ${index + 1}`}
-                  className="h-32 w-full rounded-lg object-cover"
-                />
+                <div key={index} className="relative">
+                  <img
+                    src={preview}
+                    alt={`Property preview ${index + 1}`}
+                    className={`h-32 w-full rounded-lg object-cover ${
+                      index === 0 ? "ring-2 ring-[#17634f]" : ""
+                    }`}
+                  />
+
+                  {index === 0 && (
+                    <span className="absolute left-2 top-2 rounded-full bg-[#17634f] px-2 py-0.5 text-xs font-medium text-white">
+                      Main photo
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    aria-label={`Remove photo ${index + 1}`}
+                    onClick={() => removePhoto(index)}
+                    className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-sm text-gray-700 shadow hover:bg-red-50 hover:text-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
               ))
             ) : (
               <>
-                {[1, 2, 3].map((placeholder) => (
+                {[1, 2, 3, 4].map((placeholder) => (
                   <div
                     key={placeholder}
                     className="flex h-24 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400"

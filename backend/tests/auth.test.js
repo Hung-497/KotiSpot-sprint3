@@ -262,3 +262,60 @@ describe("GET /api/account/me", () => {
     expect(response.body.user.role).toBe("buyer");
   });
 });
+describe("Login only works for emails that signed up first", () => {
+  it("should not send a login code to an email without an account", async () => {
+    const response = await api
+      .post("/api/account/request-code")
+      .send({ email: "new@example.com", mode: "login" })
+      .expect(404);
+
+    expect(response.body.message).toBe(
+      "No account found with this email. Please sign up first.",
+    );
+
+    const authCode = await AuthCode.findOne({ email: "new@example.com" });
+    expect(authCode).toBeNull();
+  });
+
+  it("should send a login code to an email that has an account", async () => {
+    await User.create({ email: "test@example.com" });
+
+    await api
+      .post("/api/account/request-code")
+      .send({ email: "test@example.com", mode: "login" })
+      .expect(200);
+  });
+
+  it("should not create a user when logging in with an unknown email", async () => {
+    await createAuthCode({ email: "new@example.com" });
+
+    await api
+      .post("/api/account/verify-code")
+      .send({ email: "new@example.com", code: "123456", mode: "login" })
+      .expect(404);
+
+    const user = await User.findOne({ email: "new@example.com" });
+    expect(user).toBeNull();
+  });
+
+  it("should not let someone sign up with an email that already has an account", async () => {
+    await User.create({ email: "test@example.com" });
+
+    await api
+      .post("/api/account/request-code")
+      .send({ email: "test@example.com", mode: "register" })
+      .expect(409);
+  });
+
+  it("should create the user when signing up with a new email", async () => {
+    await createAuthCode({ email: "new@example.com" });
+
+    await api
+      .post("/api/account/verify-code")
+      .send({ email: "new@example.com", code: "123456", mode: "register" })
+      .expect(200);
+
+    const user = await User.findOne({ email: "new@example.com" });
+    expect(user).not.toBeNull();
+  });
+});

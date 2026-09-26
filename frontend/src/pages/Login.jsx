@@ -33,6 +33,7 @@ const Login = ({ onLogin }) => {
         method: "POST",
         body: JSON.stringify({
           email,
+          mode: "login", // only works for emails that already have an account
         }),
       });
 
@@ -61,6 +62,7 @@ const Login = ({ onLogin }) => {
         body: JSON.stringify({
           email,
           code: code.trim(),
+          mode: "login",
         }),
       });
 

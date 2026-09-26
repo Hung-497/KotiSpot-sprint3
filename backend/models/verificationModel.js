@@ -56,6 +56,8 @@ const verificationRequestSchema = new mongoose.Schema({
   reviewNote: { type: String, maxlength: 500 },
   rejectionReason: { type: String, trim: true, maxlength: 500 },
   reviewedAt: { type: Date },
+  // true when the admin deleted it from their notifications
+  deletedByAdmin: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
