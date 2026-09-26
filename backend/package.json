@@ -7,7 +7,10 @@
     "start": "cross-env NODE_ENV=production node server.js",
     "dev": "cross-env NODE_ENV=development nodemon server.js",
     "test": "cross-env NODE_ENV=test vitest run",
-    "test:watch": "cross-env NODE_ENV=test vitest"
+    "test:watch": "cross-env NODE_ENV=test vitest",
+    "data:import": "cross-env NODE_ENV=development node seeder.js --import",
+    "data:destroy": "cross-env NODE_ENV=development node seeder.js --destroy",
+    "data:reset": "cross-env NODE_ENV=development node seeder.js --reset"
   },
   "keywords": [],
   "author": "",
