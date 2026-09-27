@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import ApplicationCard from "../components/ApplicationCard";
 import ConversationCard from "../components/ConversationCard";
+import { apiRequest } from "../services/api";
 
-function Notifications({ isAdmin, token }) {
+function Notifications({ isAdmin }) {
   // Only for admins
   const [applications, setApplications] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
@@ -21,87 +22,38 @@ function Notifications({ isAdmin, token }) {
 
     const fetchAdminData = async () => {
       try {
-        const headers = { Authorization: `Bearer ${token}` };
-
-        const applicationsResponse = await fetch("/api/verifications", {
-          headers,
-        });
-        if (!applicationsResponse.ok) {
-          throw new Error("Failed to load applications");
-        }
-        const applicationsData = await applicationsResponse.json();
-        setApplications(applicationsData);
-
-        const messagesResponse = await fetch("/api/contact-messages", {
-          headers,
-        });
-        if (!messagesResponse.ok) {
-          throw new Error("Failed to load contact messages");
-        }
-        const messagesData = await messagesResponse.json();
-        setContactMessages(messagesData);
+        setApplications(await apiRequest("/verifications"));
+        setContactMessages(await apiRequest("/contact-messages"));
       } catch (error) {
         console.error("Failed to load admin notifications:", error);
       }
     };
 
     fetchAdminData();
-  }, [isAdmin, token]);
+  }, [isAdmin]);
 
   // Everyone: load my conversations
   useEffect(() => {
     const fetchMyNotifications = async () => {
       try {
-        const headers = { Authorization: `Bearer ${token}` };
-
-        const inquiriesResponse = await fetch("/api/inquiries/mine", {
-          headers,
-        });
-        if (!inquiriesResponse.ok) {
-          throw new Error("Failed to load inquiries");
-        }
-        const inquiriesData = await inquiriesResponse.json();
-        setInquiries(inquiriesData);
-
-        const sentResponse = await fetch("/api/inquiries/sent", { headers });
-        if (!sentResponse.ok) {
-          throw new Error("Failed to load your inquiries");
-        }
-        const sentData = await sentResponse.json();
-        setSentInquiries(sentData);
-
-        const myMessagesResponse = await fetch("/api/contact-messages/mine", {
-          headers,
-        });
-        if (!myMessagesResponse.ok) {
-          throw new Error("Failed to load your messages");
-        }
-        const myMessagesData = await myMessagesResponse.json();
-        setMyMessages(myMessagesData);
+        setInquiries(await apiRequest("/inquiries/mine"));
+        setSentInquiries(await apiRequest("/inquiries/sent"));
+        setMyMessages(await apiRequest("/contact-messages/mine"));
       } catch (error) {
         console.error("Failed to load notifications:", error);
       }
     };
 
     fetchMyNotifications();
-  }, [token]);
+  }, []);
 
   // Deletes a notification in the database, so it doesn't come back after a refresh.
-  // url is for example "/api/inquiries/123"
-  const deleteNotification = async (url) => {
-    const response = await fetch(url, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete the notification");
-    }
-  };
+  // path is for example "/inquiries/123"
+  const deleteNotification = (path) => apiRequest(path, { method: "DELETE" });
 
   const deleteApplication = async (id) => {
     try {
-      await deleteNotification(`/api/verifications/${id}`);
+      await deleteNotification(`/verifications/${id}`);
       setApplications(applications.filter((application) => application._id !== id));
     } catch (error) {
       window.alert(error.message);
@@ -110,7 +62,7 @@ function Notifications({ isAdmin, token }) {
 
   const deleteContactMessage = async (id) => {
     try {
-      await deleteNotification(`/api/contact-messages/${id}/admin`);
+      await deleteNotification(`/contact-messages/${id}/admin`);
       setContactMessages(contactMessages.filter((message) => message._id !== id));
     } catch (error) {
       window.alert(error.message);
@@ -119,7 +71,7 @@ function Notifications({ isAdmin, token }) {
 
   const deleteInquiry = async (id) => {
     try {
-      await deleteNotification(`/api/inquiries/${id}`);
+      await deleteNotification(`/inquiries/${id}`);
       setInquiries(inquiries.filter((inquiry) => inquiry._id !== id));
     } catch (error) {
       window.alert(error.message);
@@ -128,7 +80,7 @@ function Notifications({ isAdmin, token }) {
 
   const deleteSentInquiry = async (id) => {
     try {
-      await deleteNotification(`/api/inquiries/${id}`);
+      await deleteNotification(`/inquiries/${id}`);
       setSentInquiries(sentInquiries.filter((inquiry) => inquiry._id !== id));
     } catch (error) {
       window.alert(error.message);
@@ -137,7 +89,7 @@ function Notifications({ isAdmin, token }) {
 
   const deleteMyMessage = async (id) => {
     try {
-      await deleteNotification(`/api/contact-messages/${id}`);
+      await deleteNotification(`/contact-messages/${id}`);
       setMyMessages(myMessages.filter((message) => message._id !== id));
     } catch (error) {
       window.alert(error.message);
@@ -179,7 +131,6 @@ function Notifications({ isAdmin, token }) {
                 <ApplicationCard
                   key={application._id}
                   application={application}
-                  token={token}
                   onDelete={() => deleteApplication(application._id)}
                 />
               ))}
@@ -211,9 +162,10 @@ function Notifications({ isAdmin, token }) {
                   replies={contactMessage.replies}
                   me="admin"
                   otherName={contactMessage.fullName}
-                  replyUrl={`/api/contact-messages/${contactMessage._id}/replies`}
+                  replyUrl={`/contact-messages/${contactMessage._id}/replies`}
                   canReply={Boolean(contactMessage.user)}
-                  token={token}
+                  isRead={contactMessage.readByAdmin}
+                  markReadUrl={`/contact-messages/${contactMessage._id}/admin/read`}
                   onDelete={() => deleteContactMessage(contactMessage._id)}
                 />
               ))}
@@ -234,9 +186,10 @@ function Notifications({ isAdmin, token }) {
               replies={inquiry.replies}
               me="owner"
               otherName={inquiry.name}
-              replyUrl={`/api/inquiries/${inquiry._id}/replies`}
+              replyUrl={`/inquiries/${inquiry._id}/replies`}
               canReply={Boolean(inquiry.sender)}
-              token={token}
+              isRead={inquiry.readByOwner}
+              markReadUrl={`/inquiries/${inquiry._id}/read`}
               onDelete={() => deleteInquiry(inquiry._id)}
             />
           ))}
@@ -251,9 +204,10 @@ function Notifications({ isAdmin, token }) {
               replies={inquiry.replies}
               me="sender"
               otherName="Listing owner"
-              replyUrl={`/api/inquiries/${inquiry._id}/replies`}
+              replyUrl={`/inquiries/${inquiry._id}/replies`}
               canReply={true}
-              token={token}
+              isRead={inquiry.readBySender}
+              markReadUrl={`/inquiries/${inquiry._id}/read`}
               onDelete={() => deleteSentInquiry(inquiry._id)}
             />
           ))}
@@ -268,9 +222,10 @@ function Notifications({ isAdmin, token }) {
               replies={message.replies}
               me="user"
               otherName="KotiSpot"
-              replyUrl={`/api/contact-messages/${message._id}/replies`}
+              replyUrl={`/contact-messages/${message._id}/replies`}
               canReply={true}
-              token={token}
+              isRead={message.readByUser}
+              markReadUrl={`/contact-messages/${message._id}/read`}
               onDelete={() => deleteMyMessage(message._id)}
             />
           ))}

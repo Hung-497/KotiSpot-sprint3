@@ -8,6 +8,8 @@ const {
   getMyMessages,
   deleteMessageForUser,
   deleteMessageForAdmin,
+  markMessageReadForUser,
+  markMessageReadForAdmin,
 } = require("../controllers/contactControllers");
 const {
   requireAuth,
@@ -26,6 +28,17 @@ router.get("/mine", requireAuth, getMyMessages);
 
 // POST /contact-messages/:messageId/replies (admin or user replies - as many times as they want)
 router.post("/:messageId/replies", requireAuth, addContactReply);
+
+// PATCH /contact-messages/:messageId/read (user marks it as read in their notifications)
+router.patch("/:messageId/read", requireAuth, markMessageReadForUser);
+
+// PATCH /contact-messages/:messageId/admin/read (admin marks it as read in their notifications)
+router.patch(
+  "/:messageId/admin/read",
+  requireAuth,
+  requireRole("administrator"),
+  markMessageReadForAdmin,
+);
 
 // DELETE /contact-messages/:messageId (user removes it from their notifications)
 router.delete("/:messageId", requireAuth, deleteMessageForUser);

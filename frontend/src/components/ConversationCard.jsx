@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mail, Trash2 } from "lucide-react";
+import { apiRequest } from "../services/api";
 
 // One notification that holds a whole conversation between two people.
 // Both people can reply as many times as they want.
@@ -12,9 +13,10 @@ import { Mail, Trash2 } from "lucide-react";
 //   replies     - [{ from, text, sentAt }] the replies after that
 //   me          - who I am in this conversation, e.g. "owner" or "admin"
 //   otherName   - the name to show for the other person
-//   replyUrl    - where to POST a new reply
+//   replyUrl    - API path to POST a new reply to, e.g. "/inquiries/123/replies"
 //   canReply    - false for guests, who can't see replies
-//   token       - login token
+//   isRead      - false when there is something new I haven't marked as read
+//   markReadUrl - API path to PATCH to mark it as read, e.g. "/inquiries/123/read"
 //   onDelete    - called when the trash button is clicked
 const ConversationCard = ({
   title,
@@ -26,10 +28,12 @@ const ConversationCard = ({
   otherName,
   replyUrl,
   canReply,
-  token,
+  isRead,
+  markReadUrl,
   onDelete,
 }) => {
   const [allReplies, setAllReplies] = useState(replies);
+  const [read, setRead] = useState(isRead);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
 
@@ -46,22 +50,14 @@ const ConversationCard = ({
     }
 
     try {
-      const response = await fetch(replyUrl, {
+      // The backend sends back the whole conversation
+      const updated = await apiRequest(replyUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ text }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to send the reply");
-      }
-
-      // The backend sends back the whole conversation
-      const updated = await response.json();
       setAllReplies(updated.replies);
+      setRead(true); // writing a reply means I've read it
       setText("");
       setError("");
     } catch (error) {
@@ -69,15 +65,49 @@ const ConversationCard = ({
     }
   };
 
+  // Saved in the database, so it stays read after a refresh
+  const markAsRead = async () => {
+    try {
+      await apiRequest(markReadUrl, { method: "PATCH" });
+
+      setRead(true);
+      setError("");
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   return (
-    <div className="flex items-start justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div
+      className={`flex items-start justify-between gap-4 rounded-2xl border bg-white p-5 shadow-sm ${
+        read ? "border-gray-200" : "border-[#17634f] ring-1 ring-[#17634f]"
+      }`}
+    >
       <div className="flex flex-1 gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#eef6f2] text-[#17634f]">
           <Mail size={22} />
         </div>
 
         <div className="flex-1">
-          <h2 className="font-semibold text-[#08243f]">{title}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-semibold text-[#08243f]">{title}</h2>
+
+            {!read && (
+              <>
+                <span className="rounded-full bg-[#17634f] px-2 py-0.5 text-xs font-medium text-white">
+                  New
+                </span>
+
+                <button
+                  type="button"
+                  onClick={markAsRead}
+                  className="text-sm font-medium text-[#17634f] hover:underline"
+                >
+                  Mark as read
+                </button>
+              </>
+            )}
+          </div>
 
           {from && <p className="mt-1 text-sm text-gray-500">From {from}</p>}
 
@@ -103,15 +133,15 @@ const ConversationCard = ({
             ))}
           </div>
 
+          {error && (
+            <p className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </p>
+          )}
+
           {/* The reply box is always there (except for guests) */}
           {canReply ? (
             <>
-              {error && (
-                <p className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </p>
-              )}
-
               <textarea
                 rows="2"
                 placeholder="Write a reply..."

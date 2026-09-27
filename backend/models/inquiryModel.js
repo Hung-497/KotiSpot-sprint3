@@ -71,6 +71,18 @@ const inquirySchema = new mongoose.Schema({
     default: false,
   },
 
+  // false when the other person wrote something the owner / sender hasn't
+  // marked as read yet. Whoever writes a message has read the conversation.
+  readByOwner: {
+    type: Boolean,
+    default: false,
+  },
+
+  readBySender: {
+    type: Boolean,
+    default: true,
+  },
+
   submittedAt: {
     type: Date,
     default: Date.now,

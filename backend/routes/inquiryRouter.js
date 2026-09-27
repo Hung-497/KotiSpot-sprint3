@@ -7,6 +7,7 @@ const {
   getMySentInquiries,
   addInquiryReply,
   deleteInquiryNotification,
+  markInquiryRead,
 } = require("../controllers/inquiryControllers");
 const { requireAuth, optionalAuth } = require("../middleware/authMiddleware");
 
@@ -18,6 +19,9 @@ router.get("/sent", requireAuth, getMySentInquiries);
 
 // POST /inquiries/:inquiryId/replies (owner or sender replies - as many times as they want)
 router.post("/:inquiryId/replies", requireAuth, addInquiryReply);
+
+// PATCH /inquiries/:inquiryId/read (mark it as read in my notifications)
+router.patch("/:inquiryId/read", requireAuth, markInquiryRead);
 
 // DELETE /inquiries/:inquiryId (remove it from my notifications)
 router.delete("/:inquiryId", requireAuth, deleteInquiryNotification);

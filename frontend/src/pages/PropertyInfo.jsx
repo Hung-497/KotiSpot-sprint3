@@ -71,8 +71,10 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
       ? [
           ...selectedProperty.images.filter((image) => image.isMain),
           ...selectedProperty.images.filter((image) => !image.isMain),
-        ].map((image) => image.url)
-      : [houseImage];
+        ]
+      : [{ url: houseImage, description: selectedProperty.title }];
+
+  const shownImage = images[currentImage] || images[0];
 
   const showPreviousImage = () => {
     setCurrentImage(currentImage === 0 ? images.length - 1 : currentImage - 1);
@@ -139,11 +141,11 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
           <div className="lg:col-span-2">
             <div className="relative">
               <img
-                src={images[currentImage] || images[0]}
+                src={shownImage.url}
                 onError={(event) => {
                   event.target.src = houseImage;
                 }}
-                alt={selectedProperty.title}
+                alt={shownImage.description || selectedProperty.title}
                 className="h-105 w-full rounded-xl object-cover"
               />
 
@@ -176,7 +178,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
 
             {images.length > 1 && (
               <div className="mt-4 grid grid-cols-4 gap-3">
-                {images.map((imageUrl, index) => (
+                {images.map((image, index) => (
                   <button
                     key={index}
                     type="button"
@@ -184,11 +186,11 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
                     aria-label={`Show image ${index + 1}`}
                   >
                     <img
-                      src={imageUrl}
+                      src={image.url}
                       onError={(event) => {
                         event.target.src = houseImage;
                       }}
-                      alt="property"
+                      alt={image.description || selectedProperty.title}
                       className={`h-20 w-full rounded-lg object-cover ${
                         index === currentImage
                           ? "ring-2 ring-[#17634f]"

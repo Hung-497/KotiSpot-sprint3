@@ -65,6 +65,18 @@ const contactMessageSchema = new mongoose.Schema({
     default: false,
   },
 
+  // false when the other person wrote something the user / admin hasn't
+  // marked as read yet. Whoever writes a message has read the conversation.
+  readByUser: {
+    type: Boolean,
+    default: true,
+  },
+
+  readByAdmin: {
+    type: Boolean,
+    default: false,
+  },
+
   submittedAt: {
     type: Date,
     default: Date.now,

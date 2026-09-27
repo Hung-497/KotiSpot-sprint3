@@ -65,6 +65,12 @@ const addContactReply = async (req, res) => {
     return res.status(400).json({ message: "Reply is required" });
   }
 
+  if (text.trim().length > 1000) {
+    return res
+      .status(400)
+      .json({ message: "Reply cannot exceed 1000 characters" });
+  }
+
   try {
     const contactMessage = await ContactMessage.findById(req.params.messageId);
 
@@ -80,12 +86,14 @@ const addContactReply = async (req, res) => {
     if (isAdmin) {
       update = {
         $push: { replies: { from: "admin", text } },
-        $set: { deletedByUser: false }, // show it again to the user
+        // show it again (as unread) to the user
+        $set: { deletedByUser: false, readByUser: false, readByAdmin: true },
       };
     } else if (isSender) {
       update = {
         $push: { replies: { from: "user", text } },
-        $set: { deletedByAdmin: false }, // show it again to the admin
+        // show it again (as unread) to the admin
+        $set: { deletedByAdmin: false, readByAdmin: false, readByUser: true },
       };
     } else {
       return res.status(403).json({ message: "Access denied" });
@@ -102,6 +110,10 @@ const addContactReply = async (req, res) => {
   } catch (error) {
     if (error.name === "CastError") {
       return res.status(400).json({ message: "Invalid message ID" });
+    }
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: "Invalid reply" });
     }
 
     res.status(500).json({ message: "Failed to send reply" });
@@ -177,6 +189,60 @@ const deleteMessageForAdmin = async (req, res) => {
   }
 };
 
+// PATCH /contact-messages/:messageId/read (user marks it as read in their notifications)
+const markMessageReadForUser = async (req, res) => {
+  try {
+    const contactMessage = await ContactMessage.findById(req.params.messageId);
+
+    if (!contactMessage) {
+      return res.status(404).json({ message: "Contact message not found" });
+    }
+
+    if (String(contactMessage.user) !== String(req.user._id)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Only this one field is saved (old data in the document can't block it)
+    await ContactMessage.updateOne(
+      { _id: contactMessage._id },
+      { $set: { readByUser: true } },
+    );
+
+    res.status(200).json({ message: "Notification marked as read" });
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid message ID" });
+    }
+
+    res.status(500).json({ message: "Failed to mark notification as read" });
+  }
+};
+
+// PATCH /contact-messages/:messageId/admin/read (admin marks it as read in their notifications)
+const markMessageReadForAdmin = async (req, res) => {
+  try {
+    const contactMessage = await ContactMessage.findById(req.params.messageId);
+
+    if (!contactMessage) {
+      return res.status(404).json({ message: "Contact message not found" });
+    }
+
+    // Only this one field is saved (old data in the document can't block it)
+    await ContactMessage.updateOne(
+      { _id: contactMessage._id },
+      { $set: { readByAdmin: true } },
+    );
+
+    res.status(200).json({ message: "Notification marked as read" });
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid message ID" });
+    }
+
+    res.status(500).json({ message: "Failed to mark notification as read" });
+  }
+};
+
 module.exports = {
   createContactMessage,
   getContactMessages,
@@ -184,4 +250,6 @@ module.exports = {
   getMyMessages,
   deleteMessageForUser,
   deleteMessageForAdmin,
+  markMessageReadForUser,
+  markMessageReadForAdmin,
 };

@@ -1,39 +1,53 @@
 import { useState } from "react";
 import { Trash2, UserCheck } from "lucide-react";
+import { apiRequest } from "../services/api";
 
 // Shows one seller/agent application to the admin,
 // with buttons to approve or reject it.
 // It stays in the list after review until the admin deletes it.
-const ApplicationCard = ({ application, token, onDelete }) => {
+const ApplicationCard = ({ application, onDelete }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [reason, setReason] = useState("");
   const [bigPicture, setBigPicture] = useState(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState(application.status); // pending / approved / rejected
+  // Why it was approved / rejected (older ones may only have rejectionReason)
+  const [reviewReason, setReviewReason] = useState(
+    application.reviewReason || application.rejectionReason || "",
+  );
+  const [read, setRead] = useState(application.readByAdmin);
 
   const isAgent = application.role === "agent";
 
   const reviewApplication = async (newStatus) => {
-    if (newStatus === "rejected" && reason.trim() === "") {
-      setError("Please write a reason before rejecting.");
+    if (reason.trim() === "") {
+      setError("Please write a reason before approving or rejecting.");
       return;
     }
 
     try {
-      const response = await fetch(`/api/verifications/${application._id}`, {
+      const data = await apiRequest(`/verifications/${application._id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus, rejectionReason: reason }),
+        body: JSON.stringify({ status: newStatus, reviewReason: reason }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to review the application");
-      }
-
       setStatus(newStatus);
+      setReviewReason(data.reviewReason);
+      setRead(true); // reviewing it means the admin has read it
+      setError("");
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  // Saved in the database, so it stays read after a refresh
+  const markAsRead = async () => {
+    try {
+      await apiRequest(`/verifications/${application._id}/read`, {
+        method: "PATCH",
+      });
+
+      setRead(true);
       setError("");
     } catch (error) {
       setError(error.message);
@@ -41,17 +55,39 @@ const ApplicationCard = ({ application, token, onDelete }) => {
   };
 
   return (
-    <div className="flex items-start justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div
+      className={`flex items-start justify-between gap-4 rounded-2xl border bg-white p-5 shadow-sm ${
+        read ? "border-gray-200" : "border-[#17634f] ring-1 ring-[#17634f]"
+      }`}
+    >
       <div className="flex flex-1 gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#eef6f2] text-[#17634f]">
           <UserCheck size={22} />
         </div>
 
         <div className="flex-1">
-          <h3 className="font-semibold text-[#08243f]">
-            {application.fullName} wants to become{" "}
-            {isAgent ? "a real estate agent" : "a seller"}
-          </h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold text-[#08243f]">
+              {application.fullName} wants to become{" "}
+              {isAgent ? "a real estate agent" : "a seller"}
+            </h3>
+
+            {!read && (
+              <>
+                <span className="rounded-full bg-[#17634f] px-2 py-0.5 text-xs font-medium text-white">
+                  New
+                </span>
+
+                <button
+                  type="button"
+                  onClick={markAsRead}
+                  className="text-sm font-medium text-[#17634f] hover:underline"
+                >
+                  Mark as read
+                </button>
+              </>
+            )}
+          </div>
 
           <p className="mt-1 text-sm text-gray-600">{application.email}</p>
 
@@ -158,15 +194,17 @@ const ApplicationCard = ({ application, token, onDelete }) => {
 
           {/* Already reviewed: show the result */}
           {status === "approved" && (
-            <p className="mt-4 rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
-              Approved
-            </p>
+            <div className="mt-4 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700">
+              <p className="font-medium">Approved</p>
+              {reviewReason && <p>Reason: {reviewReason}</p>}
+            </div>
           )}
 
           {status === "rejected" && (
-            <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700">
-              Rejected
-            </p>
+            <div className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+              <p className="font-medium">Rejected</p>
+              {reviewReason && <p>Reason: {reviewReason}</p>}
+            </div>
           )}
 
           {/* Not reviewed yet: show the reason box and the buttons */}
@@ -174,7 +212,8 @@ const ApplicationCard = ({ application, token, onDelete }) => {
             <>
               <input
                 type="text"
-                placeholder="Reason (required if rejecting)"
+                placeholder="Reason for approving or rejecting (required)"
+                maxLength={500}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 className="mt-4 w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
@@ -202,12 +241,16 @@ const ApplicationCard = ({ application, token, onDelete }) => {
         </div>
       </div>
 
-      <button
-        onClick={onDelete}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500"
-      >
-        <Trash2 size={19} />
-      </button>
+      {/* Pending applications can't be deleted: the user can't apply again
+          until theirs is reviewed */}
+      {status !== "pending" && (
+        <button
+          onClick={onDelete}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+        >
+          <Trash2 size={19} />
+        </button>
+      )}
     </div>
   );
 };

@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
 import houseImage from "../assets/house1.jpg";
+import PhotoManager from "../components/PhotoManager";
+import {
+  toEditablePhotos,
+  toPropertyImages,
+  getMainImage,
+} from "../utils/imageUtils";
 
 const emptyFeatures = {
   balcony: false,
@@ -43,6 +49,7 @@ const MyListings = () => {
       rentalDetails: listing.rentalDetails
         ? { ...listing.rentalDetails }
         : null,
+      photos: toEditablePhotos(listing.images),
     });
 
     setError("");
@@ -135,6 +142,11 @@ const MyListings = () => {
       bathrooms: Number(editingListing.bathrooms),
       size: Number(editingListing.size),
       features: editingListing.features,
+      // The whole photo list is saved, so removed photos are gone after saving
+      images: toPropertyImages(
+        editingListing.photos,
+        editingListing.title,
+      ),
     };
 
     if (editingListing.listingType === "rent") {
@@ -535,6 +547,23 @@ const MyListings = () => {
               </div>
             )}
 
+            <div className="mt-8 border-t pt-6">
+              <h2 className="font-semibold text-[#08243f]">
+                Property photos
+              </h2>
+
+              <PhotoManager
+                photos={editingListing.photos}
+                onChange={(photos) =>
+                  setEditingListing((current) => ({
+                    ...current,
+                    photos,
+                  }))
+                }
+                listingTitle={editingListing.title}
+              />
+            </div>
+
             <div className="mt-8 flex justify-end gap-3 border-t pt-6">
               <button
                 type="button"
@@ -589,12 +618,7 @@ const MyListings = () => {
         ) : (
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {listings.map((listing) => {
-              const image =
-                listing.images?.find(
-                  (image) => image.isMain,
-                )?.url ||
-                listing.images?.[0]?.url ||
-                houseImage;
+              const mainImage = getMainImage(listing);
 
               return (
                 <div
@@ -602,8 +626,11 @@ const MyListings = () => {
                   className="overflow-hidden rounded-2xl border border-gray-200 bg-white"
                 >
                   <img
-                    src={image}
-                    alt={listing.title}
+                    src={mainImage?.url || houseImage}
+                    onError={(event) => {
+                      event.currentTarget.src = houseImage;
+                    }}
+                    alt={mainImage?.description || listing.title}
                     className="h-48 w-full object-cover"
                   />
 

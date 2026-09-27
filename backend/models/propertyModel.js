@@ -49,6 +49,39 @@ const rentalDetailsSchema = new Schema(
   { _id: false },
 );
 
+// Image limits (the frontend uses the same numbers)
+const MAX_IMAGES = 8;
+const MAX_IMAGE_DESCRIPTION_LENGTH = 200;
+// A photo saved inside the listing is about 750 KB at most, so 8 photos
+// still fit in one request (the JSON body limit is 10 MB)
+const MAX_IMAGE_DATA_URL_LENGTH = 1_000_000;
+const MAX_IMAGE_WEB_URL_LENGTH = 2048;
+
+const imageDataUrlPattern = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+// An image is either a JPEG/PNG/WebP photo saved as a data URL, or a link
+// to an image on the web (http/https). Anything else, like "javascript:"
+// or "data:text/html", is rejected.
+const isValidImageUrl = (value) => {
+  if (value.startsWith("data:")) {
+    return (
+      value.length <= MAX_IMAGE_DATA_URL_LENGTH &&
+      imageDataUrlPattern.test(value)
+    );
+  }
+
+  if (value.length > MAX_IMAGE_WEB_URL_LENGTH) {
+    return false;
+  }
+
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
 const strictImageNumberCast = (value) => {
   if (value === null || value === undefined) {
     return value;
@@ -102,16 +135,27 @@ const imageSchema = new Schema(
       required: true,
       trim: true,
       cast: strictImageStringCast("url"),
-      validate: {
-        validator: (value) => value.trim() !== "",
-        message: "image url must not be blank",
-      },
+      validate: [
+        {
+          validator: (value) => value.trim() !== "",
+          message: "image url must not be blank",
+        },
+        {
+          validator: isValidImageUrl,
+          message:
+            "image must be a JPEG, PNG, or WebP photo under 750 KB, or an http(s) image link",
+        },
+      ],
     },
     description: {
       type: String,
       required: true,
       trim: true,
       cast: strictImageStringCast("description"),
+      maxlength: [
+        MAX_IMAGE_DESCRIPTION_LENGTH,
+        `image description cannot exceed ${MAX_IMAGE_DESCRIPTION_LENGTH} characters`,
+      ],
       validate: {
         validator: (value) => value.trim() !== "",
         message: "image description must not be blank",
@@ -233,26 +277,33 @@ const propertySchema = new Schema(
     images: {
       type: [imageSchema],
       default: [],
-      validate: {
-        validator: (images) => {
-          if (!Array.isArray(images)) {
-            return false;
-          }
-
-          if (images.length === 0) {
-            return true;
-          }
-
-          const mainImageCount = images.filter((image) => image.isMain).length;
-          const imageIds = images.map((image) => image.id);
-
-          return (
-            mainImageCount === 1 && new Set(imageIds).size === imageIds.length
-          );
+      validate: [
+        {
+          validator: (images) =>
+            Array.isArray(images) && images.length <= MAX_IMAGES,
+          message: `a listing can have up to ${MAX_IMAGES} images`,
         },
-        message:
-          "images must contain exactly one main image and unique image ids",
-      },
+        {
+          validator: (images) => {
+            if (!Array.isArray(images)) {
+              return false;
+            }
+
+            if (images.length === 0) {
+              return true;
+            }
+
+            const mainImageCount = images.filter((image) => image.isMain).length;
+            const imageIds = images.map((image) => image.id);
+
+            return (
+              mainImageCount === 1 && new Set(imageIds).size === imageIds.length
+            );
+          },
+          message:
+            "images must contain exactly one main image and unique image ids",
+        },
+      ],
     },
     moderation: {
       type: moderationSchema,

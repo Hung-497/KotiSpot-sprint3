@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Inquiry = require("../models/inquiryModel");
 const Property = require("../models/propertyModel");
+const { publicPropertyScope } = require("../utils/propertyQueryHelpers");
 
 const createInquiry = async (req, res) => {
   const { propertyId } = req.params;
@@ -26,7 +27,12 @@ const createInquiry = async (req, res) => {
   }
 
   try {
-    const property = await Property.findById(propertyId);
+    // Only listings the public can see can receive inquiries. Inactive,
+    // sold, rented, unreviewed, flagged and removed listings look missing.
+    const property = await Property.findOne({
+      _id: propertyId,
+      ...publicPropertyScope,
+    });
 
     if (!property) {
       return res.status(404).json({
@@ -103,6 +109,12 @@ const addInquiryReply = async (req, res) => {
     return res.status(400).json({ message: "Reply is required" });
   }
 
+  if (text.trim().length > 1000) {
+    return res
+      .status(400)
+      .json({ message: "Reply cannot exceed 1000 characters" });
+  }
+
   try {
     const inquiry = await Inquiry.findById(req.params.inquiryId);
 
@@ -116,12 +128,14 @@ const addInquiryReply = async (req, res) => {
     if (String(inquiry.owner) === userId) {
       update = {
         $push: { replies: { from: "owner", text } },
-        $set: { deletedBySender: false }, // show it again to the other person
+        // show it again (as unread) to the other person
+        $set: { deletedBySender: false, readBySender: false, readByOwner: true },
       };
     } else if (String(inquiry.sender) === userId) {
       update = {
         $push: { replies: { from: "sender", text } },
-        $set: { deletedByOwner: false }, // show it again to the other person
+        // show it again (as unread) to the other person
+        $set: { deletedByOwner: false, readByOwner: false, readBySender: true },
       };
     } else {
       return res.status(403).json({ message: "Access denied" });
@@ -137,6 +151,10 @@ const addInquiryReply = async (req, res) => {
   } catch (error) {
     if (error.name === "CastError") {
       return res.status(400).json({ message: "Invalid inquiry ID" });
+    }
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: "Invalid reply" });
     }
 
     res.status(500).json({ message: "Failed to send reply" });
@@ -177,10 +195,45 @@ const deleteInquiryNotification = async (req, res) => {
   }
 };
 
+// PATCH /inquiries/:inquiryId/read (marks it as read in MY notifications only)
+const markInquiryRead = async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findById(req.params.inquiryId);
+
+    if (!inquiry) {
+      return res.status(404).json({ message: "Inquiry not found" });
+    }
+
+    const userId = String(req.user._id);
+
+    let update;
+
+    if (String(inquiry.owner) === userId) {
+      update = { readByOwner: true };
+    } else if (String(inquiry.sender) === userId) {
+      update = { readBySender: true };
+    } else {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Only this one field is saved (old data in the document can't block it)
+    await Inquiry.updateOne({ _id: inquiry._id }, { $set: update });
+
+    res.status(200).json({ message: "Notification marked as read" });
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid inquiry ID" });
+    }
+
+    res.status(500).json({ message: "Failed to mark notification as read" });
+  }
+};
+
 module.exports = {
   createInquiry,
   getMyInquiries,
   getMySentInquiries,
   addInquiryReply,
   deleteInquiryNotification,
+  markInquiryRead,
 };

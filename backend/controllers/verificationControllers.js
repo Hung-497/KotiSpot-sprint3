@@ -125,8 +125,12 @@ const getApplications = async (req, res) => {
   }
 
   try {
-    // Don't return applications the admin has deleted from notifications
-    const filter = { deletedByAdmin: { $ne: true } };
+    // Don't return applications the admin has deleted from notifications,
+    // but always return pending ones: the user can't apply again until
+    // theirs is reviewed (this also brings back ones hidden before this rule)
+    const filter = {
+      $or: [{ status: "pending" }, { deletedByAdmin: { $ne: true } }],
+    };
     if (status) {
       filter.status = status;
     }
@@ -148,18 +152,24 @@ const reviewApplication = async (req, res) => {
 
   const { status, reviewNote, rejectionReason } = req.body ?? {};
 
+  // Older clients send the reason as rejectionReason
+  const reviewReason = req.body?.reviewReason ?? rejectionReason;
+
   if (!["approved", "rejected"].includes(status)) {
     return res.status(400).json({
       message: 'Invalid status. Must be either "approved" or "rejected".',
     });
   }
 
-  if (
-    status === "rejected" &&
-    (typeof rejectionReason !== "string" || rejectionReason.trim() === "")
-  ) {
+  if (typeof reviewReason !== "string" || reviewReason.trim() === "") {
     return res.status(400).json({
-      message: "Rejection reason is required",
+      message: "A reason is required to approve or reject an application",
+    });
+  }
+
+  if (reviewReason.trim().length > 500) {
+    return res.status(400).json({
+      message: "Reason cannot exceed 500 characters",
     });
   }
 
@@ -181,9 +191,12 @@ const reviewApplication = async (req, res) => {
     verificationRequest.reviewedBy = req.user._id;
     verificationRequest.reviewedAt = new Date();
     verificationRequest.reviewNote = reviewNote || undefined;
+    verificationRequest.readByAdmin = true; // reviewing it means the admin has read it
+    verificationRequest.reviewReason = reviewReason.trim();
 
+    // Kept for rejections so older data readers still find the reason
     verificationRequest.rejectionReason =
-      status === "rejected" ? rejectionReason.trim() : undefined;
+      status === "rejected" ? reviewReason.trim() : undefined;
 
     await verificationRequest.save();
 
@@ -218,6 +231,14 @@ const deleteApplicationNotification = async (req, res) => {
       return res.status(404).json({ message: "Application not found" });
     }
 
+    // The user can't apply again while this is pending, so it has to be
+    // reviewed before it can disappear from the admin's notifications
+    if (application.status === "pending") {
+      return res.status(409).json({
+        message: "Approve or reject this application before deleting it",
+      });
+    }
+
     // Only this one field is saved (old data in the document can't block it)
     await Verification.updateOne(
       { _id: application._id },
@@ -234,10 +255,36 @@ const deleteApplicationNotification = async (req, res) => {
   }
 };
 
+// PATCH /verifications/:applicationId/read (admin marks it as read in their notifications)
+const markApplicationRead = async (req, res) => {
+  try {
+    const application = await Verification.findById(req.params.applicationId);
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    // Only this one field is saved (old data in the document can't block it)
+    await Verification.updateOne(
+      { _id: application._id },
+      { $set: { readByAdmin: true } },
+    );
+
+    res.status(200).json({ message: "Notification marked as read" });
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "Invalid application ID" });
+    }
+
+    res.status(500).json({ message: "Failed to mark notification as read" });
+  }
+};
+
 module.exports = {
   createVerification,
   getUserVerification,
   getApplications,
   reviewApplication,
   deleteApplicationNotification,
+  markApplicationRead,
 };

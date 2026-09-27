@@ -31,10 +31,12 @@ function App() {
 
   const isAdmin = auth?.user?.role === "administrator";
 
+  // Administrators moderate listings but don't sell or own any
   const canManageListings =
-    isAdmin ||
-    (["seller", "agent"].includes(auth?.user?.role) &&
-      Boolean(auth?.user?.verifiedAt));
+    ["seller", "agent"].includes(auth?.user?.role) &&
+    Boolean(auth?.user?.verifiedAt);
+
+  const noListingsRedirect = isAdmin ? "/adminpanel" : "/sell";
 
   // Sellers can still apply to become an agent
   const canApply =
@@ -237,7 +239,11 @@ function App() {
           <Route
             path="/listings"
             element={
-              canManageListings ? <Listings /> : <Navigate to="/sell" replace />
+              canManageListings ? (
+                <Listings />
+              ) : (
+                <Navigate to={noListingsRedirect} replace />
+              )
             }
           />
           <Route
@@ -250,7 +256,7 @@ function App() {
             path="/notifications"
             element={
               isLoggedIn ? (
-                <Notifications isAdmin={isAdmin} token={auth?.token} />
+                <Notifications isAdmin={isAdmin} />
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -262,7 +268,7 @@ function App() {
               canManageListings ? (
                 <MyListings />
               ) : (
-                <Navigate to="/sell" replace />
+                <Navigate to={noListingsRedirect} replace />
               )
             }
           />
@@ -312,12 +318,18 @@ function App() {
           <Route
             path="/sell"
             element={
-              canManageListings ? <Navigate to="/listings" replace /> : <Sell />
+              isAdmin ? (
+                <Navigate to="/adminpanel" replace />
+              ) : canManageListings ? (
+                <Navigate to="/listings" replace />
+              ) : (
+                <Sell />
+              )
             }
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <Footer />
+        <Footer isAdmin={isAdmin} />
       </BrowserRouter>
     </>
   );

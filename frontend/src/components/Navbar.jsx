@@ -19,9 +19,9 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
 
   const isAdmin = user?.role === "administrator";
 
+  // Administrators moderate listings but don't sell or own any
   const canManageListings =
-    isAdmin ||
-    (["seller", "agent"].includes(user?.role) && Boolean(user?.verifiedAt));
+    ["seller", "agent"].includes(user?.role) && Boolean(user?.verifiedAt);
 
   // Sellers can still apply to become an agent
   const canApply = !["agent", "administrator"].includes(user?.role);
@@ -42,7 +42,9 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
 
       <ul className="mx-auto flex items-center gap-9">
         {navLinks
-          .filter((link) => !(isAdmin && link.href === "/contact"))
+          .filter(
+            (link) => !(isAdmin && ["/contact", "/sell"].includes(link.href)),
+          )
           .map((link) => (
             <li key={link.id}>
               <Link
