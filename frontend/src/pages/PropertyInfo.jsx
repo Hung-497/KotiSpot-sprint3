@@ -1,5 +1,4 @@
 import { useLocation, Link } from "react-router-dom";
-import { MapPin, Heart, Mail, BedDouble, Bath, Maximize, Calendar, Calculator } from "lucide-react";
 import PropertyMap from "../components/PropertyMap";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -12,6 +11,8 @@ import {
   Maximize,
   ChevronLeft,
   ChevronRight,
+  Calendar, 
+  Calculator, 
 } from "lucide-react";
 import houseImage from "../assets/house1.jpg";
 import { apiRequest } from "../services/api";

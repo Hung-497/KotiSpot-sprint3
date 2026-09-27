@@ -36,6 +36,8 @@ const seedIds = Object.freeze({
   inquiries: Object.freeze({
     helsinkiViewing: "67f000000000000000000001",
     espooQuestion: "67f000000000000000000002",
+    unavailableListing: "67f000000000000000000003",
+    guestViewing: "67f000000000000000000004",
   }),
   verifications: Object.freeze({
     pendingSeller: "68f000000000000000000001",
@@ -45,6 +47,8 @@ const seedIds = Object.freeze({
   }),
   contactMessages: Object.freeze({
     supportQuestion: "69f000000000000000000001",
+    adminReply: "69f000000000000000000002",
+    readConversation: "69f000000000000000000003",
   }),
 });
 
@@ -179,6 +183,7 @@ const buildSeedData = () => {
       rooms: 3,
       bedrooms: 2,
       bathrooms: 1,
+      buildingYear: 2010,
       size: 72,
       features: { balcony: true, elevator: true, petsAllowed: true },
       moderationStatus: "approved",
@@ -205,6 +210,7 @@ const buildSeedData = () => {
       rooms: 5,
       bedrooms: 3,
       bathrooms: 2,
+      buildingYear: 1971,
       size: 142,
       features: { parking: true, petsAllowed: true, sauna: true },
       rentalDetails: {
@@ -237,6 +243,7 @@ const buildSeedData = () => {
       rooms: 1,
       bedrooms: 0,
       bathrooms: 1,
+      buildingYear: 2001,
       size: 31,
       features: { elevator: true, furnished: true },
       rentalDetails: {
@@ -269,6 +276,7 @@ const buildSeedData = () => {
       rooms: 4,
       bedrooms: 3,
       bathrooms: 1,
+      buildingYear: 1985,
       size: 96,
       features: { parking: true, petsAllowed: true, sauna: true },
       moderationStatus: "unreviewed",
@@ -292,6 +300,7 @@ const buildSeedData = () => {
       rooms: 4,
       bedrooms: 3,
       bathrooms: 2,
+      buildingYear: 1989,
       size: 128,
       features: {
         balcony: true,
@@ -323,6 +332,7 @@ const buildSeedData = () => {
       rooms: 4,
       bedrooms: 3,
       bathrooms: 1,
+      buildingYear: 1999,
       size: 104,
       features: { parking: true, sauna: true },
       rentalDetails: {
@@ -355,6 +365,7 @@ const buildSeedData = () => {
       rooms: 2,
       bedrooms: 1,
       bathrooms: 1,
+      buildingYear: 1976,
       size: 54,
       features: { balcony: true, elevator: true, petsAllowed: true },
       moderationStatus: "approved",
@@ -381,6 +392,7 @@ const buildSeedData = () => {
       rooms: 2,
       bedrooms: 1,
       bathrooms: 1,
+      buildingYear: 2020,
       size: 49,
       features: {
         balcony: true,
@@ -418,6 +430,7 @@ const buildSeedData = () => {
       rooms: 5,
       bedrooms: 3,
       bathrooms: 2,
+      buildingYear: 2013,
       size: 126,
       features: {
         balcony: true,
@@ -449,6 +462,7 @@ const buildSeedData = () => {
       rooms: 4,
       bedrooms: 3,
       bathrooms: 1,
+      buildingYear: 2008,
       size: 94,
       features: {
         balcony: true,
@@ -486,6 +500,7 @@ const buildSeedData = () => {
       rooms: 3,
       bedrooms: 2,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 71,
       features: { balcony: true, elevator: true },
       moderationStatus: "approved",
@@ -512,6 +527,7 @@ const buildSeedData = () => {
       rooms: 6,
       bedrooms: 4,
       bathrooms: 2,
+      buildingYear: 2005,
       size: 168,
       features: { parking: true, petsAllowed: true, sauna: true },
       moderationStatus: "approved",
@@ -538,6 +554,7 @@ const buildSeedData = () => {
       rooms: 1,
       bedrooms: 0,
       bathrooms: 1,
+      buildingYear: 2016,
       size: 30,
       features: { elevator: true, furnished: true },
       moderationStatus: "approved",
@@ -564,6 +581,7 @@ const buildSeedData = () => {
       rooms: 4,
       bedrooms: 3,
       bathrooms: 1,
+      buildingYear: 2017,
       size: 102,
       features: {
         parking: true,
@@ -601,6 +619,7 @@ const buildSeedData = () => {
       rooms: 2,
       bedrooms: 1,
       bathrooms: 1,
+      buildingYear: 2009,
       size: 55,
       features: { balcony: true, elevator: true, petsAllowed: true },
       rentalDetails: {
@@ -633,6 +652,7 @@ const buildSeedData = () => {
       rooms: 5,
       bedrooms: 4,
       bathrooms: 2,
+      buildingYear: 1994,
       size: 151,
       features: {
         balcony: true,
@@ -677,9 +697,14 @@ const buildSeedData = () => {
     {
       _id: id(seedIds.inquiries.helsinkiViewing),
       propertyId: id(seedIds.properties.helsinkiApartment),
-      name: "Veera Visitor",
-      email: "veera@example.com",
+      name: "Aino Buyer",
+      email: "buyer@kotispot.dev",
       message: "Could I arrange a viewing next Tuesday evening?",
+      owner: id(seedIds.users.seller),
+      sender: id(seedIds.users.buyer),
+      replies: [],
+      readByOwner: false,
+      readBySender: true,
       submittedAt: at("2026-08-24T15:00:00.000Z"),
     },
     {
@@ -688,7 +713,49 @@ const buildSeedData = () => {
       name: "Riku Renter",
       email: "renter@kotispot.dev",
       message: "Is a medium-sized dog allowed in this home?",
+      owner: id(seedIds.users.agent),
+      sender: id(seedIds.users.renter),
+      replies: [
+        {
+          from: "owner",
+          text: "Yes, pets are welcome with prior agreement.",
+          sentAt: at("2026-08-25T14:30:00.000Z"),
+        },
+      ],
+      readByOwner: true,
+      readBySender: false,
       submittedAt: at("2026-08-25T12:00:00.000Z"),
+    },
+    {
+      _id: id(seedIds.inquiries.unavailableListing),
+      propertyId: id(seedIds.properties.vantaaRental),
+      name: "Aino Buyer",
+      email: "buyer@kotispot.dev",
+      message: "Is the home still available for a long-term lease?",
+      owner: id(seedIds.users.agent),
+      sender: id(seedIds.users.buyer),
+      replies: [
+        {
+          from: "owner",
+          text: "The listing is currently unavailable, but I can contact you if that changes.",
+          sentAt: at("2026-08-26T11:00:00.000Z"),
+        },
+      ],
+      readByOwner: true,
+      readBySender: true,
+      submittedAt: at("2026-08-26T09:30:00.000Z"),
+    },
+    {
+      _id: id(seedIds.inquiries.guestViewing),
+      propertyId: id(seedIds.properties.tampereStudio),
+      name: "Veera Visitor",
+      email: "veera@example.com",
+      message: "Could I see the studio during the weekend?",
+      owner: id(seedIds.users.seller),
+      replies: [],
+      readByOwner: true,
+      readBySender: true,
+      submittedAt: at("2026-08-27T16:00:00.000Z"),
     },
   ];
 
@@ -703,6 +770,7 @@ const buildSeedData = () => {
       bio: "I want to list my own apartment.",
       idDocument: "seed-documents/pending-seller-id.pdf",
       status: "pending",
+      readByAdmin: false,
       createdAt: at("2026-08-26T09:00:00.000Z"),
     },
     {
@@ -719,6 +787,7 @@ const buildSeedData = () => {
       reviewNote: "Identity and ownership documentation verified",
       reviewReason: "Identity and ownership documentation verified",
       reviewedAt: at("2026-01-10T09:00:00.000Z"),
+      readByAdmin: true,
       createdAt: at("2026-01-09T08:00:00.000Z"),
     },
     {
@@ -740,6 +809,7 @@ const buildSeedData = () => {
       reviewNote: "Identity and licence documentation verified",
       reviewReason: "Identity and licence documentation verified",
       reviewedAt: at("2026-01-11T09:00:00.000Z"),
+      readByAdmin: true,
       createdAt: at("2026-01-09T09:00:00.000Z"),
     },
     {
@@ -762,6 +832,7 @@ const buildSeedData = () => {
       reviewReason: "License information is incomplete",
       rejectionReason: "License information is incomplete",
       reviewedAt: at("2026-08-28T10:00:00.000Z"),
+      readByAdmin: true,
       createdAt: at("2026-08-27T10:00:00.000Z"),
     },
   ];
@@ -769,11 +840,56 @@ const buildSeedData = () => {
   const contactMessages = [
     {
       _id: id(seedIds.contactMessages.supportQuestion),
-      fullName: "Dev User",
+      fullName: "Aino Buyer",
       email: "buyer@kotispot.dev",
       subject: "Question about saved favourites",
-      message: "This is a deterministic development support message.",
+      message: "My saved favourites are not appearing in the order I expected.",
+      user: id(seedIds.users.buyer),
+      replies: [],
+      readByUser: true,
+      readByAdmin: false,
       submittedAt: at("2026-08-29T13:00:00.000Z"),
+    },
+    {
+      _id: id(seedIds.contactMessages.adminReply),
+      fullName: "Riku Renter",
+      email: "renter@kotispot.dev",
+      subject: "Help updating notification settings",
+      message: "Where can I update the emails I receive from KotiSpot?",
+      user: id(seedIds.users.renter),
+      replies: [
+        {
+          from: "admin",
+          text: "You can update those options from your account settings page.",
+          sentAt: at("2026-08-30T10:15:00.000Z"),
+        },
+      ],
+      readByUser: false,
+      readByAdmin: true,
+      submittedAt: at("2026-08-30T09:00:00.000Z"),
+    },
+    {
+      _id: id(seedIds.contactMessages.readConversation),
+      fullName: "Aino Buyer",
+      email: "buyer@kotispot.dev",
+      subject: "Property alert resolved",
+      message: "I received an alert for a listing I could not open.",
+      user: id(seedIds.users.buyer),
+      replies: [
+        {
+          from: "admin",
+          text: "The listing had just become unavailable, and the alert has now been corrected.",
+          sentAt: at("2026-08-31T12:00:00.000Z"),
+        },
+        {
+          from: "user",
+          text: "Thanks, the alert is working correctly now.",
+          sentAt: at("2026-08-31T12:20:00.000Z"),
+        },
+      ],
+      readByUser: true,
+      readByAdmin: true,
+      submittedAt: at("2026-08-31T11:30:00.000Z"),
     },
   ];
 

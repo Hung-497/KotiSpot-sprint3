@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
+const jwt = require("jsonwebtoken");
 const app = require("../app");
 const connectDB = require("../config/db");
 const AuthCode = require("../models/authCodeModel");
@@ -17,6 +18,7 @@ const {
   resetSeedData,
 } = require("../data/seedDatabase");
 const { assertDevelopmentDatabase } = require("../seeder");
+const { JWT_SECRET } = require("../config/config");
 
 const api = supertest(app);
 const unrelatedUserId = new mongoose.Types.ObjectId(
@@ -42,6 +44,9 @@ const countBy = (documents, field) =>
     return counts;
   }, {});
 
+const tokenFor = (userId) =>
+  jwt.sign({ _id: userId }, JWT_SECRET, { expiresIn: "3d" });
+
 beforeAll(async () => {
   await connectDB();
 });
@@ -66,9 +71,9 @@ it("imports the deterministic cross-model development dataset", async () => {
     users: 7,
     properties: 16,
     favourites: 3,
-    inquiries: 2,
+    inquiries: 4,
     verifications: 4,
-    contactMessages: 1,
+    contactMessages: 3,
   });
 
   expect(
@@ -84,7 +89,7 @@ it("imports the deterministic cross-model development dataset", async () => {
   ).toBe(3);
   expect(
     await Inquiry.countDocuments({ _id: { $in: allIds(seedIds.inquiries) } }),
-  ).toBe(2);
+  ).toBe(4);
   expect(
     await Verification.countDocuments({
       _id: { $in: allIds(seedIds.verifications) },
@@ -94,7 +99,7 @@ it("imports the deterministic cross-model development dataset", async () => {
     await ContactMessage.countDocuments({
       _id: { $in: allIds(seedIds.contactMessages) },
     }),
-  ).toBe(1);
+  ).toBe(3);
 
   const seller = await User.findById(seedIds.users.seller);
   const helsinkiApartment = await Property.findById(
@@ -113,6 +118,117 @@ it("imports the deterministic cross-model development dataset", async () => {
       images: { $ne: [] },
     }),
   ).toBe(0);
+});
+
+it("seeds derived notification conversations with deterministic read states", async () => {
+  await importSeedData();
+
+  const inquiries = await Inquiry.find({
+    _id: { $in: allIds(seedIds.inquiries) },
+  });
+  const inquiryById = new Map(
+    inquiries.map((inquiry) => [inquiry._id.toString(), inquiry]),
+  );
+
+  const unreadOwnerInquiry = inquiryById.get(
+    seedIds.inquiries.helsinkiViewing,
+  );
+  expect(unreadOwnerInquiry.owner.toString()).toBe(seedIds.users.seller);
+  expect(unreadOwnerInquiry.sender.toString()).toBe(seedIds.users.buyer);
+  expect(unreadOwnerInquiry.replies).toHaveLength(0);
+  expect(unreadOwnerInquiry.readByOwner).toBe(false);
+  expect(unreadOwnerInquiry.readBySender).toBe(true);
+
+  const ownerReply = inquiryById.get(seedIds.inquiries.espooQuestion);
+  expect(ownerReply.owner.toString()).toBe(seedIds.users.agent);
+  expect(ownerReply.sender.toString()).toBe(seedIds.users.renter);
+  expect(ownerReply.replies.map(({ from }) => from)).toEqual(["owner"]);
+  expect(ownerReply.readByOwner).toBe(true);
+  expect(ownerReply.readBySender).toBe(false);
+
+  const unavailableInquiry = inquiryById.get(
+    seedIds.inquiries.unavailableListing,
+  );
+  expect(unavailableInquiry.propertyId.toString()).toBe(
+    seedIds.properties.vantaaRental,
+  );
+  expect(unavailableInquiry.readByOwner).toBe(true);
+  expect(unavailableInquiry.readBySender).toBe(true);
+
+  const guestInquiry = inquiryById.get(seedIds.inquiries.guestViewing);
+  expect(guestInquiry.sender).toBeUndefined();
+  expect(guestInquiry.owner.toString()).toBe(seedIds.users.seller);
+
+  const agentNotifications = await api
+    .get("/api/inquiries/mine")
+    .set("Authorization", `Bearer ${tokenFor(seedIds.users.agent)}`)
+    .expect(200);
+  const unavailableResult = agentNotifications.body.find(
+    ({ _id }) => _id === seedIds.inquiries.unavailableListing,
+  );
+  expect(unavailableResult.propertyId.status).toBe("inactive");
+  expect(unavailableResult.propertyId.moderation.status).toBe("approved");
+
+  const renterNotifications = await api
+    .get("/api/inquiries/sent")
+    .set("Authorization", `Bearer ${tokenFor(seedIds.users.renter)}`)
+    .expect(200);
+  expect(renterNotifications.body).toHaveLength(1);
+  expect(renterNotifications.body[0]._id).toBe(seedIds.inquiries.espooQuestion);
+  expect(renterNotifications.body[0].readBySender).toBe(false);
+
+  const contactMessages = await ContactMessage.find({
+    _id: { $in: allIds(seedIds.contactMessages) },
+  });
+  const contactById = new Map(
+    contactMessages.map((message) => [message._id.toString(), message]),
+  );
+
+  const unreadAdminMessage = contactById.get(
+    seedIds.contactMessages.supportQuestion,
+  );
+  expect(unreadAdminMessage.user.toString()).toBe(seedIds.users.buyer);
+  expect(unreadAdminMessage.replies).toHaveLength(0);
+  expect(unreadAdminMessage.readByAdmin).toBe(false);
+  expect(unreadAdminMessage.readByUser).toBe(true);
+
+  const unreadUserMessage = contactById.get(
+    seedIds.contactMessages.adminReply,
+  );
+  expect(unreadUserMessage.user.toString()).toBe(seedIds.users.renter);
+  expect(unreadUserMessage.replies.map(({ from }) => from)).toEqual(["admin"]);
+  expect(unreadUserMessage.readByAdmin).toBe(true);
+  expect(unreadUserMessage.readByUser).toBe(false);
+
+  const readConversation = contactById.get(
+    seedIds.contactMessages.readConversation,
+  );
+  expect(readConversation.user.toString()).toBe(seedIds.users.buyer);
+  expect(readConversation.replies.map(({ from }) => from)).toEqual([
+    "admin",
+    "user",
+  ]);
+  expect(readConversation.readByAdmin).toBe(true);
+  expect(readConversation.readByUser).toBe(true);
+
+  const verificationApplications = await Verification.find({
+    _id: { $in: allIds(seedIds.verifications) },
+  });
+  const pendingApplication = verificationApplications.find(
+    ({ status }) => status === "pending",
+  );
+  const reviewedApplications = verificationApplications.filter(
+    ({ status }) => status !== "pending",
+  );
+
+  expect(pendingApplication.readByAdmin).toBe(false);
+  expect(reviewedApplications).toHaveLength(3);
+  expect(reviewedApplications.every(({ readByAdmin }) => readByAdmin)).toBe(
+    true,
+  );
+  expect(
+    reviewedApplications.every(({ reviewReason }) => Boolean(reviewReason)),
+  ).toBe(true);
 });
 
 it("provides the exact public showcase distribution and filter coverage", async () => {
@@ -144,7 +260,7 @@ it("provides the exact public showcase distribution and filter coverage", async 
     "terraced-house": 1,
   });
 
-  for (const field of ["price", "rooms", "bedrooms", "bathrooms", "size"]) {
+  for (const field of ["price", "rooms", "bedrooms", "bathrooms","buildingYear", "size"]) {
     expect(new Set(publicProperties.map((property) => property[field])).size).toBeGreaterThan(1);
   }
 
@@ -315,6 +431,7 @@ it("resets seed-linked manual changes while preserving unrelated data", async ()
     rooms: 2,
     bedrooms: 1,
     bathrooms: 1,
+    buildingYear: 1976,
     size: 45,
     status: "active",
     moderation: { status: "unreviewed" },
@@ -353,6 +470,7 @@ it("resets seed-linked manual changes while preserving unrelated data", async ()
     rooms: 2,
     bedrooms: 1,
     bathrooms: 1,
+    buildingYear: 1987,
     size: 50,
     status: "active",
     moderation: { status: "approved" },
