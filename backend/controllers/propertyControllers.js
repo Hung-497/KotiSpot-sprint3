@@ -1,14 +1,10 @@
 const Property = require("../models/propertyModel");
 const mongoose = require("mongoose");
 const {
+  publicPropertyScope,
   addNumericRangeFilter,
   addBooleanFilter,
 } = require("../utils/propertyQueryHelpers");
-
-const publicPropertyScope = {
-  status: "active",
-  "moderation.status": "approved",
-};
 
 const hasModerationInput = (body) =>
   body &&
@@ -21,6 +17,18 @@ const hasValidRequestBody = (body) =>
   typeof body === "object" &&
   !Array.isArray(body) &&
   Object.keys(body).length > 0;
+
+// Image problems get their own message so the listing form can say what's
+// wrong. Only our own validator messages are used (a cast error would echo
+// the whole submitted value back).
+const getImageErrorMessage = (error) => {
+  const imageError = Object.entries(error.errors ?? {}).find(
+    ([path, fieldError]) =>
+      path.startsWith("images") && fieldError.name === "ValidatorError",
+  );
+
+  return imageError ? `Invalid property images: ${imageError[1].message}` : null;
+};
 
 // GET /properties
 const getActiveProperties = async (req, res) => {
@@ -61,13 +69,18 @@ const createProperty = async (req, res) => {
       owner: req.user._id,
       status: "active", // Set default status to "active"
       moderation: {
-        status: req.user.role === "agent" ? "approved" : "unreviewed", // Set default moderation status to "unreviewed"
+        // Agents and administrators are auto-approved; sellers need review
+        status: ["agent", "administrator"].includes(req.user.role)
+          ? "approved"
+          : "unreviewed",
       },
     });
     res.status(201).json(newProperty);
   } catch (error) {
     if (error.name === "ValidationError" || error.name === "CastError") {
-      res.status(400).json({ message: "Invalid property data" });
+      res.status(400).json({
+        message: getImageErrorMessage(error) || "Invalid property data",
+      });
     } else {
       res.status(500).json({ message: "Failed to create property" });
     }
@@ -111,7 +124,9 @@ const updateProperty = async (req, res) => {
 
     res.status(200).json(req.property);
   } catch (error) {
-    res.status(400).json({ message: "Failed to update property" });
+    res.status(400).json({
+      message: getImageErrorMessage(error) || "Failed to update property",
+    });
   }
 };
 

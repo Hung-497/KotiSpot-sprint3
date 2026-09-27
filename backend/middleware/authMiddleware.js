@@ -47,7 +47,11 @@ const requireVerifiedSellerOrAgent = (req, res, next) => {
     return res.status(401).json({ message: "Authentication required" });
   }
 
-  if (!["seller", "agent"].includes(req.user.role) || !req.user.verifiedAt) {
+  const isAdmin = req.user.role === "administrator";
+  const isVerifiedSeller =
+    ["seller", "agent"].includes(req.user.role) && req.user.verifiedAt;
+
+  if (!isAdmin && !isVerifiedSeller) {
     return res
       .status(403)
       .json({ message: "Verified seller or agent access required" });
@@ -86,8 +90,25 @@ const requirePropertyOwner = async (req, res, next) => {
   }
 };
 
+// Like requireAuth, but lets guests through too (req.user stays empty)
+const optionalAuth = async (req, res, next) => {
+  const authorization = req.headers.authorization;
+
+  if (authorization && authorization.startsWith("Bearer ")) {
+    try {
+      const { _id } = jwt.verify(authorization.split(" ")[1], JWT_SECRET);
+      req.user = await User.findById(_id);
+    } catch {
+      // Invalid token: continue as a guest
+    }
+  }
+
+  next();
+};
+
 module.exports = {
   requireAuth,
+  optionalAuth,
   requireRole,
   requireVerifiedSellerOrAgent,
   requirePropertyOwner,

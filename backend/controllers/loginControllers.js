@@ -45,6 +45,23 @@ const requestCode = async (req, res) => {
       return res.status(400).json({ message: "Invalid email address" });
     }
 
+    // "login" = the email must already have an account
+    // "register" = the email must NOT have an account yet
+    const { mode } = req.body;
+    const existingUser = await User.findOne({ email });
+
+    if (mode === "login" && !existingUser) {
+      return res.status(404).json({
+        message: "No account found with this email. Please sign up first.",
+      });
+    }
+
+    if (mode === "register" && existingUser) {
+      return res.status(409).json({
+        message: "An account with this email already exists. Please log in.",
+      });
+    }
+
     const now = new Date();
     const existingAuthCode = await AuthCode.findOne({ email });
     let requestCount = 0;
@@ -147,6 +164,13 @@ const verifyCode = async (req, res) => {
 
     let user = await User.findOne({ email });
 
+    // Logging in only works for an email that has signed up first
+    if (!user && req.body.mode === "login") {
+      return res.status(404).json({
+        message: "No account found with this email. Please sign up first.",
+      });
+    }
+
     if (!user) {
       user = await User.create({
         email,
@@ -160,6 +184,8 @@ const verifyCode = async (req, res) => {
       user: {
         _id: user._id,
         email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role,
         verifiedAt: user.verifiedAt,
       },
@@ -177,6 +203,8 @@ const getCurrentUser = async (req, res) => {
     user: {
       _id: req.user._id,
       email: req.user.email,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
       role: req.user.role,
       verifiedAt: req.user.verifiedAt,
     },
