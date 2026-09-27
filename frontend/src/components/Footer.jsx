@@ -3,7 +3,7 @@ import { navLinks } from "../../data";
 import { Link } from "react-router-dom";
 import { FaGithub, FaInstagram, FaLinkedin, FaFacebook, FaXTwitter } from "react-icons/fa6";
 
-const Footer = () => {
+const Footer = ({ isAdmin }) => {
   return (
     <footer className="bg-[#f1f7f4] px-6 py-10 md:px-12 lg:px-16">
 
@@ -41,7 +41,9 @@ const Footer = () => {
       <h3 className="mb-4 text-lg font-bold">Explore</h3>
 
       <ul className="space-y-2 text-black-600">
-        {navLinks.map((link) => (
+        {navLinks
+          .filter((link) => !(isAdmin && link.href === "/sell"))
+          .map((link) => (
           <li key={link.id}>
             <Link to={link.href} className="transition-colors hover:text-[#1f7356]">
               {link.footerText}

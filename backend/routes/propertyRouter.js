@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
   getActiveProperties,
@@ -8,31 +8,53 @@ const {
   updateProperty,
   deleteProperty,
   filterProperties,
-  getPropertyByKeyword
-} = require('../controllers/propertyControllers');
+  getPropertyByKeyword,
+  getMyProperties,
+} = require("../controllers/propertyControllers");
+const {
+  requireAuth,
+  requireRole,
+  requireVerifiedSellerOrAgent,
+  requirePropertyOwner,
+} = require("../middleware/authMiddleware");
 
 // GET /properties for active properties
-router.get('/', getActiveProperties);
+router.get("/", getActiveProperties);
 
 // GET /properties for all properties
-router.get('/all', getAllProperties);
+router.get("/all", requireAuth, requireRole("administrator"), getAllProperties);
 
 // POST /properties
-router.post('/', createProperty);
+router.post("/", requireAuth, requireVerifiedSellerOrAgent, createProperty);
 
-// GET /properties/filter 
-router.get('/filter', filterProperties);
+// GET /properties/mine
+router.get("/mine", requireAuth, getMyProperties);
+
+// GET /properties/filter
+router.get("/filter", filterProperties);
 
 //GET /properties/search
-router.get('/search', getPropertyByKeyword);
+router.get("/search", getPropertyByKeyword);
 
 // GET /properties/:propertyId
-router.get('/:propertyId', getPropertyById);
+router.get("/:propertyId", getPropertyById);
 
 // PATCH /properties/:propertyId
-router.patch('/:propertyId', updateProperty);
+router.patch(
+  "/:propertyId",
+  requireAuth,
+  requireVerifiedSellerOrAgent,
+  requirePropertyOwner,
+  updateProperty,
+);
 
 // DELETE /properties/:propertyId
-router.delete('/:propertyId', deleteProperty);
+router.delete(
+  "/:propertyId",
+  requireAuth,
+  requireVerifiedSellerOrAgent,
+  requirePropertyOwner,
+  deleteProperty,
+);
 
 module.exports = router;

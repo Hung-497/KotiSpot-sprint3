@@ -2,14 +2,11 @@ const mongoose = require("mongoose");
 
 const favouriteSchema = new mongoose.Schema(
   {
-    userId: {
-      type: Number,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
-      min: [1, "userId must be a positive integer"],
-      validate: {
-        validator: Number.isInteger,
-        message: "userId must be a positive integer",
-      },
+      index: true,
     },
     propertyId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -20,7 +17,7 @@ const favouriteSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-favouriteSchema.index({ userId: 1, propertyId: 1 }, { unique: true });
+favouriteSchema.index({ user: 1, propertyId: 1 }, { unique: true });
 
 const Favourite = mongoose.model("Favourite", favouriteSchema);
 

@@ -1,14 +1,10 @@
 const Property = require("../models/propertyModel");
 const mongoose = require("mongoose");
 const {
+  publicPropertyScope,
   addNumericRangeFilter,
   addBooleanFilter,
 } = require("../utils/propertyQueryHelpers");
-
-const publicPropertyScope = {
-  status: "active",
-  "moderation.status": "approved",
-};
 
 const hasModerationInput = (body) =>
   body &&
@@ -21,6 +17,18 @@ const hasValidRequestBody = (body) =>
   typeof body === "object" &&
   !Array.isArray(body) &&
   Object.keys(body).length > 0;
+
+// Image problems get their own message so the listing form can say what's
+// wrong. Only our own validator messages are used (a cast error would echo
+// the whole submitted value back).
+const getImageErrorMessage = (error) => {
+  const imageError = Object.entries(error.errors ?? {}).find(
+    ([path, fieldError]) =>
+      path.startsWith("images") && fieldError.name === "ValidatorError",
+  );
+
+  return imageError ? `Invalid property images: ${imageError[1].message}` : null;
+};
 
 // GET /properties
 const getActiveProperties = async (req, res) => {
@@ -56,11 +64,23 @@ const createProperty = async (req, res) => {
   }
 
   try {
-    const newProperty = await Property.create({ ...req.body });
+    const newProperty = await Property.create({
+      ...req.body,
+      owner: req.user._id,
+      status: "active", // Set default status to "active"
+      moderation: {
+        // Agents and administrators are auto-approved; sellers need review
+        status: ["agent", "administrator"].includes(req.user.role)
+          ? "approved"
+          : "unreviewed",
+      },
+    });
     res.status(201).json(newProperty);
   } catch (error) {
     if (error.name === "ValidationError" || error.name === "CastError") {
-      res.status(400).json({ message: "Invalid property data" });
+      res.status(400).json({
+        message: getImageErrorMessage(error) || "Invalid property data",
+      });
     } else {
       res.status(500).json({ message: "Failed to create property" });
     }
@@ -92,60 +112,30 @@ const getPropertyById = async (req, res) => {
 
 // PATCH /properties/:propertyId
 const updateProperty = async (req, res) => {
-  const { propertyId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(propertyId)) {
-    return res.status(400).json({ message: "Invalid property ID" });
-  }
-  if (!hasValidRequestBody(req.body)) {
-    return res.status(400).json({
-      message: "Property data is required",
-    });
-  }
-
-  if (hasModerationInput(req.body)) {
-    return res.status(400).json({
-      message: "Moderation can only be changed through moderation routes",
-    });
-  }
-
   try {
-    const updatedProperty = await Property.findByIdAndUpdate(
-      propertyId,
-      { ...req.body },
-      { new: true, runValidators: true },
-    );
+    const updates = {...req.body };
 
-    if (updatedProperty) {
-      res.status(200).json(updatedProperty);
-    } else {
-      res.status(404).json({ message: "Property not found" });
-    }
+    delete updates.owner; // Prevent changing the owner
+    delete updates.moderation; // Prevent changing moderation directly
+
+    Object.assign(req.property, updates);
+
+    await req.property.save();
+
+    res.status(200).json(req.property);
   } catch (error) {
-    if (error.name === "ValidationError" || error.name === "CastError") {
-      res.status(400).json({ message: "Invalid property data" });
-    } else {
-      res.status(500).json({ message: "Failed to update property" });
-    }
+    res.status(400).json({
+      message: getImageErrorMessage(error) || "Failed to update property",
+    });
   }
 };
 
 // DELETE /properties/:propertyId
 const deleteProperty = async (req, res) => {
-  const { propertyId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(propertyId)) {
-    return res.status(400).json({ message: "Invalid property ID" });
-  }
-
   try {
-    const deletedProperty = await Property.findByIdAndDelete(propertyId);
+    await req.property.deleteOne();
 
-    if (deletedProperty) {
-      res.status(204).send();
-    } else {
-      res.status(404).json({ message: "Property not found" });
-    }
+    res.status(200).json({ message: "Property deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Failed to delete property" });
   }
@@ -345,6 +335,15 @@ const getPropertyByKeyword = async (req, res) => {
   }
 };
 
+const getMyProperties = async (req, res) => {
+  try {
+    const properties = await Property.find({ owner: req.user._id });
+    res.status(200).json(properties);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get your properties" });
+  }
+};
+
 module.exports = {
   getActiveProperties,
   getAllProperties,
@@ -354,4 +353,5 @@ module.exports = {
   deleteProperty,
   filterProperties,
   getPropertyByKeyword,
+  getMyProperties,
 };

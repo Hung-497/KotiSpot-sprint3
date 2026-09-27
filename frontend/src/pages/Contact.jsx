@@ -1,47 +1,100 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { apiRequest } from "../services/api";
 
 const Contact = () => {
-    const [fullName, setFullName] = useState("")
-    const [email, setEmail] = useState("")
-    const [subject, setSubject] = useState("")
-    const [message, setMessage] = useState("")
-    const [formError, setFormError] = useState("")
-    const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
-      event.preventDefault();
-      const fields = [[fullName, "full name"], [email, "email"], [subject, "subject"], [message, "message"]];
-      const missingField = fields.find(([value]) => !value.trim());
+  const handleFullName = (event) => {
+    setFullName(event.target.value);
+  };
 
-      if (missingField) {
-        setFormError(`Please fill in the ${missingField[1]} field.`);
-        return;
-      }
+  const handleEmail = (event) => {
+    setEmail(event.target.value);
+  };
 
-      setFormError("");
+  const handleSubject = (event) => {
+    setSubject(event.target.value);
+  };
+
+  const handleMessage = (event) => {
+    setMessage(event.target.value);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const fields = [
+      [fullName, "full name"],
+      [email, "email"],
+      [subject, "subject"],
+      [message, "message"],
+    ];
+    const missingField = fields.find(([value]) => !value.trim());
+
+    if (missingField) {
+      setFormError(`Please fill in the ${missingField[1]} field.`);
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+
+    setFormError("");
+    setIsSubmitting(true);
+
+    try {
+      await apiRequest("/contact-messages", {
+        method: "POST",
+        body: JSON.stringify({
+          fullName,
+          email,
+          subject,
+          message,
+        }),
+      });
+
       navigate("/contactthankmessage");
-    };
+    } catch (error) {
+      console.error("Error sending contact message:", error);
+      setFormError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    return (
+  return (
     <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
       <div className="mx-auto max-w-5xl">
-
-        <h1 className="text-3xl font-bold text-[#08243f]">
-          Contact Us
-        </h1>
+        <h1 className="text-3xl font-bold text-[#08243f]">Contact Us</h1>
 
         <p className="mt-2 text-sm text-gray-500">
           We're here to help. Send us a message and we'll get back to you.
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-8 rounded-xl border border-gray-200 bg-white p-6">
-
+        <form
+          onSubmit={handleSubmit}
+          className="mt-8 rounded-xl border border-gray-200 bg-white p-6"
+        >
           <h2 className="mb-6 text-lg font-semibold text-[#08243f]">
             Send us a message
           </h2>
 
-          {formError && <p role="alert" className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{formError}</p>}
+          {formError && (
+            <p
+              role="alert"
+              className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              {formError}
+            </p>
+          )}
 
           <div className="mb-5">
             <label className="mb-2 block text-sm font-medium text-[#08243f]">
@@ -51,7 +104,7 @@ const Contact = () => {
             <input
               type="text"
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={handleFullName}
               placeholder="e.g. John Doe"
               className="
                 w-full
@@ -73,7 +126,7 @@ const Contact = () => {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmail}
               placeholder="e.g. john.doe@example.com"
               className="
                 w-full
@@ -94,7 +147,7 @@ const Contact = () => {
 
             <select
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={handleSubject}
               className="
                 w-full
                 rounded-lg
@@ -127,7 +180,7 @@ const Contact = () => {
 
             <textarea
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={handleMessage}
               placeholder="Type your message here..."
               rows="5"
               className="
@@ -145,6 +198,7 @@ const Contact = () => {
 
           <button
             type="submit"
+            disabled={isSubmitting}
             className="
               inline-block
               rounded-lg
@@ -154,59 +208,42 @@ const Contact = () => {
               text-white
               transition
               hover:bg-[#124f40]
+              disabled:cursor-not-allowed
+              disabled:opacity-60
             "
           >
-            Send message
+            {isSubmitting ? "Sending..." : "Send message"}
           </button>
-
         </form>
 
         <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
-
           <h2 className="mb-5 text-lg font-semibold text-[#08243f]">
             Other ways to reach us
           </h2>
 
           <div className="flex items-center justify-between border-b border-gray-100 py-4">
-            <span className="text-sm text-gray-600">
-              Email
-            </span>
+            <span className="text-sm text-gray-600">Email</span>
 
-            <span className="text-sm text-[#17634f]">
-              support@example.com
-            </span>
+            <span className="text-sm text-[#17634f]">support@example.com</span>
           </div>
 
           <div className="flex items-center justify-between border-b border-gray-100 py-4">
-            <span className="text-sm text-gray-600">
-              Phone
-            </span>
+            <span className="text-sm text-gray-600">Phone</span>
 
-            <span className="text-sm text-[#17634f]">
-              +358 10 123 4567
-            </span>
+            <span className="text-sm text-[#17634f]">+358 10 123 4567</span>
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            <span className="text-sm text-gray-600">
-              Support hours
-            </span>
+            <span className="text-sm text-gray-600">Support hours</span>
 
-            <span className="text-sm text-[#08243f]">
-              Mon-Fri, 09:00-17:00
-            </span>
+            <span className="text-sm text-[#08243f]">Mon-Fri, 09:00-17:00</span>
           </div>
-
         </div>
 
         <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
-
-          <h2 className="text-lg font-semibold text-[#08243f]">
-            FAQ
-          </h2>
+          <h2 className="text-lg font-semibold text-[#08243f]">FAQ</h2>
 
           <div className="mt-4 flex items-center justify-between">
-
             <p className="text-sm text-gray-500">
               Visit our Help Center for answers to common questions.
             </p>
@@ -224,11 +261,8 @@ const Contact = () => {
             >
               Go to Help Center
             </button>
-
           </div>
-
         </div>
-
       </div>
     </div>
   );
