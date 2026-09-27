@@ -249,7 +249,7 @@ function App() {
             path="/mylistings"
             element={
               canManageListings ? (
-                <MyListings />
+                <MyListings onListingUpdated={syncModeratedProperty} />
               ) : (
                 <Navigate to="/sell" replace />
               )
