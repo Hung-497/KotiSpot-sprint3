@@ -11,14 +11,14 @@ Deliver an integrated KotiSpot application that uses persisted backend data for 
 
 - Authentication is passwordless. A visitor registers or logs in with an expiring, single-use code sent to their email address.
 - Arranging a property viewing is part of an inquiry to the seller or agent; it is not a separate workflow.
-- Property images use the existing image references and metadata in the committed Sprint 3 scope. File upload and storage remain optional future work under PBI-09.
+- PBI-09 remained optional Sprint 3 scope but property-image upload and management were implemented during the sprint.
 - Listing analytics (PBI-21) and the AI-assisted support chatbot (PBI-31) remain in the Product Backlog and are not selected for Sprint 3.
 - Suspicious-listing moderation has an existing foundation: the backend already supports flagged listings and moderation reasons. User report submission and frontend integration remain in Sprint 3.
 - S3-US-07 is no longer a standalone user story. PBI-11 and the cross-cutting quality requirements from PBI-12 are covered by the Definition of Done; S3-US-03 retains the role, permission, and ownership requirements from PBI-12.
 
 ## Product Backlog Progress
 
-**Implemented:** 13 / 30 PBIs
+**Implemented:** 17 / 30 PBIs
 
 **Fully DoD-verified:** 0 / 30 PBIs
 
@@ -58,25 +58,25 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | ----------- | ------ | -------------------------------------------------------- | ------------ | -------------- | ------------------ |
 | [x]         | PBI-05 | Contact a seller or agent, including arranging a viewing | Selected     | Implemented    | Needs verification |
 | [x]         | PBI-13 | Save favourite properties                               | Selected     | Implemented    | Needs verification |
-| [ ]         | PBI-18 | Inquiry notifications                                   | Selected     | Partial        | Needs verification |
+| [x]         | PBI-18 | Inquiry notifications                                   | Selected     | Implemented        | Needs verification |
 | [x]         | PBI-29 | Contact KotiSpot support                                | Selected     | Implemented    | Needs verification |
 
-**Progress:** 3 / 4 implemented
+**Progress:** *4* / 4 implemented
 
 ### Listing Management & Platform Safety
 
 | Implemented | PBI    | Product Backlog Item                           | Sprint Scope         | Implementation | DoD                |
 | ----------- | ------ | ---------------------------------------------- | -------------------- | -------------- | ------------------ |
 | [x]         | PBI-08 | Create a property listing for sale or rent     | Selected             | Implemented    | Needs verification |
-| [ ]         | PBI-09 | Upload and manage property images              | Optional future work | Optional       | Not applicable     |
-| [ ]         | PBI-10 | Edit, deactivate, and delete property listings | Selected             | Implemented        | Needs verification |
+| [x]         | PBI-09 | Upload and manage property images              | Optional future work | Implemented       | Not applicable     |
+| [x]         | PBI-10 | Edit, deactivate, and delete property listings | Selected             | Implemented        | Needs verification |
 | [x]         | PBI-16 | Admin listing moderation                      | Selected             | Implemented    | Needs verification |
 | [ ]         | PBI-17 | Report suspicious listings                    | Selected             | Not started    | Not applicable     |
 | [ ]         | PBI-21 | Listing analytics for sellers and agents      | Deferred             | Deferred       | Not applicable     |
 | [x]         | PBI-26 | Manage rental-specific terms                  | Selected             | Implemented    | Needs verification |
-| [ ]         | PBI-27 | Verify seller and agent accounts              | Selected             | Partial        | Needs verification |
+| [x]         | PBI-27 | Verify seller and agent accounts              | Selected             | Implemented        | Needs verification |
 
-**Progress:** 3 / 8 implemented
+**Progress:** 6 / 8 implemented
 
 ### AI Property Intelligence
 
@@ -533,4 +533,4 @@ A Sprint 3 user story is Done when all applicable conditions are met:
 | --- | --- | --- |
 | PBI-21 | Listing analytics for sellers and agents | Deferred; not selected for Sprint 3 and excluded from the Sprint point total |
 | PBI-31 | AI-assisted support chatbot | Deferred; not selected for Sprint 3 and excluded from the Sprint point total |
-| PBI-09 | Upload and manage property images | Optional future expansion; current Sprint scope uses existing image references and metadata |
+| PBI-09 | Upload and manage property images | Optional expansion; implemented during Sprint 3 |

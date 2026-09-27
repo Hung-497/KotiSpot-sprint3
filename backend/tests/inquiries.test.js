@@ -42,7 +42,10 @@ beforeEach(async () => {
     verifiedAt: new Date(),
   });
   sender = await User.create({ email: "sender@example.com", role: "buyer" });
-  stranger = await User.create({ email: "stranger@example.com", role: "buyer" });
+  stranger = await User.create({
+    email: "stranger@example.com",
+    role: "buyer",
+  });
 
   ownerToken = tokenFor(owner);
   senderToken = tokenFor(sender);
@@ -146,7 +149,10 @@ describe("POST /api/inquiries/:propertyId", () => {
   });
 
   it("should reject an invalid email or a too long message", async () => {
-    await sendInquiry(senderToken, { ...inquiryData, email: "not-an-email" }).expect(400);
+    await sendInquiry(senderToken, {
+      ...inquiryData,
+      email: "not-an-email",
+    }).expect(400);
     await sendInquiry(senderToken, {
       ...inquiryData,
       message: "a".repeat(1001),
@@ -172,13 +178,16 @@ describe("POST /api/inquiries/:propertyId", () => {
     ["waiting for moderation", { "moderation.status": "unreviewed" }],
     ["flagged", { "moderation.status": "flagged" }],
     ["removed by moderation", { "moderation.status": "removed" }],
-  ])("should not accept an inquiry for a listing that is %s", async (_, change) => {
-    await Property.updateOne({ _id: property._id }, { $set: change });
+  ])(
+    "should not accept an inquiry for a listing that is %s",
+    async (_, change) => {
+      await Property.updateOne({ _id: property._id }, { $set: change });
 
-    await sendInquiry().expect(404);
+      await sendInquiry().expect(404);
 
-    expect(await Inquiry.countDocuments()).toBe(0);
-  });
+      expect(await Inquiry.countDocuments()).toBe(0);
+    },
+  );
 });
 
 describe("GET /api/inquiries/mine and /sent", () => {
@@ -221,6 +230,21 @@ describe("GET /api/inquiries/mine and /sent", () => {
     expect(mine.body).toHaveLength(1);
     expect(mine.body[0].propertyId).toBeNull();
   });
+
+  it("should expose unavailable listing state for an existing inquiry", async () => {
+    await sendInquiry().expect(201);
+
+    await Property.updateOne(
+      { _id: property._id },
+      { $set: { status: "inactive" } },
+    );
+
+    const response = await getMine(ownerToken).expect(200);
+
+    expect(response.body).toHaveLength(1);
+    expect(response.body[0].propertyId.title).toBe("Test apartment");
+    expect(response.body[0].propertyId.status).toBe("inactive");
+  });
 });
 
 describe("POST /api/inquiries/:inquiryId/replies", () => {
@@ -232,7 +256,11 @@ describe("POST /api/inquiries/:inquiryId/replies", () => {
 
   it("should let the owner and the sender reply back and forth", async () => {
     await reply(inquiry._id, ownerToken, "Yes it is.").expect(201);
-    const response = await reply(inquiry._id, senderToken, "Can I visit?").expect(201);
+    const response = await reply(
+      inquiry._id,
+      senderToken,
+      "Can I visit?",
+    ).expect(201);
 
     expect(response.body.replies.map((saved) => saved.from)).toEqual([
       "owner",

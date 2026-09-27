@@ -70,7 +70,7 @@ const getMyInquiries = async (req, res) => {
       owner: req.user._id,
       deletedByOwner: { $ne: true }, // also matches old inquiries without this field
     })
-      .populate("propertyId", "title address city")
+      .populate("propertyId", "title address city status moderation.status")
       .sort({ submittedAt: -1 });
 
     res.status(200).json(inquiries);
@@ -89,7 +89,7 @@ const getMySentInquiries = async (req, res) => {
       "replies.0": { $exists: true }, // has at least one reply
       deletedBySender: { $ne: true },
     })
-      .populate("propertyId", "title address city")
+      .populate("propertyId", "title address city status moderation.status")
       .sort({ submittedAt: -1 });
 
     res.status(200).json(inquiries);
@@ -129,7 +129,11 @@ const addInquiryReply = async (req, res) => {
       update = {
         $push: { replies: { from: "owner", text } },
         // show it again (as unread) to the other person
-        $set: { deletedBySender: false, readBySender: false, readByOwner: true },
+        $set: {
+          deletedBySender: false,
+          readBySender: false,
+          readByOwner: true,
+        },
       };
     } else if (String(inquiry.sender) === userId) {
       update = {
@@ -142,10 +146,14 @@ const addInquiryReply = async (req, res) => {
     }
 
     // Only the changed fields are saved (old data in the document can't block it)
-    const updatedInquiry = await Inquiry.findByIdAndUpdate(inquiry._id, update, {
-      returnDocument: "after",
-      runValidators: true,
-    });
+    const updatedInquiry = await Inquiry.findByIdAndUpdate(
+      inquiry._id,
+      update,
+      {
+        returnDocument: "after",
+        runValidators: true,
+      },
+    );
 
     res.status(201).json(updatedInquiry);
   } catch (error) {

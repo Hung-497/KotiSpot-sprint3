@@ -4,6 +4,17 @@ import ApplicationCard from "../components/ApplicationCard";
 import ConversationCard from "../components/ConversationCard";
 import { apiRequest } from "../services/api";
 
+const getInquiryPropertyLabel = (property) => {
+  if (!property) {
+    return "a deleted listing";
+  }
+
+  const isAvailable =
+    property.status === "active" && property.moderation?.status === "approved";
+
+  return isAvailable ? property.title : `${property.title} (unavailable)`;
+};
+
 function Notifications({ isAdmin }) {
   // Only for admins
   const [applications, setApplications] = useState([]);
@@ -54,7 +65,9 @@ function Notifications({ isAdmin }) {
   const deleteApplication = async (id) => {
     try {
       await deleteNotification(`/verifications/${id}`);
-      setApplications(applications.filter((application) => application._id !== id));
+      setApplications(
+        applications.filter((application) => application._id !== id),
+      );
     } catch (error) {
       window.alert(error.message);
     }
@@ -63,7 +76,9 @@ function Notifications({ isAdmin }) {
   const deleteContactMessage = async (id) => {
     try {
       await deleteNotification(`/contact-messages/${id}/admin`);
-      setContactMessages(contactMessages.filter((message) => message._id !== id));
+      setContactMessages(
+        contactMessages.filter((message) => message._id !== id),
+      );
     } catch (error) {
       window.alert(error.message);
     }
@@ -99,20 +114,16 @@ function Notifications({ isAdmin }) {
   const hasNoNotifications =
     inquiries.length === 0 &&
     sentInquiries.length === 0 &&
-    myMessages.length === 0;
+    myMessages.length === 0 &&
+    (!isAdmin || (applications.length === 0 && contactMessages.length === 0));
 
   return (
     <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
       <div className="mx-auto max-w-4xl">
-
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#08243f]">
-            Notifications
-          </h1>
+          <h1 className="text-3xl font-bold text-[#08243f]">Notifications</h1>
 
-          <p className="mt-2 text-gray-500">
-            Stay updated with your
-          </p>
+          <p className="mt-2 text-gray-500">Stay updated with your</p>
         </div>
 
         {/* ---------- Admin only ---------- */}
@@ -179,9 +190,12 @@ function Notifications({ isAdmin }) {
           {inquiries.map((inquiry) => (
             <ConversationCard
               key={inquiry._id}
-              title={`Inquiry about ${inquiry.propertyId?.title || "a deleted listing"}`}
+              title={`Inquiry about ${getInquiryPropertyLabel(inquiry.propertyId)}`}
               from={`${inquiry.name} (${inquiry.email})`}
-              firstMessage={{ text: inquiry.message, sentAt: inquiry.submittedAt }}
+              firstMessage={{
+                text: inquiry.message,
+                sentAt: inquiry.submittedAt,
+              }}
               starter="sender"
               replies={inquiry.replies}
               me="owner"
@@ -198,8 +212,11 @@ function Notifications({ isAdmin }) {
           {sentInquiries.map((inquiry) => (
             <ConversationCard
               key={inquiry._id}
-              title={`Your inquiry about ${inquiry.propertyId?.title || "a deleted listing"}`}
-              firstMessage={{ text: inquiry.message, sentAt: inquiry.submittedAt }}
+              title={`Your inquiry about ${getInquiryPropertyLabel(inquiry.propertyId)}`}
+              firstMessage={{
+                text: inquiry.message,
+                sentAt: inquiry.submittedAt,
+              }}
               starter="sender"
               replies={inquiry.replies}
               me="sender"
@@ -217,7 +234,10 @@ function Notifications({ isAdmin }) {
             <ConversationCard
               key={message._id}
               title={`Your message: ${message.subject}`}
-              firstMessage={{ text: message.message, sentAt: message.submittedAt }}
+              firstMessage={{
+                text: message.message,
+                sentAt: message.submittedAt,
+              }}
               starter="user"
               replies={message.replies}
               me="user"
@@ -231,10 +251,8 @@ function Notifications({ isAdmin }) {
           ))}
 
           {hasNoNotifications && (
-            <div
-              className="rounded-2xl border border-gray-200 bg-white px-6 py-16 text-center shadow-sm">
-              <div
-                className=" mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#eef6f2] text-[#17634f]">
+            <div className="rounded-2xl border border-gray-200 bg-white px-6 py-16 text-center shadow-sm">
+              <div className=" mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#eef6f2] text-[#17634f]">
                 <Bell size={26} />
               </div>
 
@@ -242,9 +260,7 @@ function Notifications({ isAdmin }) {
                 No notifications left
               </h2>
 
-              <p className="mt-1 text-sm text-gray-500">
-                You're now caught up
-              </p>
+              <p className="mt-1 text-sm text-gray-500">You're now caught up</p>
             </div>
           )}
         </div>
