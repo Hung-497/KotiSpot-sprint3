@@ -45,6 +45,7 @@ const Register = ({ onRegister }) => {
         method: "POST",
         body: JSON.stringify({
           email,
+          mode: "register", // only works for emails that don't have an account yet
         }),
       });
 
@@ -73,6 +74,7 @@ const Register = ({ onRegister }) => {
         body: JSON.stringify({
           email,
           code: code.trim(),
+          mode: "register",
         }),
       });
 

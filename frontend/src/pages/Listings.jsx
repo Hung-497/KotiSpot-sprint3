@@ -5,13 +5,15 @@ import {
   validateListing,
   buildPropertyData,
 } from "../utils/listingForm";
+import { toPropertyImages } from "../utils/imageUtils";
+import PhotoManager from "../components/PhotoManager";
 
 const Listings = () => {
   const [listingType, setListingType] = useState("");
   const [formMessage, setFormMessage] = useState("");
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [photoPreviews, setPhotoPreviews] = useState([]);
+  const [photos, setPhotos] = useState([]);
 
   const [newListing, setNewListing] = useState(createEmptyListing());
 
@@ -50,6 +52,9 @@ const Listings = () => {
 
     const propertyData = buildPropertyData(newListing, listingType);
 
+    // Add the photos to the listing, in order, with the chosen main photo
+    propertyData.images = toPropertyImages(photos, newListing.title);
+
     setIsSubmitting(true);
 
     try {
@@ -64,11 +69,7 @@ const Listings = () => {
           : "Listing submitted and is waiting for approval.",
       );
 
-      photoPreviews.forEach((preview) => {
-        URL.revokeObjectURL(preview);
-      });
-
-      setPhotoPreviews([]);
+      setPhotos([]);
       setNewListing(createEmptyListing());
       setListingType("");
     } catch (error) {
@@ -80,16 +81,6 @@ const Listings = () => {
 
   const handleListingType = (event) => {
     setListingType(event.target.value);
-  };
-
-  const handlePhotoChange = (event) => {
-    const files = Array.from(event.target.files).slice(0, 3);
-
-    photoPreviews.forEach((preview) => {
-      URL.revokeObjectURL(preview);
-    });
-
-    setPhotoPreviews(files.map((file) => URL.createObjectURL(file)));
   };
 
   return (
@@ -480,53 +471,11 @@ const Listings = () => {
         <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
           <h2 className="font-semibold text-[#08243f]">Property photos</h2>
 
-          <label
-            className="
-                            mt-4
-                            flex cursor-pointer
-                            items-center justify-center
-                            rounded-lg
-                            border-2 border-dashed border-gray-300
-                            py-6
-                            text-sm
-                            text-[#08243f]
-                            hover:bg-gray-50
-                        "
-          >
-            + Upload photos
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handlePhotoChange}
-              className="hidden"
-            />
-          </label>
-
-          {/* Image placeholders */}
-          <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-3">
-            {photoPreviews.length > 0 ? (
-              photoPreviews.map((preview, index) => (
-                <img
-                  key={preview}
-                  src={preview}
-                  alt={`Property preview ${index + 1}`}
-                  className="h-32 w-full rounded-lg object-cover"
-                />
-              ))
-            ) : (
-              <>
-                {[1, 2, 3].map((placeholder) => (
-                  <div
-                    key={placeholder}
-                    className="flex h-24 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400"
-                  >
-                    Image placeholder
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
+          <PhotoManager
+            photos={photos}
+            onChange={setPhotos}
+            listingTitle={newListing.title}
+          />
         </div>
 
         {/* BUTTONS */}

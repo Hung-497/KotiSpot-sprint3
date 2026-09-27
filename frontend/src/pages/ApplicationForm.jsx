@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
+import { imageToText } from "../utils/imageUtils";
 
-const ApplicationForm = () => {
+const ApplicationForm = ({ userRole }) => {
+  // A seller can only upgrade to agent, so the agent form is picked for them
+  const isSeller = userRole === "seller";
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState(isSeller ? "agent" : "");
   const [companyName, setCompanyName] = useState("");
   const [location, setLocation] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
@@ -78,23 +82,31 @@ const ApplicationForm = () => {
       return;
     }
 
-    const applicationData = {
-      role,
-      fullName,
-      companyName: role === "agent" ? companyName : undefined,
-      phone: phoneNumber,
-      email,
-      areas: role === "agent" ? location : undefined,
-      licenseNumber: role === "agent" ? licenseNumber : undefined,
-      bio: about,
-      idDocument: governmentId.name,
-      licenseDocument: role === "agent" ? realEstateLicense.name : undefined,
-    };
-
     setFormError("");
     setIsSubmitting(true);
 
     try {
+      // Turn the pictures into text so they can be sent with the application
+      const idDocument = await imageToText(governmentId);
+
+      let licenseDocument;
+      if (role === "agent") {
+        licenseDocument = await imageToText(realEstateLicense);
+      }
+
+      const applicationData = {
+        role,
+        fullName,
+        companyName: role === "agent" ? companyName : undefined,
+        phone: phoneNumber,
+        email,
+        areas: role === "agent" ? location : undefined,
+        licenseNumber: role === "agent" ? licenseNumber : undefined,
+        bio: about,
+        idDocument,
+        licenseDocument,
+      };
+
       await apiRequest("/verifications", {
         method: "POST",
         body: JSON.stringify(applicationData),
@@ -172,33 +184,40 @@ const ApplicationForm = () => {
             </div>
           </div>
 
-          <div className="mt-7">
-            <h2 className="mb-3 text-sm font-medium text-[#08243f]">
-              What type of account are you applying for?
-            </h2>
+          {isSeller ? (
+            <p className="mt-7 rounded-lg bg-[#eef6f2] px-4 py-3 text-sm text-[#17634f]">
+              You are already a seller. Fill in the form below to upgrade your
+              account to a real estate agent.
+            </p>
+          ) : (
+            <div className="mt-7">
+              <h2 className="mb-3 text-sm font-medium text-[#08243f]">
+                What type of account are you applying for?
+              </h2>
 
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="radio"
-                  value="seller"
-                  checked={role === "seller"}
-                  onChange={handleRole}
-                />
-                Seller
-              </label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    value="seller"
+                    checked={role === "seller"}
+                    onChange={handleRole}
+                  />
+                  Seller
+                </label>
 
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="radio"
-                  value="agent"
-                  checked={role === "agent"}
-                  onChange={handleRole}
-                />
-                Real estate agent
-              </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    value="agent"
+                    checked={role === "agent"}
+                    onChange={handleRole}
+                  />
+                  Real estate agent
+                </label>
+              </div>
             </div>
-          </div>
+          )}
 
           {role === "seller" && (
             <>

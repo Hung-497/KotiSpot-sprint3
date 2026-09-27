@@ -3,8 +3,8 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
-export default defineConfig({
-  base: "/KotiSpot-sprint3/",
+export default defineConfig(({ command }) => ({
+  base: command === "build" ? "/KotiSpot-sprint3/" : "/",
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
@@ -14,4 +14,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

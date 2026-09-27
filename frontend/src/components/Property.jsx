@@ -1,27 +1,25 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import houseImage from "../assets/house1.jpg";
+import { getMainImage } from "../utils/imageUtils";
 
 const Property = ({ property, favorites, onToggleFavorite }) => {
   const isFavorite = favorites.includes(property.id);
   const { address, city, price, size, listingType } = property;
   const isRental = listingType === "rent";
 
-  const image =
-    property.images?.find((image) => image.isMain)?.url ||
-    property.images?.[0]?.url ||
-    houseImage;
+  const mainImage = getMainImage(property);
 
   return (
     <div className="property-card w-52.5 overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
       <div className="relative">
         <Link to={`/properties/${property.id}`}>
           <img
-            src={image}
+            src={mainImage?.url || houseImage}
             onError={(event) => {
               event.currentTarget.src = houseImage;
             }}
-            alt="house image"
+            alt={mainImage?.description || property.title || "Property photo"}
             className="h-28.75 w-full object-cover"
           />
 

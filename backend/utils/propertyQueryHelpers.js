@@ -54,7 +54,14 @@ const addBooleanFilter = (query, field, rawValue) => {
   return `Invalid ${field} value`;
 };
 
+// Listings anyone can see: active and approved by moderation
+const publicPropertyScope = {
+  status: "active",
+  "moderation.status": "approved",
+};
+
 module.exports = {
+  publicPropertyScope,
   addNumericRangeFilter,
   addBooleanFilter,
 };

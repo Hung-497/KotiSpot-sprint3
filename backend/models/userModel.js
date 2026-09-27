@@ -51,6 +51,7 @@ const ROLE_ACTIONS = {
     "browseProperties",
     "searchProperties",
     "viewPropertyDetails",
+    "manageListings",
     "reviewVerification",
     "moderateListings",
   ],
