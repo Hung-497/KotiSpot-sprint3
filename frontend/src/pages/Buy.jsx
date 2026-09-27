@@ -1,4 +1,4 @@
-import Properties from "../components/properties";
+import Properties from "../components/Properties";
 import { properties } from "../../data";
 import PropertySearch from "../components/PropertySearch";
 import { Star, Heart } from "lucide-react";

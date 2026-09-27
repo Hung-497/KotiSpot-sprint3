@@ -109,6 +109,7 @@ const AdminPanel = ({ properties, moderationStatuses, onModerate }) => {
                                 <p><strong className="text-[#08243f]">Address:</strong> {selectedProperty.address}, {selectedProperty.city}</p>
                                 <p><strong className="text-[#08243f]">Listing type:</strong> {selectedProperty.listingType}</p>
                                 <p><strong className="text-[#08243f]">Size:</strong> {selectedProperty.size} m²</p>
+                                <p><strong className="text-[#08243f]">Year of Construction:</strong> {selectedProperty.buildingYear}</p>
                                 <p>{selectedProperty.description}</p>
                             </div>
                         </div>

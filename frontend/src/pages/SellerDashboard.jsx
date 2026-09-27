@@ -312,6 +312,23 @@ const SellerDashboard = ({
 
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-[#08243f]">
+                                    Year of construction 
+                                </label>
+                                <input
+                                    type="number"
+                                    value={selectedListing.buildingYear}
+                                    onChange={(event) =>
+                                        setSelectedListing({
+                                            ...selectedListing,
+                                            buildingYear: event.target.value
+                                        })
+                                    }
+                                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#17634f] focus:bg-white"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-[#08243f]">
                                     Condition
                                 </label>
                                 <select

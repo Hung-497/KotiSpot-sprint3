@@ -1,0 +1,9 @@
+const express = require("express");                                                                                                                                                                                                         
+const { getEstimate, getGrowth } = require("../controllers/estimationControllers");                                                                                                                                                                  
+                                                                                                                                                                                                                                            
+const router = express.Router();                                                                                                                                                                                                            
+                                                                                                                                                                                                                                            
+router.post("/estimate", getEstimate);                                                                                                                                                                                                      
+router.post("/growth", getGrowth);                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+module.exports = router;   

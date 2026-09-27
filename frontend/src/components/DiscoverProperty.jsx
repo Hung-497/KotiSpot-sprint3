@@ -1,5 +1,5 @@
 import { useState } from "react"
-import Properties from "./properties"
+import Properties from "./Properties"
 import { properties } from "../../data";
 import { Star, Heart } from "lucide-react";
 

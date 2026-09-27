@@ -26,6 +26,8 @@ const ListingDetails = ({ listing, onClose }) => {
             <p>Bathrooms: {listing.bathrooms}</p>
             <p>Size: {listing.size} m²</p>
 
+            <p>Year of construction: {listing.buildingYear}</p>
+
             <p>Condition: {listing.condition}</p>
 
             <p>Description: {listing.description}</p>

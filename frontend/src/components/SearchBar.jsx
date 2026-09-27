@@ -13,6 +13,8 @@ const SearchBar = () => {
     const [maxPrice, setMaxPrice] = useState("");
     const [minSize, setMinSize] = useState("");
     const [maxSize, setMaxSize] = useState("");
+    const [minYear, setMinYear] = useState("");
+    const [maxYear, setMaxYear] = useState("");
 
     const navigate = useNavigate();
 
@@ -77,6 +79,14 @@ const SearchBar = () => {
             }
 
             if (maxSize !== "" && property.size > Number(maxSize)) {
+                return false;
+            }
+            
+            if (minYear !== "" && property.buildingYear < Number(minYear)) {
+                return false;
+            }
+
+            if (maxYear !== "" && property.buildingYear > Number(maxYear)) {
                 return false;
             }
 
@@ -155,6 +165,16 @@ const SearchBar = () => {
                             <input type="text"
                                 placeholder="maximum size m^2"
                                 onChange={e => setMaxSize(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <input type="text"
+                                placeholder="minimum year"
+                                onChange={e => setMinYear(e.target.value)}
+                            />
+                            <input type="text"
+                                placeholder="maximum year"
+                                onChange={e => setMaxYear(e.target.value)}
                             />
                         </div>
                         <div>

@@ -170,10 +170,9 @@ const filterProperties = async (req, res) => {
     const validPropertyTypes = ["residential", "any"];
     const validPropertySubTypes = [
       "apartment",
-      "detached-house",
-      "studio",
-      "semi-detached-house",
-      "terraced-house",
+      "detached house",
+      "semi-detached house",
+      "terraced house",
       "any",
     ];
 
@@ -234,6 +233,7 @@ const filterProperties = async (req, res) => {
       ["bedrooms", "minBedrooms", "maxBedrooms"],
       ["bathrooms", "minBathrooms", "maxBathrooms"],
       ["size", "minSize", "maxSize"],
+      ["year", "minYear", "maxYear"],
     ];
 
     for (const [field, minParameter, maxParameter] of numericRanges) {

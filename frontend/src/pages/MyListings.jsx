@@ -361,6 +361,26 @@ const MyListings = ({
 
                                 </div>
 
+                                 <div>
+
+                                    <label className="mb-2 block text-sm font-medium text-[#08243f]">
+                                        Year of construction
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        value={selectedListing.buildingYear}
+                                        onChange={(event) =>
+                                            setSelectedListing({
+                                                ...selectedListing,
+                                                buildingYear: event.target.value
+                                            })
+                                        }
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
+                                    />
+
+                                </div>
+
                             </div>
 
 

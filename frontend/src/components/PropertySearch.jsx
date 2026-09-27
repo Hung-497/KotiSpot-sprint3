@@ -12,6 +12,8 @@ const PropertySearch = ({ properties, onResults, placeholder, compact = false })
     const [maxPrice, setMaxPrice] = useState("");
     const [minSize, setMinSize] = useState("");
     const [maxSize, setMaxSize] = useState("");
+    const [minYear, setMinYear] = useState("");
+    const [maxYear, setMaxYear] = useState("");
 
     const applyFilters = () => {
         const searchQuery = search.trim().toLowerCase();
@@ -36,9 +38,11 @@ const PropertySearch = ({ properties, onResults, placeholder, compact = false })
             const matchesMaxPrice = !maxPrice || Number(property.price) <= Number(maxPrice);
             const matchesMinSize = !minSize || property.size >= Number(minSize);
             const matchesMaxSize = !maxSize || property.size <= Number(maxSize);
+            const matchesMinYear = !minYear || property.buildingYear >= Number(minYear);
+            const matchesMaxYear = !maxYear || property.buildingYear <= Number(maxYear);
 
             return matchesSearch && matchesLocation && matchesType && matchesListing &&
-                matchesRooms && matchesMinPrice && matchesMaxPrice && matchesMinSize && matchesMaxSize;
+                matchesRooms && matchesMinPrice && matchesMaxPrice && matchesMinSize && matchesMaxSize && matchesMinYear && matchesMaxYear;
         });
 
         onResults(filteredProperties);
@@ -98,6 +102,8 @@ const PropertySearch = ({ properties, onResults, placeholder, compact = false })
                     <input type="number" min="0" placeholder="Maximum price" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]" />
                     <input type="number" min="0" placeholder="Minimum size m²" value={minSize} onChange={(event) => setMinSize(event.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]" />
                     <input type="number" min="0" placeholder="Maximum size m²" value={maxSize} onChange={(event) => setMaxSize(event.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]" />
+                    <input type="number" min="0" placeholder="Minimum year" value={minYear} onChange={(event) => setMinYear(event.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]" />
+                    <input type="number" min="0" placeholder="Maximum year" value={maxYear} onChange={(event) => setMaxYear(event.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]" />
                     <button type="button" onClick={() => { applyFilters(); setIsFilterOpen(false); }} className="rounded-lg bg-[#17634f] px-4 py-2 text-sm font-medium text-white hover:bg-[#12503f]">Apply filters</button>
                 </div>
             )}

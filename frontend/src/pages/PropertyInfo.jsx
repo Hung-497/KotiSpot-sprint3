@@ -1,5 +1,5 @@
 import { useLocation, Link } from "react-router-dom";
-import { MapPin, Heart, Mail, BedDouble, Bath, Maximize } from "lucide-react";
+import { MapPin, Heart, Mail, BedDouble, Bath, Maximize, Calendar, Calculator } from "lucide-react";
 import PropertyMap from "../components/PropertyMap";
 
 const PropertyInfo = ({ property, favorites, setFavorites }) => {
@@ -29,6 +29,9 @@ const PropertyInfo = ({ property, favorites, setFavorites }) => {
     console.log('You pressed the "contact seller or agent" button');
   };
 
+  const calculateEstimate = () => {
+    console.log('Feature in progress');
+  };
   return (
     <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
       <div className="mx-auto max-w-6xl">
@@ -160,6 +163,28 @@ const PropertyInfo = ({ property, favorites, setFavorites }) => {
               Contact seller or agent
             </button>
 
+            <div id="estimate-div">
+              <button
+                type="button"
+                onClick={calculateEstimate}
+                className="
+                mt-3
+                flex w-full
+                items-center justify-center gap-2
+                rounded-lg
+                bg-[#08243f]
+                px-4 py-3
+                text-sm font-medium
+                text-white
+                transition
+                hover:bg-[#17634f]
+              "
+              >
+                <Calculator size={18} />
+                Calculate price estimate
+              </button>
+            </div>
+
           </div>
 
         </div>
@@ -195,6 +220,14 @@ const PropertyInfo = ({ property, favorites, setFavorites }) => {
 
                 <span className="text-sm">
                   {selectedProperty.size} m²
+                </span>
+              </div>
+
+              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
+                <Calendar size={18} />
+
+                <span className="text-sm">
+                  {selectedProperty.buildingYear}
                 </span>
               </div>
 

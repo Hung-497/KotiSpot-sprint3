@@ -15,6 +15,7 @@ const Listings = ({ propertyListings, setPropertyListings }) => {
         bedrooms: "",
         bathrooms: "",
         size: "",
+        buildingYear: "",
         rooms: "",
         features: [],
         description: "",
@@ -73,7 +74,7 @@ const Listings = ({ propertyListings, setPropertyListings }) => {
         const requiredFields = [
             ["title", "title"], ["location", "location"], ["address", "address"],
             ["postalCode", "postal code"], ["propertyType", "property type"],
-            ["bedrooms", "bedrooms"], ["bathrooms", "bathrooms"], ["size", "size"],
+            ["bedrooms", "bedrooms"], ["bathrooms", "bathrooms"], ["size", "size"], ["buildingYear", "buildingYear"]
             ["rooms", "rooms"], ["description", "description"], ["availableFrom", "available date"],
             ["condition", "condition"],
         ];
@@ -126,6 +127,7 @@ const Listings = ({ propertyListings, setPropertyListings }) => {
             bedrooms: "",
             bathrooms: "",
             size: "",
+            buildingYear:"",
             rooms: "",
             features: [],
             description: "",
@@ -343,6 +345,20 @@ const Listings = ({ propertyListings, setPropertyListings }) => {
                                 value={newListing.size}
                                 onChange={handleInputChange}
                                 placeholder="55"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-2 block text-sm">
+                                Year of construction *
+                            </label>
+
+                            <input
+                                type="number"
+                                name="buildingYear"
+                                value={newListing.buildingYear}
+                                onChange={handleInputChange}
+                                placeholder="1970"
                                 className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
                             />
                         </div>
