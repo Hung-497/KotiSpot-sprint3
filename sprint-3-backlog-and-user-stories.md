@@ -68,7 +68,7 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | Implemented | PBI    | Product Backlog Item                           | Sprint Scope         | Implementation | DoD                |
 | ----------- | ------ | ---------------------------------------------- | -------------------- | -------------- | ------------------ |
 | [x]         | PBI-08 | Create a property listing for sale or rent     | Selected             | Implemented    | Needs verification |
-| [x]         | PBI-09 | Upload and manage property images              | Optional future work | Implemented       | Not applicable     |
+| [x]         | PBI-09 | Upload and manage property images              | Optional future work | Implemented       | Needs verification     |
 | [x]         | PBI-10 | Edit, deactivate, and delete property listings | Selected             | Implemented        | Needs verification |
 | [x]         | PBI-16 | Admin listing moderation                      | Selected             | Implemented    | Needs verification |
 | [ ]         | PBI-17 | Report suspicious listings                    | Selected             | Not started    | Not applicable     |
