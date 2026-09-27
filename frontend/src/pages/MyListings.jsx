@@ -11,7 +11,7 @@ const emptyFeatures = {
   sauna: false,
 };
 
-const MyListings = () => {
+const MyListings = ({ onListingUpdated }) => {
   const [listings, setListings] = useState([]);
   const [editingListing, setEditingListing] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -109,12 +109,8 @@ const MyListings = () => {
 
     if (
       editingListing.listingType === "rent" &&
-      (
-        !editingListing.rentalDetails?.availableFrom ||
-        Number(
-          editingListing.rentalDetails?.minimumRentalPeriod,
-        ) < 1
-      )
+      (!editingListing.rentalDetails?.availableFrom ||
+        Number(editingListing.rentalDetails?.minimumRentalPeriod) < 1)
     ) {
       setError(
         "Rental listings require an available date and minimum rental period.",
@@ -123,6 +119,7 @@ const MyListings = () => {
     }
 
     const updates = {
+      status: editingListing.status,
       title: editingListing.title.trim(),
       description: editingListing.description.trim(),
       propertySubType: editingListing.propertySubType,
@@ -139,11 +136,9 @@ const MyListings = () => {
 
     if (editingListing.listingType === "rent") {
       updates.rentalDetails = {
-        availableFrom:
-          editingListing.rentalDetails.availableFrom,
+        availableFrom: editingListing.rentalDetails.availableFrom,
         minimumRentalPeriod: Number(
-          editingListing.rentalDetails
-            .minimumRentalPeriod,
+          editingListing.rentalDetails.minimumRentalPeriod,
         ),
       };
 
@@ -156,9 +151,7 @@ const MyListings = () => {
         );
       }
 
-      if (
-        editingListing.rentalDetails.additionalCosts?.trim()
-      ) {
+      if (editingListing.rentalDetails.additionalCosts?.trim()) {
         updates.rentalDetails.additionalCosts =
           editingListing.rentalDetails.additionalCosts.trim();
       }
@@ -177,12 +170,11 @@ const MyListings = () => {
 
       setListings((current) =>
         current.map((listing) =>
-          listing.id === updatedListing.id
-            ? updatedListing
-            : listing,
+          listing.id === updatedListing.id ? updatedListing : listing,
         ),
       );
 
+      onListingUpdated(updatedListing);
       setEditingListing(null);
     } catch (error) {
       setError(error.message);
@@ -202,9 +194,7 @@ const MyListings = () => {
       });
 
       setListings((current) =>
-        current.filter(
-          (listing) => listing.id !== propertyId,
-        ),
+        current.filter((listing) => listing.id !== propertyId),
       );
     } catch (error) {
       window.alert(error.message);
@@ -213,9 +203,7 @@ const MyListings = () => {
 
   if (loading) {
     return (
-      <p className="p-10 text-center text-gray-500">
-        Loading listings...
-      </p>
+      <p className="p-10 text-center text-gray-500">Loading listings...</p>
     );
   }
 
@@ -223,9 +211,7 @@ const MyListings = () => {
     return (
       <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold text-[#08243f]">
-            Edit listing
-          </h1>
+          <h1 className="text-3xl font-bold text-[#08243f]">Edit listing</h1>
 
           <p className="mt-2 text-sm text-gray-500">
             Update your property information.
@@ -239,11 +225,26 @@ const MyListings = () => {
             )}
 
             <div className="grid gap-5 md:grid-cols-2">
-
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-medium">
-                  Title
+                  Listing status
                 </label>
+
+                <select
+                  name="status"
+                  value={editingListing.status}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border px-4 py-3"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="sold">Sold</option>
+                  <option value="rented">Rented</option>
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-medium">Title</label>
 
                 <input
                   name="title"
@@ -264,25 +265,17 @@ const MyListings = () => {
                   onChange={handleChange}
                   className="w-full rounded-lg border px-4 py-3"
                 >
-                  <option value="apartment">
-                    Apartment
-                  </option>
+                  <option value="apartment">Apartment</option>
 
-                  <option value="detached-house">
-                    Detached house
-                  </option>
+                  <option value="detached-house">Detached house</option>
 
-                  <option value="studio">
-                    Studio
-                  </option>
+                  <option value="studio">Studio</option>
 
                   <option value="semi-detached-house">
                     Semi-detached house
                   </option>
 
-                  <option value="terraced-house">
-                    Terraced house
-                  </option>
+                  <option value="terraced-house">Terraced house</option>
                 </select>
               </div>
 
@@ -302,9 +295,7 @@ const MyListings = () => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
-                  City
-                </label>
+                <label className="mb-2 block text-sm font-medium">City</label>
 
                 <input
                   name="city"
@@ -356,9 +347,7 @@ const MyListings = () => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
-                  Rooms
-                </label>
+                <label className="mb-2 block text-sm font-medium">Rooms</label>
 
                 <input
                   name="rooms"
@@ -416,7 +405,6 @@ const MyListings = () => {
                   className="w-full resize-none rounded-lg border px-4 py-3"
                 />
               </div>
-
             </div>
 
             <div className="mt-8 border-t pt-6">
@@ -433,17 +421,11 @@ const MyListings = () => {
                   ["petsAllowed", "Pets allowed"],
                   ["sauna", "Sauna"],
                 ].map(([name, label]) => (
-                  <label
-                    key={name}
-                    className="flex items-center gap-2 text-sm"
-                  >
+                  <label key={name} className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
                       name={name}
-                      checked={
-                        editingListing.features?.[name] ??
-                        false
-                      }
+                      checked={editingListing.features?.[name] ?? false}
                       onChange={handleFeatureChange}
                     />
 
@@ -460,7 +442,6 @@ const MyListings = () => {
                 </h2>
 
                 <div className="grid gap-5 md:grid-cols-2">
-
                   <div>
                     <label className="mb-2 block text-sm font-medium">
                       Available from
@@ -469,10 +450,7 @@ const MyListings = () => {
                     <input
                       name="availableFrom"
                       type="date"
-                      value={
-                        editingListing.rentalDetails
-                          ?.availableFrom || ""
-                      }
+                      value={editingListing.rentalDetails?.availableFrom || ""}
                       onChange={handleRentalChange}
                       className="w-full rounded-lg border px-4 py-3"
                     />
@@ -489,8 +467,7 @@ const MyListings = () => {
                       min="1"
                       step="1"
                       value={
-                        editingListing.rentalDetails
-                          ?.minimumRentalPeriod ?? ""
+                        editingListing.rentalDetails?.minimumRentalPeriod ?? ""
                       }
                       onChange={handleRentalChange}
                       className="w-full rounded-lg border px-4 py-3"
@@ -506,10 +483,7 @@ const MyListings = () => {
                       name="deposit"
                       type="number"
                       min="0"
-                      value={
-                        editingListing.rentalDetails
-                          ?.deposit ?? ""
-                      }
+                      value={editingListing.rentalDetails?.deposit ?? ""}
                       onChange={handleRentalChange}
                       className="w-full rounded-lg border px-4 py-3"
                     />
@@ -523,14 +497,12 @@ const MyListings = () => {
                     <input
                       name="additionalCosts"
                       value={
-                        editingListing.rentalDetails
-                          ?.additionalCosts || ""
+                        editingListing.rentalDetails?.additionalCosts || ""
                       }
                       onChange={handleRentalChange}
                       className="w-full rounded-lg border px-4 py-3"
                     />
                   </div>
-
                 </div>
               </div>
             )}
@@ -554,9 +526,7 @@ const MyListings = () => {
                 onClick={saveEdit}
                 className="rounded-lg bg-[#17634f] px-6 py-2.5 font-medium text-white disabled:opacity-60"
               >
-                {isSaving
-                  ? "Saving..."
-                  : "Save changes"}
+                {isSaving ? "Saving..." : "Save changes"}
               </button>
             </div>
           </div>
@@ -568,31 +538,21 @@ const MyListings = () => {
   return (
     <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-bold text-[#08243f]">
-          My listings
-        </h1>
+        <h1 className="text-3xl font-bold text-[#08243f]">My listings</h1>
 
         <p className="mt-2 text-sm text-gray-500">
           Manage your property listings.
         </p>
 
-        {error && (
-          <p className="mt-5 text-red-600">
-            {error}
-          </p>
-        )}
+        {error && <p className="mt-5 text-red-600">{error}</p>}
 
         {listings.length === 0 ? (
-          <p className="mt-8">
-            No listings yet.
-          </p>
+          <p className="mt-8">No listings yet.</p>
         ) : (
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {listings.map((listing) => {
               const image =
-                listing.images?.find(
-                  (image) => image.isMain,
-                )?.url ||
+                listing.images?.find((image) => image.isMain)?.url ||
                 listing.images?.[0]?.url ||
                 houseImage;
 
@@ -618,22 +578,21 @@ const MyListings = () => {
 
                     <p className="mt-2 font-semibold">
                       {listing.price} €
-                      {listing.listingType === "rent"
-                        ? " / month"
-                        : ""}
+                      {listing.listingType === "rent" ? " / month" : ""}
                     </p>
 
                     <p className="mt-1 text-sm capitalize text-gray-500">
-                      Moderation:{" "}
-                      {listing.moderation?.status}
+                      Status: {listing.status}
+                    </p>
+
+                    <p className="mt-1 text-sm capitalize text-gray-500">
+                      Moderation: {listing.moderation?.status}
                     </p>
 
                     <div className="mt-4 flex gap-2">
                       <button
                         type="button"
-                        onClick={() =>
-                          startEdit(listing)
-                        }
+                        onClick={() => startEdit(listing)}
                         className="rounded-lg border border-[#17634f] px-4 py-2 text-[#17634f]"
                       >
                         Edit
@@ -641,9 +600,7 @@ const MyListings = () => {
 
                       <button
                         type="button"
-                        onClick={() =>
-                          deleteListing(listing.id)
-                        }
+                        onClick={() => deleteListing(listing.id)}
                         className="rounded-lg border border-red-300 px-4 py-2 text-red-600"
                       >
                         Delete

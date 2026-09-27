@@ -69,7 +69,7 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | ----------- | ------ | ---------------------------------------------- | -------------------- | -------------- | ------------------ |
 | [x]         | PBI-08 | Create a property listing for sale or rent     | Selected             | Implemented    | Needs verification |
 | [ ]         | PBI-09 | Upload and manage property images              | Optional future work | Optional       | Not applicable     |
-| [ ]         | PBI-10 | Edit, deactivate, and delete property listings | Selected             | Partial        | Needs verification |
+| [ ]         | PBI-10 | Edit, deactivate, and delete property listings | Selected             | Implemented        | Needs verification |
 | [x]         | PBI-16 | Admin listing moderation                      | Selected             | Implemented    | Needs verification |
 | [ ]         | PBI-17 | Report suspicious listings                    | Selected             | Not started    | Not applicable     |
 | [ ]         | PBI-21 | Listing analytics for sellers and agents      | Deferred             | Deferred       | Not applicable     |
