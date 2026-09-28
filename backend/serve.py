@@ -88,9 +88,9 @@ def predict():
         "size": d["size"],
         "rooms": d.get("rooms"),
         "age": CURRENT_YEAR - d["buildingYear"],
-        "isDetached": 1 if building_type == "detached house" else 0,
-        "isSemiDetached": 1 if building_type == "semi-detached house" else 0,
-        "isTerraced": 1 if building_type == "terraced house" else 0,
+        "isDetached": 1 if building_type == "detached-house" else 0,
+        "isSemiDetached": 1 if building_type == "semi-detached-house" else 0,
+        "isTerraced": 1 if building_type == "terraced-house" else 0,
     }])                                                                                                                                                                                                                              
     return jsonify({"estimate": (trunc(float(price_model.predict(row)[0])/1000))*1000})                                                                                                                                                                        
                                                                                                                                                                                                                                             
