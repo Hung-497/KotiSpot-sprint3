@@ -5,6 +5,8 @@ const {
   getCurrentUser,
   updateUser,
   deleteUser,
+  getUserPreferences,
+  updateUserPreferences,
 } = require("../controllers/userControllers");
 const { requireAuth, requireRole } = require("../middleware/authMiddleware");
 
@@ -20,4 +22,9 @@ router.patch("/me", requireAuth, updateUser);
 // DELETE /users/me
 router.delete("/me", requireAuth, deleteUser);
 
+// GET /api/users/me/preferences
+router.get("/me/preferences", requireAuth, getUserPreferences);
+
+// PATCH /api/users/me/preferences
+router.patch("/me/preferences", requireAuth, updateUserPreferences);
 module.exports = router;

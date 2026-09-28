@@ -23,11 +23,22 @@ import { useState, useEffect } from "react";
 import { getStoredAuth, saveAuth, clearAuth } from "./utils/authStorage";
 import { apiRequest } from "./services/api";
 import NotFound from "./pages/NotFound";
+import usePreferences from "./hooks/usePreferences";
 
 function App() {
   const [favorites, setFavorites] = useState([]);
   const [auth, setAuth] = useState(() => getStoredAuth());
   const isLoggedIn = Boolean(auth?.user && auth?.token);
+  const {
+    preferences,
+    setPreferences,
+    isLoading: preferencesLoading,
+    error: preferencesError,
+    setError: setPreferencesError,
+    message: preferencesMessage,
+    setMessage: setPreferencesMessage,
+    resetPreferences,
+  } = usePreferences(isLoggedIn);
 
   const isAdmin = auth?.user?.role === "administrator";
 
@@ -155,6 +166,7 @@ function App() {
     clearAuth();
     setAuth(null);
     setFavorites([]);
+    resetPreferences();
   };
 
   const toggleFavourite = async (propertyId) => {
@@ -249,7 +261,20 @@ function App() {
           <Route
             path="/settings"
             element={
-              isLoggedIn ? <Settings /> : <Navigate to="/login" replace />
+              isLoggedIn ? (
+                <Settings
+                  preferences={preferences}
+                  setPreferences={setPreferences}
+                  isLoading={preferencesLoading}
+                  error={preferencesError}
+                  setError={setPreferencesError}
+                  message={preferencesMessage}
+                  setMessage={setPreferencesMessage}
+                  onAccountDeleted={logOut}
+                />
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
           <Route
