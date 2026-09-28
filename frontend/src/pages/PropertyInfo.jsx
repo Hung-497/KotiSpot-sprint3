@@ -341,7 +341,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
                 hover:bg-gray-50
               "
                 >
-                  Estimation: {estimate} €
+                  {Math.trunc((estimate*0.925)/1000)*1000}&nbsp;-&nbsp;{Math.trunc((estimate*1.075)/1000)*1000} €
                   {growth &&(
                     <>
                     &nbsp;({growth} %)
