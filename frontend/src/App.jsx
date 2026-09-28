@@ -21,6 +21,7 @@ import MyListings from "./pages/MyListings";
 import SellerDashboard from "./pages/SellerDashboard";
 import Listings from "./pages/Listings";
 import AdminPanel from "./pages/AdminPanel";
+import Comparison from "./pages/Comparision";
 import { properties } from "../data";
 import { useState } from "react";
 
@@ -109,6 +110,8 @@ function App() {
                     <Route path="/rent" element={<Rent favorites={favorites} setFavorites={setFavorites} />}
                     />
                     <Route path="/sell" element={<Sell />}
+                    />
+                    <Route path="/comparison" element={<Comparison />}
                     />
                 </Routes>
                 <Footer />

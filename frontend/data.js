@@ -12,6 +12,266 @@ export const authLinks = [
     { id: 2, href: "/register", text: "Register" },
 ];
 
+export const reviews = [
+  // PROPERTY 1
+  {
+    id: 1,
+    propertyId: 1,
+    userName: "Emma",
+    rating: 5,
+    comment: "Great location and a very comfortable apartment",
+    date: "2026-08-12"
+  },
+  {
+    id: 2,
+    propertyId: 1,
+    userName: "Leo",
+    rating: 4,
+    comment: "Clean apartment and easy access to public transport",
+    date: "2026-08-20"
+  },
+  {
+    id: 3,
+    propertyId: 1,
+    userName: "Sara",
+    rating: 5,
+    comment: "Bright rooms and a pleasant neighborhood",
+    date: "2026-09-02"
+  },
+  {
+    id: 4,
+    propertyId: 1,
+    userName: "Han",
+    rating: 2,
+    comment: "This is an poor acommodation i've ever had",
+    date: "2026-09-02"
+  },
+
+  // PROPERTY 2
+  {
+    id: 4,
+    propertyId: 2,
+    userName: "Oliver",
+    rating: 5,
+    comment: "Perfect studio for one person and close to many cafes",
+    date: "2026-07-15"
+  },
+  {
+    id: 5,
+    propertyId: 2,
+    userName: "Ella",
+    rating: 4,
+    comment: "Small but practical and nicely furnished",
+    date: "2026-08-01"
+  },
+
+  // PROPERTY 3
+  {
+    id: 6,
+    propertyId: 3,
+    userName: "Lucas",
+    rating: 5,
+    comment: "Very spacious house and perfect for a family",
+    date: "2026-06-11"
+  },
+  {
+    id: 7,
+    propertyId: 3,
+    userName: "Olivia",
+    rating: 5,
+    comment: "The private yard is one of the best parts of the property",
+    date: "2026-07-03"
+  },
+  {
+    id: 8,
+    propertyId: 3,
+    userName: "Elias",
+    rating: 4,
+    comment: "Quiet residential area and plenty of space",
+    date: "2026-07-29"
+  },
+
+  // PROPERTY 4
+  {
+    id: 9,
+    propertyId: 4,
+    userName: "Sophia",
+    rating: 5,
+    comment: "Beautiful apartment and very close to parks and shops",
+    date: "2026-07-09"
+  },
+  {
+    id: 10,
+    propertyId: 4,
+    userName: "Alex",
+    rating: 4,
+    comment: "Good size for one or two people and a great location",
+    date: "2026-07-25"
+  },
+
+  // PROPERTY 5
+  {
+    id: 11,
+    propertyId: 5,
+    userName: "Isabella",
+    rating: 5,
+    comment: "Amazing city views and a very modern interior",
+    date: "2026-06-18"
+  },
+  {
+    id: 12,
+    propertyId: 5,
+    userName: "Matias",
+    rating: 5,
+    comment: "The terrace is spacious and the apartment feels premium",
+    date: "2026-07-14"
+  },
+  {
+    id: 13,
+    propertyId: 5,
+    userName: "Charlotte",
+    rating: 4,
+    comment: "Great apartment with lots of natural light",
+    date: "2026-08-05"
+  },
+
+  // PROPERTY 6
+  {
+    id: 14,
+    propertyId: 6,
+    userName: "Amelia",
+    rating: 5,
+    comment: "Peaceful area and very good transport connections",
+    date: "2026-07-02"
+  },
+  {
+    id: 15,
+    propertyId: 6,
+    userName: "Samuel",
+    rating: 4,
+    comment: "Comfortable apartment with plenty of space",
+    date: "2026-07-30"
+  },
+
+  // PROPERTY 7
+  {
+    id: 16,
+    propertyId: 7,
+    userName: "Emily",
+    rating: 5,
+    comment: "Beautiful traditional house with lots of character",
+    date: "2026-06-20"
+  },
+  {
+    id: 17,
+    propertyId: 7,
+    userName: "Joonas",
+    rating: 5,
+    comment: "The private garden and peaceful area are excellent",
+    date: "2026-07-17"
+  },
+  {
+    id: 18,
+    propertyId: 7,
+    userName: "Maria",
+    rating: 4,
+    comment: "A charming house in a very nice part of Porvoo",
+    date: "2026-08-07"
+  },
+
+  // PROPERTY 8
+  {
+    id: 19,
+    propertyId: 8,
+    userName: "Ella",
+    rating: 4,
+    comment: "Affordable apartment with convenient transport options",
+    date: "2026-07-12"
+  },
+  {
+    id: 20,
+    propertyId: 8,
+    userName: "Adam",
+    rating: 5,
+    comment: "Clean apartment and everything needed is nearby",
+    date: "2026-08-03"
+  }
+];
+
+export const hosts = [
+  {
+    id: 1,
+    name: "Mikko Laine",
+    role: "Property owner",
+    image: ".src/host1.jpg",
+    joinedYear: 2022,
+    description: "Property owner based in Helsinki with experience in long-term rentals"
+  },
+
+  {
+    id: 2,
+    name: "Anna Korhonen",
+    role: "Property owner",
+    image: "/images/hosts/host2.jpg",
+    joinedYear: 2023,
+    description: "Apartment owner focused on comfortable homes in central Helsinki"
+  },
+
+  {
+    id: 3,
+    name: "Jari Nieminen",
+    role: "Property owner",
+    image: "/images/hosts/host3.jpg",
+    joinedYear: 2021,
+    description: "Home owner based in Espoo offering family-friendly properties"
+  },
+
+  {
+    id: 4,
+    name: "Laura Virtanen",
+    role: "Property owner",
+    image: "/images/hosts/host4.jpg",
+    joinedYear: 2024,
+    description: "Property owner offering apartments around Helsinki"
+  },
+
+  {
+    id: 5,
+    name: "Antti Mäkinen",
+    role: "Property owner",
+    image: "/images/hosts/host5.jpg",
+    joinedYear: 2020,
+    description: "Private property owner with listings in Helsinki"
+  },
+
+  {
+    id: 6,
+    name: "Sofia Lehtonen",
+    role: "Property owner",
+    image: "/images/hosts/host6.jpg",
+    joinedYear: 2023,
+    description: "Property owner based in Espoo with a focus on modern apartments"
+  },
+
+  {
+    id: 7,
+    name: "Oskari Salonen",
+    role: "Property owner",
+    image: "/images/hosts/host7.jpg",
+    joinedYear: 2021,
+    description: "Home owner offering traditional and family-oriented properties"
+  },
+
+  {
+    id: 8,
+    name: "Emilia Hämäläinen",
+    role: "Property owner",
+    image: "/images/hosts/host8.jpg",
+    joinedYear: 2024,
+    description: "Property owner offering affordable homes in the Helsinki metropolitan area"
+  }
+];
+
 export const properties = [
     {
         id: 1, ownerId: 1, title: "Modern apartment in Helsinki",

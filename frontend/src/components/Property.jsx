@@ -1,10 +1,21 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 
-const Property = ({ property, favorites, setFavorites }) => {
+const Property = ({ property, favorites, setFavorites, selectedProperties =[], setSelectedProperties, }) => {
     const isFavorite = favorites.includes(property.id);
+    const isSelected = selectedProperties.includes(property.id);
     const { image, address, city, price, size, listingType } = property;
     const isRental = listingType === "rent" || listingType === "forRent";
+    const handleCompare = () => {
+        if (isSelected) {
+            setSelectedProperties(
+                selectedProperties.filter(
+                    (id) => id !== property.id)
+            );
+        } else {
+            setSelectedProperties([ ...selectedProperties, property.id]);
+        }
+    };
 
     return (
         <div className="property-card w-52.5 overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
@@ -50,6 +61,16 @@ const Property = ({ property, favorites, setFavorites }) => {
                 <Heart size={18} strokeWidth={2} fill={isFavorite ? "currentColor" : "none"} />
             </button>
             </div>
+
+            <label className="flex w-full items-center gap-2 border-t px-3 py-2 cursor-pointer">
+
+            <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={handleCompare}
+            />
+            Compare
+             </label>
 
         </div>
     );
