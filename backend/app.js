@@ -9,6 +9,7 @@ const loginRouter = require("./routes/loginRouter");
 const verificationRouter = require("./routes/verificationRouter");
 const inquiryRouter = require("./routes/inquiryRouter");
 const contactRouter = require("./routes/contactRouter");
+const estimateRouter = require("./routes/estimationRouter");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api/account", loginRouter);
 app.use("/api/verifications", verificationRouter);
 app.use("/api/inquiries", inquiryRouter);
 app.use("/api/contact-messages", contactRouter);
+app.use("/api/estimates", estimateRouter);
 
 app.use(unknownEndpoint);
 app.use(errorHandler);

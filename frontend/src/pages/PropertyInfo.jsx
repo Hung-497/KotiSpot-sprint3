@@ -31,6 +31,8 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
   const [inquirySent, setInquirySent] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [estimate, setEstimate] = useState(null);
+  const [growth, setGrowth] = useState(null);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -138,8 +140,29 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
     }
   };
 
-  const calculateEstimate = () => {
-    console.log('Feature in progress');
+  const calculateEstimate = async () => {
+    try {
+      const proposedEstimate = await apiRequest(`/estimates/estimate`, {
+        method: "POST",
+        body: JSON.stringify({
+          postalCode: selectedProperty.postalCode, 
+          size: selectedProperty.size, 
+          rooms: selectedProperty.rooms, 
+          buildingYear: selectedProperty.buildingYear, 
+          buildingType: selectedProperty.propertySubType,
+        }),
+      });
+      const proposedGrowth = await apiRequest(`/estimates/growth`, {
+        method: "POST",
+        body: JSON.stringify({
+          postalCode: selectedProperty.postalCode,
+        }),
+      });
+      setEstimate(proposedEstimate.estimate);
+      setGrowth(proposedGrowth.annualGrowthPct)
+    } catch (error) {
+      console.error("Error getting estimate:", error);
+    }
   };
   return (
     <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
@@ -299,12 +322,40 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
               <Mail size={18} />
               Contact seller or agent
             </button>
+            {!isRental &&(
+            estimate ? 
+              <>
+                <button
+                  title="Estimation of current price and predicted annual growth per next 5 years"
+                  type="button"
+                  className="
+                mt-3
+                flex w-full
+                items-center justify-center gap-2
+                rounded-lg
+                border border-gray-400
+                px-4 py-3
+                text-sm
+                text-[#08243f]
+                transition
+                hover:bg-gray-50
+              "
+                >
+                  Estimation: {estimate} €
+                  {growth &&(
+                    <>
+                    &nbsp;({growth} %)
+                    </>
+                  )}
 
-            <div id="estimate-div">
-              <button
-                type="button"
-                onClick={calculateEstimate}
-                className="
+                </button>
+              </>
+            : (
+              <>
+                <button
+                  type="button"
+                  onClick={calculateEstimate}
+                  className="
                 mt-3
                 flex w-full
                 items-center justify-center gap-2
@@ -316,12 +367,14 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
                 transition
                 hover:bg-[#17634f]
               "
-              >
-                <Calculator size={18} />
-                Calculate price estimate
-              </button>
-            </div>
-
+                >
+                  <Calculator size={18} />
+                  Calculate price estimate
+                </button>
+              </>
+            )
+          )}
+            
           </div>
             {isInquiryFormOpen && (
               <div className="mt-4 rounded-lg border border-gray-200 p-4">

@@ -6,7 +6,8 @@ POST /predict-growth   -> 5-year growth forecast for a postal code
 """                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                             
 import json                                                                                                                                                                                                                                 
-import os                                                                                                                                                                                                                                   
+import os
+from math import trunc                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                             
 from flask import Flask, request, jsonify                                                                                                                                                                                                   
 import lightgbm as lgb                                                                                                                                                                                                                      
@@ -21,40 +22,40 @@ HORIZON = 5
 # ---------------------------------------------------------------------------                                                                                                                                                               
 # Load price model + its postal code encoding                                                                                                                                                                                               
 # ---------------------------------------------------------------------------                                                                                                                                                               
-price_model = lgb.Booster(model_file="model.txt")                                                                                                                                                                                           
+price_model = lgb.Booster(model_file="backend/utils/estimation_models/model.txt")                                                                                                                                                                                           
                                                                                                                                                                                                                                             
-if not os.path.exists("postal_code_ppsm.json"):                                                                                                                                                                                             
+if not os.path.exists("backend/utils/estimation_models/data/postal_code_ppsm.json"):                                                                                                                                                                                             
     raise RuntimeError("postal_code_ppsm.json not found. Run: python train_model.py")                                                                                                                                                       
                                                                                                                                                                                                                                             
-with open("postal_code_ppsm.json") as f:                                                                                                                                                                                                    
+with open("backend/utils/estimation_models/data/postal_code_ppsm.json") as f:                                                                                                                                                                                                    
     ppsm_encoding = json.load(f)                                                                                                                                                                                                            
 POSTAL_PPSM = ppsm_encoding["postalCodes"]                                                                                                                                                                                                  
 GLOBAL_MEAN_PPSM = ppsm_encoding["globalMean"]                                                                                                                                                                                              
                                                                                                                                                                                                                                             
 VALID_BUILDING_TYPES = {
     "apartment",
-    "detached house",
-    "semi-detached house",
-    "terraced house",
+    "detached-house",
+    "semi-detached-house",
+    "terraced-house",
 }                                                                                                                                                                              
                                                                                                                                                                                                                                             
 # ---------------------------------------------------------------------------                                                                                                                                                               
 # Load growth model + its postal code encoding + price history                                                                                                                                                                              
 # ---------------------------------------------------------------------------                                                                                                                                                               
-growth_model = lgb.Booster(model_file="model_growth.txt")                                                                                                                                                                                   
+growth_model = lgb.Booster(model_file="backend/utils/estimation_models/model_growth.txt")                                                                                                                                                                                   
                                                                                                                                                                                                                                             
-if not os.path.exists("postal_code_growth.json"):                                                                                                                                                                                           
+if not os.path.exists("backend/utils/estimation_models/data/postal_code_growth.json"):                                                                                                                                                                                           
     raise RuntimeError(                                                                                                                                                                                                                     
         "postal_code_growth.json not found. Run: python train_growth.py"                                                                                                                                                                    
     )                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                             
-with open("postal_code_growth.json") as f:                                                                                                                                                                                                  
+with open("backend/utils/estimation_models/data/postal_code_growth.json") as f:                                                                                                                                                                                                  
     growth_encoding = json.load(f)                                                                                                                                                                                                          
 POSTAL_GROWTH = growth_encoding["postalCodes"]                                                                                                                                                                                              
 GLOBAL_MEAN_GROWTH = growth_encoding["globalMean"]                                                                                                                                                                                          
                                                                                                                                                                                                                                             
 # IMPORTANT: read postalCode as string so "05500" doesn't become 5500.                                                                                                                                                                      
-history = pd.read_csv("data/price_growth.csv", dtype={"postalCode": str})                                                                                                                                                                   
+history = pd.read_csv("backend/utils/estimation_models/data/price_growth.csv", dtype={"postalCode": str})                                                                                                                                                                   
 HISTORY_MAX_YEAR = int(history["year"].max())                                                                                                                                                                                               
                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                             
@@ -80,7 +81,8 @@ def predict():
     postal_ppsm = POSTAL_PPSM.get(postal)                                                                                                                                                                                                   
     if postal_ppsm is None:                                                                                                                                                                                                                 
         postal_ppsm = GLOBAL_MEAN_PPSM                                                                                                                                                                                                      
-                                                                                                                                                                                                                                            
+
+    building_type = d["buildingType"]                                                                                                                                                                                                             
     row = pd.DataFrame([{
         "postalPpsm": postal_ppsm,
         "size": d["size"],
@@ -90,7 +92,7 @@ def predict():
         "isSemiDetached": 1 if building_type == "semi-detached house" else 0,
         "isTerraced": 1 if building_type == "terraced house" else 0,
     }])                                                                                                                                                                                                                              
-    return jsonify({"estimate": float(price_model.predict(row)[0])})                                                                                                                                                                        
+    return jsonify({"estimate": (trunc(float(price_model.predict(row)[0])/1000))*1000})                                                                                                                                                                        
                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                             
 # ---------------------------------------------------------------------------                                                                                                                                                               

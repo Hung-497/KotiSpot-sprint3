@@ -1,9 +1,10 @@
 const express = require("express");                                                                                                                                                                                                         
-const { getEstimate, getGrowth } = require("../controllers/estimationControllers");                                                                                                                                                                  
+const { getEstimate, getGrowth } = require("../controllers/estimationControllers");  
+const { requireAuth} = require("../middleware/authMiddleware");                                                                                                                                                                
                                                                                                                                                                                                                                             
 const router = express.Router();                                                                                                                                                                                                            
                                                                                                                                                                                                                                             
-router.post("/estimate", getEstimate);                                                                                                                                                                                                      
-router.post("/growth", getGrowth);                                                                                                                                                                                                          
+router.post("/estimate", requireAuth, getEstimate);                                                                                                                                                                                                      
+router.post("/growth", requireAuth, getGrowth);                                                                                                                                                                                                          
                                                                                                                                                                                                                                             
 module.exports = router;   

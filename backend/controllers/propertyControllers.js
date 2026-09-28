@@ -160,9 +160,9 @@ const filterProperties = async (req, res) => {
     const validPropertyTypes = ["residential", "any"];
     const validPropertySubTypes = [
       "apartment",
-      "detached house",
-      "semi-detached house",
-      "terraced house",
+      "detached-house",
+      "semi-detached-house",
+      "terraced-house",
       "any",
     ];
 

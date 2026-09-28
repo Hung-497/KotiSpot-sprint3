@@ -1,9 +1,9 @@
 const { estimatePrice, predictGrowth } = require("../services/estimationService");                                                                                                                                                                  
                                                                                                                                                                                                                                             
 const VALID_BUILDING_TYPES = new Set(["apartment",
-    "detached house",
-    "semi-detached house",
-    "terraced house"]);                                                                                                                                                                
+    "detached-house",
+    "semi-detached-house",
+    "terraced-house"]);                                                                                                                                                                
                                                                                                                                                                                                                                             
 async function getEstimate(req, res, next) {                                                                                                                                                                                                
   try {                                                                                                                                                                                                                                     
