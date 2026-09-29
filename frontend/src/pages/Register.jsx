@@ -1,103 +1,27 @@
 import { useNavigate, Link } from "react-router-dom";
-import logo from "../assets/KotiSpot_Logo.png";
+import logo from "../assets/KotiSpot_logo.png";
+import useOtpAuth from "../hooks/useOtpAuth";
 import { useState } from "react";
 import { apiRequest } from "../services/api";
 
 const Register = ({ onRegister }) => {
   const navigate = useNavigate();
 
+  const {
+    email,
+    setEmail,
+    code,
+    setCode,
+    codeRequested,
+    formError,
+    isSubmitting,
+    requestCode,
+    verifyCode,
+    resetCode,
+  } = useOtpAuth("register");
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [codeRequested, setCodeRequested] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const requestCode = async (event) => {
-    event.preventDefault();
-
-    if (!firstName.trim()) {
-      setFormError("Please enter your first name.");
-      return;
-    }
-
-    if (!lastName.trim()) {
-      setFormError("Please enter your last name.");
-      return;
-    }
-
-    if (!email.trim()) {
-      setFormError("Please enter your email.");
-      return;
-    }
-
-    if (!email.includes("@")) {
-      setFormError("Please enter a valid email address.");
-      return;
-    }
-
-    setFormError("");
-    setIsSubmitting(true);
-
-    try {
-      await apiRequest("/account/request-code", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          mode: "register", // only works for emails that don't have an account yet
-        }),
-      });
-
-      setCodeRequested(true);
-    } catch (error) {
-      setFormError(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const verifyCode = async (event) => {
-    event.preventDefault();
-
-    if (!/^\d{6}$/.test(code.trim())) {
-      setFormError("Please enter the 6-digit verification code.");
-      return;
-    }
-
-    setFormError("");
-    setIsSubmitting(true);
-
-    try {
-      const authData = await apiRequest("/account/verify-code", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          code: code.trim(),
-          mode: "register",
-        }),
-      });
-
-      const profileData = await apiRequest("/users/me", {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${authData.token}`,
-        },
-        body: JSON.stringify({
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-        }),
-      });
-
-      onRegister(profileData.user, authData.token);
-
-      navigate("/");
-    } catch (error) {
-      setFormError(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f7f9f8] px-4">
@@ -119,7 +43,21 @@ const Register = ({ onRegister }) => {
         </div>
 
         {!codeRequested ? (
-          <form onSubmit={requestCode} className="space-y-5">
+          <form
+            onSubmit={(e) =>
+              requestCode(e, () => {
+                if (!firstName.trim()) {
+                  return "Please enter your first name.";
+                }
+                if (!lastName.trim()) {
+                  return "Please enter your last name.";
+                }
+
+                return null; // No validation errors
+              })
+            }
+            className="space-y-5"
+          >
             {formError && (
               <p
                 role="alert"
@@ -189,7 +127,24 @@ const Register = ({ onRegister }) => {
             </button>
           </form>
         ) : (
-          <form onSubmit={verifyCode}>
+          <form
+            onSubmit={(e) =>
+              verifyCode(e, async (authData) => {
+                const profileData = await apiRequest("/users/me", {
+                  method: "PATCH",
+                  headers: {
+                    Authorization: `Bearer ${authData.token}`,
+                  },
+                  body: JSON.stringify({
+                    firstName: firstName.trim(),
+                    lastName: lastName.trim(),
+                  }),
+                });
+                onRegister(profileData.user, authData.token);
+                navigate("/");
+              })
+            }
+          >
             {formError && (
               <p
                 role="alert"
@@ -230,11 +185,7 @@ const Register = ({ onRegister }) => {
             <button
               type="button"
               disabled={isSubmitting}
-              onClick={() => {
-                setCode("");
-                setFormError("");
-                setCodeRequested(false);
-              }}
+              onClick={resetCode}
               className="mt-3 w-full text-sm font-medium text-[#1f7356] hover:underline"
             >
               Change information
