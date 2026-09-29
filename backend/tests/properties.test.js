@@ -155,17 +155,24 @@ describe("GET /api/properties/filter", () => {
     expect(response.body[0].title).toBe("Espoo family house");
   });
 
-  it("should match keyword and location partially, ignoring case", async () => {
+  it("should match keyword, city and postal code partially, ignoring case", async () => {
     const byKeyword = await api
       .get("/api/properties/filter")
       .query({ keyword: "FAMILY" })
       .expect(200);
+    const byCity = await api
+      .get("/api/properties/filter")
+      .query({ city: "espoo" })
+      .expect(200);
     const byPostalCode = await api
       .get("/api/properties/filter")
-      .query({ location: "001" })
+      .query({ postalCode: "001" })
       .expect(200);
 
     expect(byKeyword.body.map((property) => property.title)).toEqual([
+      "Espoo family house",
+    ]);
+    expect(byCity.body.map((property) => property.title)).toEqual([
       "Espoo family house",
     ]);
     expect(byPostalCode.body.map((property) => property.title)).toEqual([

@@ -23,8 +23,9 @@ const PropertySearch = ({
 }) => {
   const [search, setSearch] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [location, setLocation] = useState("");
-  const [propertyType, setPropertyType] = useState("");
+  const [city, setCity] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [propertySubType, setPropertySubType] = useState("");
   const [buyOrRent, setBuyOrRent] = useState("");
   const [rooms, setRooms] = useState("");
   const [bedrooms, setBedrooms] = useState("");
@@ -53,11 +54,12 @@ const PropertySearch = ({
     const params = new URLSearchParams();
 
     if (search.trim()) params.append("keyword", search.trim());
-    if (location.trim()) params.append("location", location.trim());
+    if (city.trim()) params.append("city", city.trim());
+    if (postalCode.trim()) params.append("postalCode", postalCode.trim());
     if (listingType || buyOrRent) {
       params.append("listingType", listingType || buyOrRent);
     }
-    if (propertyType) params.append("propertySubType", propertyType);
+    if (propertySubType) params.append("propertySubType", propertySubType);
     if (rooms === "7+") {
       params.append("minRooms", "7");
     } else if (rooms) {
@@ -89,8 +91,9 @@ const PropertySearch = ({
 
   const clearFilters = () => {
     setSearch("");
-    setLocation("");
-    setPropertyType("");
+    setCity("");
+    setPostalCode("");
+    setPropertySubType("");
     setBuyOrRent("");
     setRooms("");
     setBedrooms("");
@@ -172,14 +175,21 @@ const PropertySearch = ({
           )}
           <input
             type="text"
-            placeholder="Location or postal code"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
+            placeholder="City"
+            value={city}
+            onChange={(event) => setCity(event.target.value)}
+            className={inputClassName}
+          />
+          <input
+            type="text"
+            placeholder="Postal code"
+            value={postalCode}
+            onChange={(event) => setPostalCode(event.target.value)}
             className={inputClassName}
           />
           <select
-            value={propertyType}
-            onChange={(event) => setPropertyType(event.target.value)}
+            value={propertySubType}
+            onChange={(event) => setPropertySubType(event.target.value)}
             className={inputClassName}
           >
             <option value="">Property type</option>

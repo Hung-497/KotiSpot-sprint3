@@ -259,23 +259,21 @@ const filterProperties = async (req, res) => {
       }
     }
 
-    for (const field of ["city", "currency"]) {
-      if (req.query[field] !== undefined) {
-        if (
-          typeof req.query[field] !== "string" ||
-          req.query[field].trim() === ""
-        ) {
-          return res.status(400).json({ message: `Invalid ${field} value` });
-        }
+    if (req.query.currency !== undefined) {
+      if (
+        typeof req.query.currency !== "string" ||
+        req.query.currency.trim() === ""
+      ) {
+        return res.status(400).json({ message: "Invalid currency value" });
+      }
 
-        if (req.query[field].trim() !== "any") {
-          query[field] = req.query[field].trim();
-        }
+      if (req.query.currency.trim() !== "any") {
+        query.currency = req.query.currency.trim();
       }
     }
 
-    // keyword and location match part of the text and ignore letter case
-    const { keyword, location } = req.query;
+    // keyword, city and postalCode match part of the text and ignore letter case
+    const { keyword, city, postalCode } = req.query;
     const textSearches = [];
 
     if (keyword !== undefined) {
@@ -295,12 +293,20 @@ const filterProperties = async (req, res) => {
       );
     }
 
-    if (location !== undefined) {
-      if (typeof location !== "string" || location.trim() === "") {
-        return res.status(400).json({ message: "Invalid location value" });
+    if (city !== undefined) {
+      if (typeof city !== "string" || city.trim() === "") {
+        return res.status(400).json({ message: "Invalid city value" });
       }
 
-      textSearches.push(buildTextMatch(location, ["city", "postalCode"]));
+      textSearches.push(buildTextMatch(city, ["city"]));
+    }
+
+    if (postalCode !== undefined) {
+      if (typeof postalCode !== "string" || postalCode.trim() === "") {
+        return res.status(400).json({ message: "Invalid postal code value" });
+      }
+
+      textSearches.push(buildTextMatch(postalCode, ["postalCode"]));
     }
 
     if (textSearches.length > 0) {
