@@ -38,9 +38,9 @@ const Home = ({ properties, favorites, onToggleFavorite }) => {
           </p>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 w-130 -translate-x-1/2">
+        {/* z-30 keeps the filter menu above the property cards below */}
+        <div className="absolute bottom-8 left-1/2 z-30 w-130 -translate-x-1/2">
           <PropertySearch
-            properties={properties}
             onResults={setFilteredProperties}
             placeholder="Search by city, area, or property type..."
             compact

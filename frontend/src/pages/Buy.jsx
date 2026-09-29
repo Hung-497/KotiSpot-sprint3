@@ -35,8 +35,8 @@ const Buy = ({ properties, favorites, onToggleFavorite }) => {
             Search for a house to buy
           </p>
           <PropertySearch
-            properties={propertiesForSale}
             onResults={setFilteredProperties}
+            listingType="sale"
             placeholder="Search city, neighborhood or postal code"
           />
         </div>

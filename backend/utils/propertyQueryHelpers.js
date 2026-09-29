@@ -54,6 +54,18 @@ const addBooleanFilter = (query, field, rawValue) => {
   return `Invalid ${field} value`;
 };
 
+// Case-insensitive "contains" match of the text in any of the given fields.
+// The text is escaped so characters like "." or "(" are matched literally.
+const buildTextMatch = (text, fields) => {
+  const pattern = text.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  return {
+    $or: fields.map((field) => ({
+      [field]: { $regex: pattern, $options: "i" },
+    })),
+  };
+};
+
 // Listings anyone can see: active and approved by moderation
 const publicPropertyScope = {
   status: "active",
@@ -64,4 +76,5 @@ module.exports = {
   publicPropertyScope,
   addNumericRangeFilter,
   addBooleanFilter,
+  buildTextMatch,
 };

@@ -4,6 +4,7 @@ const {
   publicPropertyScope,
   addNumericRangeFilter,
   addBooleanFilter,
+  buildTextMatch,
 } = require("../utils/propertyQueryHelpers");
 
 const hasModerationInput = (body) =>
@@ -273,6 +274,39 @@ const filterProperties = async (req, res) => {
       }
     }
 
+    // keyword and location match part of the text and ignore letter case
+    const { keyword, location } = req.query;
+    const textSearches = [];
+
+    if (keyword !== undefined) {
+      if (typeof keyword !== "string" || keyword.trim() === "") {
+        return res.status(400).json({ message: "Invalid keyword value" });
+      }
+
+      textSearches.push(
+        buildTextMatch(keyword, [
+          "title",
+          "description",
+          "city",
+          "address",
+          "postalCode",
+          "propertySubType",
+        ]),
+      );
+    }
+
+    if (location !== undefined) {
+      if (typeof location !== "string" || location.trim() === "") {
+        return res.status(400).json({ message: "Invalid location value" });
+      }
+
+      textSearches.push(buildTextMatch(location, ["city", "postalCode"]));
+    }
+
+    if (textSearches.length > 0) {
+      query.$and = textSearches;
+    }
+
     const propertyQuery = Property.find(query);
 
     if (sort === "price-asc") {
@@ -310,15 +344,9 @@ const getPropertyByKeyword = async (req, res) => {
     return res.status(400).json({ message: "Invalid listing type" });
   }
 
-  const escapedKeyword = keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const query = {
     ...publicPropertyScope,
-    $or: [
-      { title: { $regex: escapedKeyword, $options: "i" } },
-      { description: { $regex: escapedKeyword, $options: "i" } },
-      { city: { $regex: escapedKeyword, $options: "i" } },
-      { address: { $regex: escapedKeyword, $options: "i" } },
-    ],
+    ...buildTextMatch(keyword, ["title", "description", "city", "address"]),
   };
 
   if (listingType !== undefined && listingType !== "any") {
