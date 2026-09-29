@@ -162,7 +162,6 @@ const filterProperties = async (req, res) => {
     const validPropertySubTypes = [
       "apartment",
       "detached-house",
-      "studio",
       "semi-detached-house",
       "terraced-house",
       "any",

@@ -180,7 +180,7 @@ describe("GET /api/properties/filter", () => {
     ]);
   });
 
-  it("should sort by price", async () => {
+  it("should sort by price, highest first", async () => {
     const response = await api
       .get("/api/properties/filter")
       .query({ sort: "price-desc" })
@@ -188,6 +188,40 @@ describe("GET /api/properties/filter", () => {
 
     expect(response.body.map((property) => property.price)).toEqual([
       250000, 1800,
+    ]);
+  });
+
+  it("should sort by price, lowest first", async () => {
+    const response = await api
+      .get("/api/properties/filter")
+      .query({ sort: "price-asc" })
+      .expect(200);
+
+    expect(response.body.map((property) => property.price)).toEqual([
+      1800, 250000,
+    ]);
+  });
+
+  it("should sort by newest first", async () => {
+    // Give the listings clearly different creation dates. The collection is
+    // updated directly because Mongoose does not let createdAt be changed.
+    await Property.collection.updateOne(
+      { title: "Test apartment" },
+      { $set: { createdAt: new Date("2026-01-01T00:00:00.000Z") } },
+    );
+    await Property.collection.updateOne(
+      { title: "Espoo family house" },
+      { $set: { createdAt: new Date("2026-02-01T00:00:00.000Z") } },
+    );
+
+    const response = await api
+      .get("/api/properties/filter")
+      .query({ sort: "newest" })
+      .expect(200);
+
+    expect(response.body.map((property) => property.title)).toEqual([
+      "Espoo family house",
+      "Test apartment",
     ]);
   });
 

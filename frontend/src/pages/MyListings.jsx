@@ -281,8 +281,6 @@ const MyListings = ({ onListingUpdated }) => {
 
                   <option value="detached-house">Detached house</option>
 
-                  <option value="studio">Studio</option>
-
                   <option value="semi-detached-house">
                     Semi-detached house
                   </option>
