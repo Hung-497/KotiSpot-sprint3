@@ -24,7 +24,7 @@ app.use("/api/account", loginRouter);
 app.use("/api/verifications", verificationRouter);
 app.use("/api/inquiries", inquiryRouter);
 app.use("/api/contact-messages", contactRouter);
-app.use("/api/estimates", estimateRouter);
+app.use("/api/estimate", estimateRouter);
 
 app.use(unknownEndpoint);
 app.use(errorHandler);

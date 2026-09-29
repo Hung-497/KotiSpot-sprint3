@@ -7,6 +7,7 @@ import {
 } from "../utils/listingForm";
 import { toPropertyImages } from "../utils/imageUtils";
 import PhotoManager from "../components/PhotoManager";
+import { Calculator } from "lucide-react";
 
 const Listings = () => {
   const [listingType, setListingType] = useState("");
@@ -14,6 +15,11 @@ const Listings = () => {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photos, setPhotos] = useState([]);
+
+  //Estimation variables
+  const [estimate, setEstimate] = useState(0);
+  const [growth, setGrowth] = useState(0);
+  const modifiers = ["postalCode", "propertyType", "size", "rooms", "buildingYear"];
 
   const [newListing, setNewListing] = useState(createEmptyListing());
 
@@ -26,6 +32,10 @@ const Listings = () => {
       ...prevListing,
       [name]: value,
     }));
+    if(modifiers.includes(name)){
+      setEstimate(0);
+      setGrowth(0);
+    }
   };
 
   const handleFeatureChange = (event) => {
@@ -38,6 +48,42 @@ const Listings = () => {
         : prevListing.features.filter((feature) => feature !== value),
     }));
   };
+
+  //Estimate functions
+  const calculateEstimate = async () => {
+    try {
+      const proposedEstimate = await apiRequest(`/estimate`, {
+        method: "POST",
+        body: JSON.stringify({
+          postalCode: newListing.postalCode, 
+          size: Number(newListing.size), 
+          rooms: Number(newListing.rooms), 
+          buildingYear: Number(newListing.buildingYear), 
+          buildingType: newListing.propertyType,
+        }),
+      });
+      const proposedGrowth = await apiRequest(`/estimate/growth`, {
+        method: "POST",
+        body: JSON.stringify({
+          postalCode: newListing.postalCode,
+        }),
+      });
+      setEstimate(proposedEstimate.estimate);
+      setGrowth(proposedGrowth.annualGrowthPct)
+    } catch (error) {
+      console.error("Error getting estimate:", error);
+    }
+  };
+
+  const applyEstimate = () => {
+    setFormError("");
+    setFormMessage("");
+
+    setNewListing((prevListing) => ({
+      ...prevListing,
+      ["price"]: estimate,
+    }));
+  }
 
   const addListing = async () => {
     setFormError("");
@@ -258,21 +304,22 @@ const Listings = () => {
                 className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
               />
             </div>
-            <div>
-              <label className="mb-2 block text-sm">Year of construction *</label>
-                <input
-                    type="number"
-                    name="buildingYear"
-                    value={newListing.buildingYear}
-                    onChange={handleInputChange}
-                    placeholder="1970"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
-                />
-            </div>
+
           </div>
 
           {/* Rooms */}
           <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm">Year of construction *</label>
+              <input
+                type="number"
+                name="buildingYear"
+                value={newListing.buildingYear}
+                onChange={handleInputChange}
+                placeholder="1970"
+                className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
+              />
+            </div>
             <div>
               <label className="mb-2 block text-sm">Rooms *</label>
 
@@ -473,6 +520,67 @@ const Listings = () => {
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
                 />
               </div>
+                { newListing.postalCode && 
+                  newListing.propertyType && 
+                  newListing.size && 
+                  newListing.rooms && 
+                  newListing.buildingYear && 
+                  (estimate ?
+                    <>
+                    <div>
+                      <label className="mb-2 block text-sm">Price estimate (click to apply) (€) *</label>
+                      <button
+                        title="Estimation of current price and predicted annual growth per next 5 years"
+                        type="button"
+                        onClick={applyEstimate}
+                        className="
+                          w-full
+                          items-center justify-center gap-2
+                          rounded-lg
+                          border border-gray-300
+                          px-4 py-3
+                          text-sm
+                          text-[#08243f]
+                          transition
+                          hover:bg-gray-50
+                        "
+                      >
+                        {Math.trunc((estimate * 0.925) / 1000) * 1000}&nbsp;-&nbsp;{Math.trunc((estimate * 1.075) / 1000) * 1000} €
+                        {growth && (
+                          <>
+                            &nbsp;({growth} %)
+                          </>
+                        )}
+
+                      </button>
+                    </div>
+                    </>
+                    : (
+                      <>
+                      <div>
+                        <label className="mb-2 block text-sm">Price estimate(€) *</label>
+                        <button
+                          type="button"
+                          onClick={calculateEstimate}
+                          className="
+                            w-full
+                            items-center justify-center gap-2
+                            rounded-lg
+                            bg-[#08243f]
+                            px-4 py-3
+                            text-sm font-medium
+                            text-white
+                            transition
+                            hover:bg-[#17634f]
+                          "
+                        >
+                          {/* <Calculator size={18} /> */}
+                          <p>Calculate price estimate <sup >AI-powered </sup></p>
+                        </button>
+                        </div>
+                      </>
+                    )
+                )}
             </div>
           </div>
         )}

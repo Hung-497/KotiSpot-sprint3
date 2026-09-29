@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import PropertyMap from "../components/PropertyMap";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -11,8 +11,7 @@ import {
   Maximize,
   ChevronLeft,
   ChevronRight,
-  Calendar, 
-  Calculator, 
+  Calendar,  
 } from "lucide-react";
 import houseImage from "../assets/house1.jpg";
 import { apiRequest } from "../services/api";
@@ -23,6 +22,8 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentImage, setCurrentImage] = useState(0);
+  const [longitude, setLongitude] = useState(0);
+  const [latitude, setLatitude] = useState(0);
 
   const [isInquiryFormOpen, setIsInquiryFormOpen] = useState(false);
   const [inquiryName, setInquiryName] = useState("");
@@ -31,8 +32,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
   const [inquirySent, setInquirySent] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [estimate, setEstimate] = useState(null);
-  const [growth, setGrowth] = useState(null);
+ 
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -49,8 +49,19 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
         setLoading(false);
       }
     };
+    //Map variables
+    const getLonLat = async () => {
+      try {
+        const encoder = await apiRequest(`/properties/geocode/${id}`);
+        setLongitude(Number(encoder.longitude));
+        setLatitude(Number(encoder.latitude));
+      } catch (error) {
+        console.error("Error geocoding location:", error);
+      }
+    };
     fetchProperty();
-  }, [id]);
+    getLonLat();
+  }, [id, longitude, latitude]);
 
   if (loading) {
     return (
@@ -137,31 +148,6 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
       setFormError(error.message);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const calculateEstimate = async () => {
-    try {
-      const proposedEstimate = await apiRequest(`/estimates/estimate`, {
-        method: "POST",
-        body: JSON.stringify({
-          postalCode: selectedProperty.postalCode, 
-          size: selectedProperty.size, 
-          rooms: selectedProperty.rooms, 
-          buildingYear: selectedProperty.buildingYear, 
-          buildingType: selectedProperty.propertySubType,
-        }),
-      });
-      const proposedGrowth = await apiRequest(`/estimates/growth`, {
-        method: "POST",
-        body: JSON.stringify({
-          postalCode: selectedProperty.postalCode,
-        }),
-      });
-      setEstimate(proposedEstimate.estimate);
-      setGrowth(proposedGrowth.annualGrowthPct)
-    } catch (error) {
-      console.error("Error getting estimate:", error);
     }
   };
   return (
@@ -321,60 +307,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
             >
               <Mail size={18} />
               Contact seller or agent
-            </button>
-            {!isRental &&(
-            estimate ? 
-              <>
-                <button
-                  title="Estimation of current price and predicted annual growth per next 5 years"
-                  type="button"
-                  className="
-                mt-3
-                flex w-full
-                items-center justify-center gap-2
-                rounded-lg
-                border border-gray-400
-                px-4 py-3
-                text-sm
-                text-[#08243f]
-                transition
-                hover:bg-gray-50
-              "
-                >
-                  {Math.trunc((estimate*0.925)/1000)*1000}&nbsp;-&nbsp;{Math.trunc((estimate*1.075)/1000)*1000} €
-                  {growth &&(
-                    <>
-                    &nbsp;({growth} %)
-                    </>
-                  )}
-
-                </button>
-              </>
-            : (
-              <>
-                <button
-                  type="button"
-                  onClick={calculateEstimate}
-                  className="
-                mt-3
-                flex w-full
-                items-center justify-center gap-2
-                rounded-lg
-                bg-[#08243f]
-                px-4 py-3
-                text-sm font-medium
-                text-white
-                transition
-                hover:bg-[#17634f]
-              "
-                >
-                  <Calculator size={18} />
-                  Calculate price estimate
-                </button>
-              </>
-            )
-          )}
-            
+            </button>            
           </div>
             {isInquiryFormOpen && (
               <div className="mt-4 rounded-lg border border-gray-200 p-4">
@@ -543,8 +476,11 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
           <h2 className="mb-5 text-2xl font-semibold text-[#08243f]">
             Location
           </h2>
-
-          <PropertyMap />
+          <PropertyMap 
+          latitude={latitude}
+          longitude={longitude}
+          address={selectedProperty.address}
+          />
 
         </div>
 

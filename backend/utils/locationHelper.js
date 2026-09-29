@@ -1,32 +1,32 @@
 const Property = require("../models/propertyModel");
 const mongoose = require("mongoose");
+const {
+  publicPropertyScope,
+} = require("../utils/propertyQueryHelpers");
 const NodeGeocoder = require('node-geocoder');
 const options = {
   provider: 'openstreetmap',
 }
 const geocoder = NodeGeocoder(options);
-const getLongLatById =  (id) => {
-  const propertyId = id
+const getLongLatById = async (req, res) => {
+  const { propertyId } = req.params
 
   if (!mongoose.Types.ObjectId.isValid(propertyId)) {
-    return null;
+    return res.status(400).json({ message: "Invalid property ID" });
   }
   try {
-    const property = Property.findOne({
+    const property = await Property.findOne({
       _id: propertyId,
       ...publicPropertyScope,
     });
     if (property) {
-      const details =  geocoder.geocode(property.address);
-      const lat = details[0][0][0];
-      const long = details[0][0][1];
-      const response = [lat, long];
-      return response;
+      const details = await geocoder.geocode(property.address);
+      res.status(200).json({ latitude: `${details[0].latitude}`, longitude: `${details[0].longitude}` });
     } else {
-      return null;
+      res.status(404).json({ message: "Property location not found" });
     }
   } catch (error) {
-    return null;
+    res.status(500).json({ message: "Failed to geocode property location" });
   }
 }
 

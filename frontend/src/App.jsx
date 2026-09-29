@@ -19,6 +19,7 @@ import Notifications from "./pages/Notifications";
 import MyListings from "./pages/MyListings";
 import Listings from "./pages/Listings";
 import AdminPanel from "./pages/AdminPanel";
+import Comparison from "./pages/Comparison";
 import { useState, useEffect } from "react";
 import { getStoredAuth, saveAuth, clearAuth } from "./utils/authStorage";
 import { apiRequest } from "./services/api";
@@ -325,6 +326,14 @@ function App() {
               ) : (
                 <Sell />
               )
+            }
+          />
+          <Route
+            path="/comparison"
+            element={
+              <Comparison 
+              properties={properties}
+              />
             }
           />
           <Route path="*" element={<NotFound />} />
