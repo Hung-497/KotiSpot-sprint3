@@ -20,15 +20,26 @@ import MyListings from "./pages/MyListings";
 import Listings from "./pages/Listings";
 import AdminPanel from "./pages/AdminPanel";
 import { useState, useEffect } from "react";
-import { getStoredAuth, saveAuth, clearAuth } from "./utils/authStorage";
+import useAuth from "./hooks/useAuth";
 import { apiRequest } from "./services/api";
 import NotFound from "./pages/NotFound";
 import usePreferences from "./hooks/usePreferences";
 
 function App() {
   const [favorites, setFavorites] = useState([]);
-  const [auth, setAuth] = useState(() => getStoredAuth());
-  const isLoggedIn = Boolean(auth?.user && auth?.token);
+
+  const {
+    auth,
+    isLoggedIn,
+    isAdmin,
+    canManageListings,
+    canApply,
+    noListingsRedirect,
+    logIn,
+    logOut: authLogOut,
+    updateAuthUser,
+  } = useAuth();
+  
   const {
     preferences,
     setPreferences,
@@ -40,18 +51,11 @@ function App() {
     resetPreferences,
   } = usePreferences(isLoggedIn);
 
-  const isAdmin = auth?.user?.role === "administrator";
-
-  // Administrators moderate listings but don't sell or own any
-  const canManageListings =
-    ["seller", "agent"].includes(auth?.user?.role) &&
-    Boolean(auth?.user?.verifiedAt);
-
-  const noListingsRedirect = isAdmin ? "/adminpanel" : "/sell";
-
-  // Sellers can still apply to become an agent
-  const canApply =
-    isLoggedIn && !["agent", "administrator"].includes(auth?.user?.role);
+  const logOut = () => {
+    authLogOut();
+    setFavorites([]);
+    resetPreferences();
+  };
 
   const syncModeratedProperty = (updatedProperty) => {
     setProperties((currentProperties) => {
@@ -85,29 +89,6 @@ function App() {
   const othersProperties = properties.filter(
     (property) => property.owner !== auth?.user?._id,
   );
-
-  useEffect(() => {
-    const validateStoredAuth = async () => {
-      const storedAuth = getStoredAuth();
-
-      if (!storedAuth?.token) {
-        return;
-      }
-
-      try {
-        const data = await apiRequest("/users/me");
-
-        const refreshedAuth = saveAuth(data.user, storedAuth.token);
-
-        setAuth(refreshedAuth);
-      } catch {
-        clearAuth();
-        setAuth(null);
-      }
-    };
-
-    validateStoredAuth();
-  }, []);
 
   useEffect(() => {
     const loadProperties = async () => {
@@ -145,29 +126,6 @@ function App() {
 
     loadFavorites();
   }, [auth?.token]);
-
-  const updateAuthUser = (user) => {
-    const storedAuth = getStoredAuth();
-
-    if (!storedAuth?.token) {
-      return;
-    }
-
-    const updatedAuth = saveAuth(user, storedAuth.token);
-    setAuth(updatedAuth);
-  };
-
-  const logIn = (user, token) => {
-    const storedAuth = saveAuth(user, token);
-    setAuth(storedAuth);
-  };
-
-  const logOut = () => {
-    clearAuth();
-    setAuth(null);
-    setFavorites([]);
-    resetPreferences();
-  };
 
   const toggleFavourite = async (propertyId) => {
     if (!isLoggedIn) {
