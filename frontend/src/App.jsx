@@ -19,15 +19,13 @@ import Notifications from "./pages/Notifications";
 import MyListings from "./pages/MyListings";
 import Listings from "./pages/Listings";
 import AdminPanel from "./pages/AdminPanel";
-import { useState, useEffect } from "react";
-import useAuth from "./hooks/useAuth";
-import { apiRequest } from "./services/api";
 import NotFound from "./pages/NotFound";
+import useAuth from "./hooks/useAuth";
+import useProperties from "./hooks/useProperties";
+import useFavorites from "./hooks/useFavorites";
 import usePreferences from "./hooks/usePreferences";
 
 function App() {
-  const [favorites, setFavorites] = useState([]);
-
   const {
     auth,
     isLoggedIn,
@@ -39,7 +37,7 @@ function App() {
     logOut: authLogOut,
     updateAuthUser,
   } = useAuth();
-  
+
   const {
     preferences,
     setPreferences,
@@ -51,103 +49,18 @@ function App() {
     resetPreferences,
   } = usePreferences(isLoggedIn);
 
-  const logOut = () => {
-    authLogOut();
-    setFavorites([]);
-    resetPreferences();
-  };
+  const { properties, othersProperties, syncModeratedProperty } =
+    useProperties(auth?.user?._id);
 
-  const syncModeratedProperty = (updatedProperty) => {
-    setProperties((currentProperties) => {
-      const isPublic =
-        updatedProperty.status === "active" &&
-        updatedProperty.moderation?.status === "approved";
-
-      const alreadyExists = currentProperties.some(
-        (property) => property.id === updatedProperty.id,
-      );
-
-      if (!isPublic) {
-        return currentProperties.filter(
-          (property) => property.id !== updatedProperty.id,
-        );
-      }
-
-      if (alreadyExists) {
-        return currentProperties.map((property) =>
-          property.id === updatedProperty.id ? updatedProperty : property,
-        );
-      }
-
-      return [...currentProperties, updatedProperty];
-    });
-  };
-
-  const [properties, setProperties] = useState([]);
-
-  // Listings made by other people (you don't see your own listings here)
-  const othersProperties = properties.filter(
-    (property) => property.owner !== auth?.user?._id,
+  const { favorites, toggleFavourite, resetFavorites } = useFavorites(
+    auth?.token,
+    isLoggedIn,
   );
 
-  useEffect(() => {
-    const loadProperties = async () => {
-      try {
-        const data = await apiRequest("/properties");
-        setProperties(data);
-      } catch (error) {
-        console.error("Failed to load properties:", error);
-      }
-    };
-
-    loadProperties();
-    // Load again whenever someone logs in or out, so new listings show up
-  }, [auth?.user?._id]);
-
-  useEffect(() => {
-    const loadFavorites = async () => {
-      if (!auth?.token) {
-        setFavorites([]);
-        return;
-      }
-
-      try {
-        const data = await apiRequest("/favourites");
-        const favouriteIds = data
-          .filter((item) => item.available && item.property)
-          .map((item) => item.property.id);
-
-        setFavorites(favouriteIds);
-      } catch (error) {
-        console.error("Failed to load favorites:", error);
-        setFavorites([]);
-      }
-    };
-
-    loadFavorites();
-  }, [auth?.token]);
-
-  const toggleFavourite = async (propertyId) => {
-    if (!isLoggedIn) {
-      window.alert("Please log in to manage favorites.");
-      return;
-    }
-
-    const isFavorite = favorites.includes(propertyId);
-
-    try {
-      await apiRequest(`/favourites/${propertyId}`, {
-        method: isFavorite ? "DELETE" : "POST",
-      });
-
-      setFavorites((currentFavorites) =>
-        isFavorite
-          ? currentFavorites.filter((id) => id !== propertyId)
-          : [...currentFavorites, propertyId],
-      );
-    } catch (error) {
-      window.alert(error.message);
-    }
+  const logOut = () => {
+    authLogOut();
+    resetFavorites();
+    resetPreferences();
   };
 
   return (
