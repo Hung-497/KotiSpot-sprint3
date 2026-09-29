@@ -43,14 +43,14 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | [x]         | PBI-01 | Browse active properties for sale or rent | Selected     | Implemented    | Needs verification |
 | [ ]         | PBI-02 | View complete property details            | Selected     | Partial        | Needs verification |
 | [x]         | PBI-03 | Search properties by location or keyword  | Selected     | Implemented    | Needs verification |
-| [ ]         | PBI-04 | Filter and sort properties                | Selected     | Partial        | Needs verification |
+| [x]         | PBI-04 | Filter and sort properties                | Selected     | Implemented        | Needs verification |
 | [ ]         | PBI-15 | Display properties on a map               | Selected     | Ongoing        | Needs verification |
 | [ ]         | PBI-19 | Compare selected properties               | Selected     | Ongoing        | Needs verification |
 | [ ]         | PBI-20 | Mortgage and affordability calculator     | Selected     | Not started    | Not applicable     |
 | [ ]         | PBI-22 | Real-estate market dashboard              | Selected     | Not started    | Not applicable     |
 | [x]         | PBI-25 | View rental-specific terms                | Selected     | Implemented    | Needs verification |
 
-**Progress:** 3 / 9 implemented, 2 ongoing
+**Progress:** 4 / 9 implemented, 2 ongoing
 
 ### Engagement & Communication
 

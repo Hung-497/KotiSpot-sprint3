@@ -4,6 +4,7 @@ const {
   publicPropertyScope,
   addNumericRangeFilter,
   addBooleanFilter,
+  buildTextMatch,
 } = require("../utils/propertyQueryHelpers");
 
 const hasModerationInput = (body) =>
@@ -161,7 +162,6 @@ const filterProperties = async (req, res) => {
     const validPropertySubTypes = [
       "apartment",
       "detached-house",
-      "studio",
       "semi-detached-house",
       "terraced-house",
       "any",
@@ -258,19 +258,58 @@ const filterProperties = async (req, res) => {
       }
     }
 
-    for (const field of ["city", "currency"]) {
-      if (req.query[field] !== undefined) {
-        if (
-          typeof req.query[field] !== "string" ||
-          req.query[field].trim() === ""
-        ) {
-          return res.status(400).json({ message: `Invalid ${field} value` });
-        }
-
-        if (req.query[field].trim() !== "any") {
-          query[field] = req.query[field].trim();
-        }
+    if (req.query.currency !== undefined) {
+      if (
+        typeof req.query.currency !== "string" ||
+        req.query.currency.trim() === ""
+      ) {
+        return res.status(400).json({ message: "Invalid currency value" });
       }
+
+      if (req.query.currency.trim() !== "any") {
+        query.currency = req.query.currency.trim();
+      }
+    }
+
+    // keyword, city and postalCode match part of the text and ignore letter case
+    const { keyword, city, postalCode } = req.query;
+    const textSearches = [];
+
+    if (keyword !== undefined) {
+      if (typeof keyword !== "string" || keyword.trim() === "") {
+        return res.status(400).json({ message: "Invalid keyword value" });
+      }
+
+      textSearches.push(
+        buildTextMatch(keyword, [
+          "title",
+          "description",
+          "city",
+          "address",
+          "postalCode",
+          "propertySubType",
+        ]),
+      );
+    }
+
+    if (city !== undefined) {
+      if (typeof city !== "string" || city.trim() === "") {
+        return res.status(400).json({ message: "Invalid city value" });
+      }
+
+      textSearches.push(buildTextMatch(city, ["city"]));
+    }
+
+    if (postalCode !== undefined) {
+      if (typeof postalCode !== "string" || postalCode.trim() === "") {
+        return res.status(400).json({ message: "Invalid postal code value" });
+      }
+
+      textSearches.push(buildTextMatch(postalCode, ["postalCode"]));
+    }
+
+    if (textSearches.length > 0) {
+      query.$and = textSearches;
     }
 
     const propertyQuery = Property.find(query);
@@ -310,15 +349,9 @@ const getPropertyByKeyword = async (req, res) => {
     return res.status(400).json({ message: "Invalid listing type" });
   }
 
-  const escapedKeyword = keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const query = {
     ...publicPropertyScope,
-    $or: [
-      { title: { $regex: escapedKeyword, $options: "i" } },
-      { description: { $regex: escapedKeyword, $options: "i" } },
-      { city: { $regex: escapedKeyword, $options: "i" } },
-      { address: { $regex: escapedKeyword, $options: "i" } },
-    ],
+    ...buildTextMatch(keyword, ["title", "description", "city", "address"]),
   };
 
   if (listingType !== undefined && listingType !== "any") {

@@ -36,7 +36,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
 
   return (
     <nav className="flex h-20 items-center border-b border-gray-200 bg-white px-8 lg:px-16">
-      <Link to="/" className="flex items-center">
+      <Link to="/" reloadDocument className="flex items-center">
         <img className="w-45 h-auto" src={logo} alt="Kotispot" />
       </Link>
 
