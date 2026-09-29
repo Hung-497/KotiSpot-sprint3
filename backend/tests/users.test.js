@@ -161,3 +161,344 @@ describe("GET /api/users", () => {
     expect(response.body).toHaveLength(2);
   });
 });
+
+describe("GET /api/users/me/preferences", () => {
+  it("should reject preference access without authentication", async () => {
+    await api.get("/api/users/me/preferences").expect(401);
+  });
+
+  it("should return the authenticated user's default preferences", async () => {
+    const response = await api
+      .get("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    expect(response.body.preferences).toEqual({
+      theme: "system",
+      emailNotifications: true,
+      marketingEmails: false,
+      smsNotifications: false,
+    });
+  });
+
+  it("should return the authenticated user's saved preferences", async () => {
+    user.preferences.theme = "dark";
+    user.preferences.emailNotifications = false;
+    user.preferences.marketingEmails = true;
+    user.preferences.smsNotifications = true;
+
+    await user.save();
+
+    const response = await api
+      .get("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+
+    expect(response.body.preferences).toEqual({
+      theme: "dark",
+      emailNotifications: false,
+      marketingEmails: true,
+      smsNotifications: true,
+    });
+  });
+
+  it("should return only the authenticated user's preferences", async () => {
+    const anotherUser = await User.create({
+      email: "another@example.com",
+      role: "buyer",
+      preferences: {
+        theme: "dark",
+        emailNotifications: false,
+        marketingEmails: true,
+        smsNotifications: true,
+      },
+    });
+
+    const anotherToken = jwt.sign({ _id: anotherUser._id }, JWT_SECRET, {
+      expiresIn: "3d",
+    });
+
+    const firstResponse = await api
+      .get("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+
+    const secondResponse = await api
+      .get("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${anotherToken}`)
+      .expect(200);
+
+    expect(firstResponse.body.preferences.theme).toBe("system");
+
+    expect(secondResponse.body.preferences).toEqual({
+      theme: "dark",
+      emailNotifications: false,
+      marketingEmails: true,
+      smsNotifications: true,
+    });
+  });
+});
+
+describe("PATCH /api/users/me/preferences", () => {
+  it("should reject preference updates without authentication", async () => {
+    await api
+      .patch("/api/users/me/preferences")
+      .send({
+        theme: "dark",
+      })
+      .expect(401);
+  });
+
+  it("should reject an empty preferences update", async () => {
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({})
+      .expect(400);
+
+    expect(response.body.message).toBe("Preferences data is required");
+  });
+
+  it("should update the theme preference", async () => {
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        theme: "dark",
+      })
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    expect(response.body.preferences.theme).toBe("dark");
+
+    const updatedUser = await User.findById(user._id);
+
+    expect(updatedUser.preferences.theme).toBe("dark");
+  });
+
+  it("should update all communication preferences", async () => {
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        emailNotifications: false,
+        marketingEmails: true,
+        smsNotifications: true,
+      })
+      .expect(200);
+
+    expect(response.body.preferences).toEqual({
+      theme: "system",
+      emailNotifications: false,
+      marketingEmails: true,
+      smsNotifications: true,
+    });
+
+    const updatedUser = await User.findById(user._id);
+
+    expect(updatedUser.preferences.emailNotifications).toBe(false);
+    expect(updatedUser.preferences.marketingEmails).toBe(true);
+    expect(updatedUser.preferences.smsNotifications).toBe(true);
+  });
+
+  it("should update all preferences together", async () => {
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        theme: "light",
+        emailNotifications: false,
+        marketingEmails: true,
+        smsNotifications: true,
+      })
+      .expect(200);
+
+    expect(response.body.preferences).toEqual({
+      theme: "light",
+      emailNotifications: false,
+      marketingEmails: true,
+      smsNotifications: true,
+    });
+  });
+
+  it("should preserve preferences that are not included in a partial update", async () => {
+    user.preferences.theme = "light";
+    user.preferences.emailNotifications = false;
+    user.preferences.marketingEmails = true;
+    user.preferences.smsNotifications = true;
+
+    await user.save();
+
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        theme: "dark",
+      })
+      .expect(200);
+
+    expect(response.body.preferences).toEqual({
+      theme: "dark",
+      emailNotifications: false,
+      marketingEmails: true,
+      smsNotifications: true,
+    });
+
+    const updatedUser = await User.findById(user._id);
+
+    expect(updatedUser.preferences.theme).toBe("dark");
+    expect(updatedUser.preferences.emailNotifications).toBe(false);
+    expect(updatedUser.preferences.marketingEmails).toBe(true);
+    expect(updatedUser.preferences.smsNotifications).toBe(true);
+  });
+
+  it("should persist preferences for later requests", async () => {
+    await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        theme: "dark",
+        emailNotifications: false,
+      })
+      .expect(200);
+
+    const response = await api
+      .get("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+
+    expect(response.body.preferences.theme).toBe("dark");
+    expect(response.body.preferences.emailNotifications).toBe(false);
+  });
+
+  it("should reject an invalid theme without changing saved preferences", async () => {
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        theme: "purple",
+      })
+      .expect(400);
+
+    expect(response.body.message).toBe("Theme must be light, dark, or system");
+
+    const unchangedUser = await User.findById(user._id);
+
+    expect(unchangedUser.preferences.theme).toBe("system");
+  });
+
+  it.each([
+    ["emailNotifications", "yes"],
+    ["marketingEmails", 1],
+    ["smsNotifications", null],
+  ])(
+    "should reject an invalid %s value without changing preferences",
+    async (field, invalidValue) => {
+      const originalUser = await User.findById(user._id);
+      const originalPreferences = originalUser.preferences.toObject();
+
+      await api
+        .patch("/api/users/me/preferences")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          [field]: invalidValue,
+        })
+        .expect(400);
+
+      const unchangedUser = await User.findById(user._id);
+
+      expect(unchangedUser.preferences.toObject()).toEqual(originalPreferences);
+    },
+  );
+
+  it("should reject an unknown preference field", async () => {
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        unknownPreference: true,
+      })
+      .expect(400);
+
+    expect(response.body.message).toBe(
+      "Invalid preference field: unknownPreference",
+    );
+  });
+
+  it("should reject the whole request when a valid preference is mixed with an invalid field", async () => {
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        theme: "dark",
+        unknownPreference: true,
+      })
+      .expect(400);
+
+    expect(response.body.message).toBe(
+      "Invalid preference field: unknownPreference",
+    );
+
+    const unchangedUser = await User.findById(user._id);
+
+    expect(unchangedUser.preferences.theme).toBe("system");
+  });
+
+  it("should not allow profile fields to be changed through preferences", async () => {
+    const response = await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        firstName: "Hacker",
+      })
+      .expect(400);
+
+    expect(response.body.message).toBe("Invalid preference field: firstName");
+
+    const unchangedUser = await User.findById(user._id);
+
+    expect(unchangedUser.firstName).toBe("Test");
+  });
+
+  it("should not allow protected account fields to be changed through preferences", async () => {
+    const originalVerifiedAt = user.verifiedAt;
+
+    await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        role: "administrator",
+      })
+      .expect(400);
+
+    const unchangedUser = await User.findById(user._id);
+
+    expect(unchangedUser.role).toBe("seller");
+    expect(new Date(unchangedUser.verifiedAt)).toEqual(originalVerifiedAt);
+  });
+
+  it("should update only the authenticated user's preferences", async () => {
+    const anotherUser = await User.create({
+      email: "other@example.com",
+      role: "buyer",
+      preferences: {
+        theme: "light",
+      },
+    });
+
+    await api
+      .patch("/api/users/me/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        theme: "dark",
+      })
+      .expect(200);
+
+    const updatedUser = await User.findById(user._id);
+    const unchangedOtherUser = await User.findById(anotherUser._id);
+
+    expect(updatedUser.preferences.theme).toBe("dark");
+    expect(unchangedOtherUser.preferences.theme).toBe("light");
+  });
+});

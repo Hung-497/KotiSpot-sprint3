@@ -31,10 +31,10 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | [x]         | PBI-06 | Sign up and log in                      | Selected                               | Implemented    | Needs verification |
 | [x]         | PBI-07 | User roles and permissions              | Selected                               | Implemented    | Needs verification |
 | [x]         | PBI-12 | Security, validation, and error handling | Selected — cross-cutting and S3-US-03 | Implemented    | Needs verification |
-| [ ]         | PBI-28 | Manage account settings                 | Selected                               | Partial        | Needs verification |
+| [x]         | PBI-28 | Manage account settings                 | Selected                               | Implemented        | Needs verification |
 | [x]         | PBI-30 | View and update profile information     | Selected                               | Implemented    | Needs verification |
 
-**Progress:** 4 / 5 implemented
+**Progress:** 5 / 5 implemented
 
 ### Property Discovery & Decision Tools
 
@@ -43,14 +43,14 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | [x]         | PBI-01 | Browse active properties for sale or rent | Selected     | Implemented    | Needs verification |
 | [ ]         | PBI-02 | View complete property details            | Selected     | Partial        | Needs verification |
 | [x]         | PBI-03 | Search properties by location or keyword  | Selected     | Implemented    | Needs verification |
-| [ ]         | PBI-04 | Filter and sort properties                | Selected     | Partial        | Needs verification |
+| [x]         | PBI-04 | Filter and sort properties                | Selected     | Implemented        | Needs verification |
 | [ ]         | PBI-15 | Display properties on a map               | Selected     | Ongoing        | Needs verification |
 | [ ]         | PBI-19 | Compare selected properties               | Selected     | Ongoing        | Needs verification |
 | [ ]         | PBI-20 | Mortgage and affordability calculator     | Selected     | Not started    | Not applicable     |
 | [ ]         | PBI-22 | Real-estate market dashboard              | Selected     | Not started    | Not applicable     |
 | [x]         | PBI-25 | View rental-specific terms                | Selected     | Implemented    | Needs verification |
 
-**Progress:** 3 / 9 implemented, 2 ongoing
+**Progress:** 4 / 9 implemented, 2 ongoing
 
 ### Engagement & Communication
 
@@ -61,7 +61,7 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | [x]         | PBI-18 | Inquiry notifications                                   | Selected     | Implemented        | Needs verification |
 | [x]         | PBI-29 | Contact KotiSpot support                                | Selected     | Implemented    | Needs verification |
 
-**Progress:** *4* / 4 implemented
+**Progress:** 4 / 4 implemented
 
 ### Listing Management & Platform Safety
 

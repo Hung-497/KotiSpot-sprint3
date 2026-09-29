@@ -217,7 +217,6 @@ const Listings = () => {
                 <option value="">Select type</option>
                 <option value="apartment">Apartment</option>
                 <option value="detached-house">Detached house</option>
-                <option value="studio">Studio</option>
                 <option value="semi-detached-house">Semi-detached house</option>
                 <option value="terraced-house">Terraced house</option>
               </select>

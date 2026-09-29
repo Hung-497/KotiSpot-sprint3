@@ -253,9 +253,8 @@ it("provides the exact public showcase distribution and filter coverage", async 
     Turku: 2,
   });
   expect(countBy(publicProperties, "propertySubType")).toEqual({
-    apartment: 3,
+    apartment: 5,
     "detached-house": 2,
-    studio: 2,
     "semi-detached-house": 2,
     "terraced-house": 1,
   });
