@@ -63,7 +63,7 @@ const useOtpAuth = (mode) => {
       const data = await apiRequest("/account/verify-code", {
         method: "POST",
         body: JSON.stringify({
-          email,
+          email: email.trim(),
           code: code.trim(),
           mode,
         }),
