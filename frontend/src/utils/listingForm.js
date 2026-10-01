@@ -6,6 +6,7 @@ export const createEmptyListing = () => ({
   propertyType: "",
   bedrooms: "",
   bathrooms: "",
+  buildingYear:"",
   size: "",
   rooms: "",
   features: [],
@@ -29,6 +30,7 @@ export const validateListing = (listing, listingType) => {
     ["address", "address"],
     ["postalCode", "postal code"],
     ["propertyType", "property type"],
+    ["buildingYear", "year of construction"],
     ["bedrooms", "bedrooms"],
     ["bathrooms", "bathrooms"],
     ["size", "size"],
@@ -47,6 +49,8 @@ export const validateListing = (listing, listingType) => {
   if (
     Number(listing.rooms) < 1 ||
     Number(listing.bedrooms) < 0 ||
+    Number(listing.buildingYear) < 0 ||
+    Number(listing.buildingYear) > 2027 ||
     Number(listing.bathrooms) < 0 ||
     Number(listing.size) <= 0
   ) {
@@ -108,6 +112,7 @@ export const buildPropertyData = (listing, listingType) => {
     address: listing.address.trim(),
     postalCode: listing.postalCode.trim(),
     rooms: Number(listing.rooms),
+    buildingYear: Number(listing.buildingYear),
     bedrooms: Number(listing.bedrooms),
     bathrooms: Number(listing.bathrooms),
     size: Number(listing.size),

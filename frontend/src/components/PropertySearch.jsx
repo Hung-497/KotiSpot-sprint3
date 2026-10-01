@@ -72,6 +72,8 @@ const PropertySearch = ({
     if (maxPrice) params.append("maxPrice", maxPrice);
     if (minSize) params.append("minSize", minSize);
     if (maxSize) params.append("maxSize", maxSize);
+    if (minYear) params.append("minYear", minYear);
+    if (maxYear) params.append("maxYear", maxYear);
     if (sort) params.append("sort", sort);
     features.forEach((feature) => params.append(feature, "true"));
 
@@ -102,6 +104,8 @@ const PropertySearch = ({
     setMaxPrice("");
     setMinSize("");
     setMaxSize("");
+    setMinYear("");
+    setMaxYear("");
     setSort("");
     setFeatures([]);
     setError("");
@@ -276,6 +280,22 @@ const PropertySearch = ({
             placeholder="Maximum size m²"
             value={maxSize}
             onChange={(event) => setMaxSize(event.target.value)}
+            className={inputClassName}
+          />
+          <input
+            type="number"
+            min="0"
+            placeholder="Minimum year"
+            value={minYear}
+            onChange={(event) => setMinYear(event.target.value)}
+            className={inputClassName}
+          />
+          <input
+            type="number"
+            min="0"
+            placeholder="Maximum year"
+            value={maxYear}
+            onChange={(event) => setMaxYear(event.target.value)}
             className={inputClassName}
           />
           <select

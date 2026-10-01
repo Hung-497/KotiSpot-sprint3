@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
 import houseImage from "../assets/house1.jpg";
 import PhotoManager from "../components/PhotoManager";
+// import { Calculator } from "lucide-react";
 import {
   toEditablePhotos,
   toPropertyImages,
@@ -23,6 +24,11 @@ const MyListings = ({ onListingUpdated }) => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+
+    //Estimation variables
+  const [estimate, setEstimate] = useState(0);
+  const [growth, setGrowth] = useState(0);
+  const modifiers = ["postalCode", "propertySubType", "size", "rooms", "buildingYear"];
 
   useEffect(() => {
     const loadListings = async () => {
@@ -53,6 +59,8 @@ const MyListings = ({ onListingUpdated }) => {
     });
 
     setError("");
+    setEstimate(0);
+    setGrowth(0);
   };
 
   const handleChange = (event) => {
@@ -62,6 +70,10 @@ const MyListings = ({ onListingUpdated }) => {
       ...current,
       [name]: value,
     }));
+    if(modifiers.includes(name)){
+      setEstimate(0);
+      setGrowth(0);
+    }
   };
 
   const handleFeatureChange = (event) => {
@@ -88,6 +100,37 @@ const MyListings = ({ onListingUpdated }) => {
     }));
   };
 
+   //Estimate functions
+  const calculateEstimate = async () => {
+    try {
+      const proposedEstimate = await apiRequest(`/estimate`, {
+        method: "POST",
+        body: JSON.stringify({
+          postalCode: editingListing.postalCode, 
+          size: Number(editingListing.size), 
+          rooms: Number(editingListing.rooms), 
+          buildingYear: Number(editingListing.buildingYear), 
+          buildingType: editingListing.propertySubType,
+        }),
+      });
+      const proposedGrowth = await apiRequest(`/estimate/growth`, {
+        method: "POST",
+        body: JSON.stringify({
+          postalCode: editingListing.postalCode,
+        }),
+      });
+      setEstimate(proposedEstimate.estimate);
+      setGrowth(proposedGrowth.annualGrowthPct)
+    } catch (error) {
+      console.error("Error getting estimate:", error);
+    }
+  };
+    const applyEstimate = () => {
+    setEditingListing((current) => ({
+      ...current,
+      ["price"]: estimate,
+    }));
+  }
   const saveEdit = async () => {
     setError("");
 
@@ -105,6 +148,8 @@ const MyListings = ({ onListingUpdated }) => {
 
     if (
       Number(editingListing.price) <= 0 ||
+      Number(editingListing.buildingYear) < 0 ||
+      Number(editingListing.buildingYear) > 2027 ||
       Number(editingListing.rooms) < 1 ||
       Number(editingListing.bedrooms) < 0 ||
       Number(editingListing.bathrooms) < 0 ||
@@ -134,6 +179,7 @@ const MyListings = ({ onListingUpdated }) => {
       city: editingListing.city.trim(),
       address: editingListing.address.trim(),
       postalCode: editingListing.postalCode.trim(),
+      buildingYear: Number(editingListing.buildingYear),
       rooms: Number(editingListing.rooms),
       bedrooms: Number(editingListing.bedrooms),
       bathrooms: Number(editingListing.bathrooms),
@@ -237,7 +283,8 @@ const MyListings = ({ onListingUpdated }) => {
             )}
 
             <div className="grid gap-5 md:grid-cols-2">
-              <div className="md:col-span-2">
+              {/* <div className="md:col-span-2"> */}
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Listing status
                 </label>
@@ -254,18 +301,6 @@ const MyListings = ({ onListingUpdated }) => {
                   <option value="rented">Rented</option>
                 </select>
               </div>
-
-              <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium">Title</label>
-
-                <input
-                  name="title"
-                  value={editingListing.title}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
-                />
-              </div>
-
               <div>
                 <label className="mb-2 block text-sm font-medium">
                   Property type
@@ -289,6 +324,16 @@ const MyListings = ({ onListingUpdated }) => {
                 </select>
               </div>
 
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-sm font-medium">Title</label>
+
+                <input
+                  name="title"
+                  value={editingListing.title}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border px-4 py-3"
+                />
+              </div>
               <div>
                 <label className="mb-2 block text-sm font-medium">
                   Price (€)
@@ -303,6 +348,70 @@ const MyListings = ({ onListingUpdated }) => {
                   className="w-full rounded-lg border px-4 py-3"
                 />
               </div>
+              <div>
+                { editingListing.listingType !== "rent" &&
+                  editingListing.postalCode && 
+                  editingListing.propertyType && 
+                  editingListing.size && 
+                  editingListing.rooms && 
+                  editingListing.buildingYear && 
+                  (estimate ?
+                    <>
+                    <div>
+                      <label className="mb-2 block text-sm">Price estimate (click to apply) (€) *</label>
+                      <button
+                        title="Estimation of current price and predicted annual growth per next 5 years"
+                        type="button"
+                        onClick={applyEstimate}
+                        className="
+                          w-full
+                          items-center justify-center gap-2
+                          rounded-lg
+                          border border-gray-300
+                          px-4 py-3
+                          text-sm
+                          text-[#08243f]
+                          transition
+                          hover:bg-gray-50
+                        "
+                      >
+                        {Math.trunc((estimate * 0.925) / 1000) * 1000}&nbsp;-&nbsp;{Math.trunc((estimate * 1.075) / 1000) * 1000} €
+                        {growth && (
+                          <>
+                            &nbsp;({growth} %)
+                          </>
+                        )}
+
+                      </button>
+                    </div>
+                    </>
+                    : (
+                      <>
+                      <div>
+                        <label className="mb-2 block text-sm">Price estimate(€) *</label>
+                        <button
+                          type="button"
+                          onClick={calculateEstimate}
+                          className="
+                            w-full
+                            items-center justify-center gap-2
+                            rounded-lg
+                            bg-[#08243f]
+                            px-4 py-3
+                            text-sm font-medium
+                            text-white
+                            transition
+                            hover:bg-[#17634f]
+                          "
+                        >
+                          {/* <Calculator size={18} /> */}
+                          <p>Calculate price estimate <sup >AI-powered </sup></p>
+                        </button>
+                        </div>
+                      </>
+                    )
+                )}
+            </div>
 
               <div>
                 <label className="mb-2 block text-sm font-medium">City</label>
@@ -365,6 +474,22 @@ const MyListings = ({ onListingUpdated }) => {
                   min="1"
                   step="1"
                   value={editingListing.rooms}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border px-4 py-3"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Year of construction
+                </label>
+
+                <input
+                  name="buildingYear"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={editingListing.buildingYear}
                   onChange={handleChange}
                   className="w-full rounded-lg border px-4 py-3"
                 />

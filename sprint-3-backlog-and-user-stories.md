@@ -484,9 +484,9 @@ so that I can choose a realistic asking price.
 
 - Only a verified seller or agent can request an estimate for a property they own or manage.
 - The estimate uses the property fields and market-data source approved before implementation.
-- The result provides a price range, is labelled as AI-generated, and explains its inputs, limitations, and uncertainty.
+- The result provides a price range, is labelled as AI-generated, and explains its inputs, limitations.
 - The estimate remains private unless the owner explicitly applies it to the listing price.
-- Missing input data, an unavailable AI service, an invalid response, or a rate limit produces a fallback state without changing the listing.
+- Missing input data, an unavailable AI service or an invalid response produce a fallback state without changing the listing.
 - No secret, private account data, or personal data unnecessary for the estimate is sent to the AI service.
 
 **Needs product clarification:** Which property fields, market-data source, AI service, retention rules, and rate limits are approved for the estimate?
@@ -505,9 +505,9 @@ so that I can understand its possible price direction.
 
 - Only a verified seller or agent can request a prediction for a property they own or manage.
 - The prediction uses the historical regional market-data source approved before implementation.
-- The result shows its time horizon, expected direction, possible price range, and uncertainty, and is labelled as AI-generated.
+- The result shows its time horizon, expected direction, possible price range and is labelled as AI-generated.
 - The prediction remains private to authorized users and is not presented as financial or professional property advice.
-- Insufficient data, an unavailable service, an invalid response, or a rate limit produces a fallback state without changing the listing.
+- Insufficient data, an unavailable service or an invalid response produce a fallback state without changing the listing.
 - No secret, private account data, or personal data unnecessary for the prediction is sent to the AI service.
 
 **Needs product clarification:** Which historical data source, prediction horizon, AI service, retention rules, and rate limits are approved for the prediction?

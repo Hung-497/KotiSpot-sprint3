@@ -224,6 +224,7 @@ const filterProperties = async (req, res) => {
       ["bedrooms", "minBedrooms", "maxBedrooms"],
       ["bathrooms", "minBathrooms", "maxBathrooms"],
       ["size", "minSize", "maxSize"],
+      ["buildingYear", "minYear", "maxYear"],
     ];
 
     for (const [field, minParameter, maxParameter] of numericRanges) {

@@ -1,0 +1,10 @@
+const express = require("express");                                                                                                                                                                                                         
+const { getEstimate, getGrowth } = require("../controllers/estimationControllers");  
+const { requireAuth} = require("../middleware/authMiddleware");                                                                                                                                                                
+                                                                                                                                                                                                                                            
+const router = express.Router();                                                                                                                                                                                                            
+                                                                                                                                                                                                                                            
+router.post("/", requireAuth, getEstimate);                                                                                                                                                                                                      
+router.post("/growth", requireAuth, getGrowth);                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+module.exports = router;   

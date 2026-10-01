@@ -253,13 +253,13 @@ it("provides the exact public showcase distribution and filter coverage", async 
     Turku: 2,
   });
   expect(countBy(publicProperties, "propertySubType")).toEqual({
-    apartment: 5,
+    "apartment": 5,
     "detached-house": 2,
     "semi-detached-house": 2,
     "terraced-house": 1,
   });
 
-  for (const field of ["price", "rooms", "bedrooms", "bathrooms", "size"]) {
+  for (const field of ["price", "rooms", "bedrooms", "bathrooms","buildingYear", "size"]) {
     expect(new Set(publicProperties.map((property) => property[field])).size).toBeGreaterThan(1);
   }
 
@@ -430,6 +430,7 @@ it("resets seed-linked manual changes while preserving unrelated data", async ()
     rooms: 2,
     bedrooms: 1,
     bathrooms: 1,
+    buildingYear: 1976,
     size: 45,
     status: "active",
     moderation: { status: "unreviewed" },
@@ -468,6 +469,7 @@ it("resets seed-linked manual changes while preserving unrelated data", async ()
     rooms: 2,
     bedrooms: 1,
     bathrooms: 1,
+    buildingYear: 1987,
     size: 50,
     status: "active",
     moderation: { status: "approved" },

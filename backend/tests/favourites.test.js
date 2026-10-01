@@ -47,6 +47,7 @@ beforeEach(async () => {
     rooms: 3,
     bedrooms: 2,
     bathrooms: 1,
+    buildingYear: 2000,
     size: 70,
     status: "active",
     moderation: {

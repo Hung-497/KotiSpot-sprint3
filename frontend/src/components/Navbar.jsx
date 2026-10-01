@@ -1,5 +1,5 @@
 import { navLinks, authLinks } from "../../data";
-import logo from "../assets/KotiSpot_logo.png";
+import logo from "../assets/KotiSpot_Logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {

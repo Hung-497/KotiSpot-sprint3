@@ -32,6 +32,26 @@ The seed users exercise buyer, renter, verified seller, verified agent, administ
 
 Authentication still uses the normal one-time email-code flow. The seed does not create readable OTP codes, passwords, or JWTs. Seed commands always use `MONGO_URI`, refuse the test runtime, and also refuse to run when `MONGO_URI` and `TEST_MONGO_URI` point to the same database.
 
+## Estimation model setup
+
+The backend includes an estimation model and python server for intended use (Feature WIP).
+
+First, ensure required python packages are installed by running (in `backend/utils/estimation_models/`):
+```sh
+pip install -r requirements.txt
+```
+For __linux__ users, venv may be required. Run the following in project root folder:
+```sh
+python -m venv venv
+source venv/bin/activate
+pip install -r backend/utils/estimation_models/requirements.txt
+```
+Afterwards, to start the server, navigate to `backend/` and run:
+```sh
+python serve.py
+```
+
+
 ## Sprint Documentation
 
 - [Sprint 3 Backlog and User Stories](./sprint-3-backlog-and-user-stories.md)
