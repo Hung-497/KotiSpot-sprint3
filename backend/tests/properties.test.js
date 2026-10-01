@@ -42,6 +42,7 @@ beforeEach(async () => {
     rooms: 3,
     bedrooms: 2,
     bathrooms: 1,
+    buildingYear: 2000,
     size: 70,
     status: "active",
     moderation: {
@@ -64,6 +65,7 @@ beforeEach(async () => {
     rooms: 2,
     bedrooms: 1,
     bathrooms: 1,
+    buildingYear: 2000,
     size: 50,
     status: "active",
     moderation: {
@@ -87,6 +89,7 @@ beforeEach(async () => {
     rooms: 2,
     bedrooms: 1,
     bathrooms: 1,
+    buildingYear: 2000,
     size: 45,
     status: "inactive",
     moderation: {
@@ -269,6 +272,7 @@ describe("POST /api/properties", () => {
       rooms: 2,
       bedrooms: 1,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 55,
       status: "inactive",
     };
@@ -325,6 +329,7 @@ describe("POST /api/properties", () => {
       rooms: 3,
       bedrooms: 2,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 70,
       status: "active",
     };
@@ -363,6 +368,7 @@ describe("POST /api/properties", () => {
       rooms: 3,
       bedrooms: 2,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 70,
       status: "inactive",
     };
@@ -396,6 +402,7 @@ describe("POST /api/properties", () => {
       rooms: 3,
       bedrooms: 2,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 70,
       moderation: {
         status: "approved",
@@ -440,6 +447,7 @@ describe("GET /api/properties/mine", () => {
       rooms: 2,
       bedrooms: 1,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 50,
       status: "active",
       moderation: {
