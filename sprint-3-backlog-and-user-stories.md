@@ -18,7 +18,7 @@ Deliver an integrated KotiSpot application that uses persisted backend data for 
 
 ## Product Backlog Progress
 
-**Implemented:** 17 / 30 PBIs
+**Implemented:** 19 / 30 PBIs
 
 **Fully DoD-verified:** 0 / 30 PBIs
 
