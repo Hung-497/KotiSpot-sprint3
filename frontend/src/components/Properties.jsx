@@ -7,7 +7,7 @@ const Properties = ({ properties, favorites, onToggleFavorite }) => {
     const navigate = useNavigate();
     const goToCompare = () => {
 
-    navigate("/Comparison", {
+    navigate("/comparison", {
       state: { selectedProperties: selectedProperties }
     });
 
