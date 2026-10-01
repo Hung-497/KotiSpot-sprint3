@@ -1,4 +1,3 @@
-import { useLocation } from "react-router-dom";
 import PropertyMap from "../components/PropertyMap";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -11,7 +10,7 @@ import {
   Maximize,
   ChevronLeft,
   ChevronRight,
-  Calendar,  
+  Calendar,
 } from "lucide-react";
 import houseImage from "../assets/house1.jpg";
 import { apiRequest } from "../services/api";
@@ -22,8 +21,8 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentImage, setCurrentImage] = useState(0);
-  const [longitude, setLongitude] = useState(0);
-  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(null);
+  const [latitude, setLatitude] = useState(null);
 
   const [isInquiryFormOpen, setIsInquiryFormOpen] = useState(false);
   const [inquiryName, setInquiryName] = useState("");
@@ -32,7 +31,6 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
   const [inquirySent, setInquirySent] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
- 
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -49,8 +47,11 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
         setLoading(false);
       }
     };
-    //Map variables
+
     const getLonLat = async () => {
+      setLongitude(null);
+      setLatitude(null);
+
       try {
         const encoder = await apiRequest(`/properties/geocode/${id}`);
         setLongitude(Number(encoder.longitude));
@@ -59,9 +60,10 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
         console.error("Error geocoding location:", error);
       }
     };
+
     fetchProperty();
     getLonLat();
-  }, [id, longitude, latitude]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -307,184 +309,178 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
             >
               <Mail size={18} />
               Contact seller or agent
-            </button>            
+            </button>
           </div>
-            {isInquiryFormOpen && (
-              <div className="mt-4 rounded-lg border border-gray-200 p-4">
-                {inquirySent ? (
-                  <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
-                    Your message has been sent. The seller or agent will get
-                    back to you soon.
-                  </p>
-                ) : (
-                  <form onSubmit={submitInquiry} className="space-y-3">
-                    {formError && (
-                      <p
-                        role="alert"
-                        className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
-                      >
-                        {formError}
-                      </p>
-                    )}
-
-                    <div>
-                      <label
-                        htmlFor="inquiry-name"
-                        className="mb-1 block text-xs font-medium text-[#08243f]"
-                      >
-                        Your name
-                      </label>
-                      <input
-                        id="inquiry-name"
-                        type="text"
-                        value={inquiryName}
-                        onChange={(event) => setInquiryName(event.target.value)}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="inquiry-email"
-                        className="mb-1 block text-xs font-medium text-[#08243f]"
-                      >
-                        Your email
-                      </label>
-                      <input
-                        id="inquiry-email"
-                        type="email"
-                        value={inquiryEmail}
-                        onChange={(event) =>
-                          setInquiryEmail(event.target.value)
-                        }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="inquiry-message"
-                        className="mb-1 block text-xs font-medium text-[#08243f]"
-                      >
-                        Message
-                      </label>
-                      <textarea
-                        id="inquiry-message"
-                        value={inquiryMessage}
-                        onChange={(event) =>
-                          setInquiryMessage(event.target.value)
-                        }
-                        rows="3"
-                        placeholder={`Hi, I'm interested in ${selectedProperty.title || "this property"}...`}
-                        className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full rounded-lg bg-[#17634f] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#12503f] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isSubmitting ? "Sending..." : "Send message"}
-                    </button>
-                  </form>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-2">
-          <div>
-            <h2 className="text-2xl font-semibold text-[#08243f]">
-              Property details:
-            </h2>
-
-            <div className="mt-4 flex overflow-hidden rounded-full border border-gray-300 bg-white">
-              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
-                <BedDouble size={18} />
-
-                <span className="text-sm">
-                  {selectedProperty.bedrooms} bedrooms
-                </span>
-              </div>
-
-              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
-                <Bath size={18} />
-
-                <span className="text-sm">
-                  {selectedProperty.bathrooms} bathroom
-                </span>
-              </div>
-
-              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
-                <Maximize size={18} />
-
-                <span className="text-sm">{selectedProperty.size} m²</span>
-              </div>
-
-              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
-                <Calendar size={18} />
-
-                <span className="text-sm">
-                  {selectedProperty.buildingYear}
-                </span>
-              </div>
-
-              <div className="flex flex-1 items-center justify-center gap-2 px-4 py-3">
-                <span>🏠</span>
-
-                <span className="text-sm">{selectedProperty.rooms} rooms</span>
-              </div>
-            </div>
-
-            {selectedProperty.description && (
-              <div className="mt-6">
-                <h3 className="font-semibold text-[#08243f]">Description</h3>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  {selectedProperty.description}
+          {isInquiryFormOpen && (
+            <div className="mt-4 rounded-lg border border-gray-200 p-4">
+              {inquirySent ? (
+                <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
+                  Your message has been sent. The seller or agent will get back
+                  to you soon.
                 </p>
-              </div>
-            )}
-          </div>
+              ) : (
+                <form onSubmit={submitInquiry} className="space-y-3">
+                  {formError && (
+                    <p
+                      role="alert"
+                      className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+                    >
+                      {formError}
+                    </p>
+                  )}
 
-          <div>
-            <h2 className="text-2xl font-semibold text-[#08243f]">Features:</h2>
+                  <div>
+                    <label
+                      htmlFor="inquiry-name"
+                      className="mb-1 block text-xs font-medium text-[#08243f]"
+                    >
+                      Your name
+                    </label>
+                    <input
+                      id="inquiry-name"
+                      type="text"
+                      value={inquiryName}
+                      onChange={(event) => setInquiryName(event.target.value)}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                    />
+                  </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
-              {selectedProperty.features?.balcony && <div>✓ Balcony</div>}
+                  <div>
+                    <label
+                      htmlFor="inquiry-email"
+                      className="mb-1 block text-xs font-medium text-[#08243f]"
+                    >
+                      Your email
+                    </label>
+                    <input
+                      id="inquiry-email"
+                      type="email"
+                      value={inquiryEmail}
+                      onChange={(event) => setInquiryEmail(event.target.value)}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                    />
+                  </div>
 
-              {selectedProperty.features?.elevator && <div>✓ Elevator</div>}
+                  <div>
+                    <label
+                      htmlFor="inquiry-message"
+                      className="mb-1 block text-xs font-medium text-[#08243f]"
+                    >
+                      Message
+                    </label>
+                    <textarea
+                      id="inquiry-message"
+                      value={inquiryMessage}
+                      onChange={(event) =>
+                        setInquiryMessage(event.target.value)
+                      }
+                      rows="3"
+                      placeholder={`Hi, I'm interested in ${selectedProperty.title || "this property"}...`}
+                      className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                    />
+                  </div>
 
-              {selectedProperty.features?.parking && <div>✓ Parking</div>}
-
-              {selectedProperty.features?.furnished && <div>✓ Furnished</div>}
-
-              {selectedProperty.features?.petsAllowed && (
-                <div>✓ Pets allowed</div>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full rounded-lg bg-[#17634f] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#12503f] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSubmitting ? "Sending..." : "Send message"}
+                  </button>
+                </form>
               )}
+            </div>
+          )}
+        </div>
+      </div>
 
-              {selectedProperty.features?.sauna && <div>✓ Sauna</div>}
+      <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-2">
+        <div>
+          <h2 className="text-2xl font-semibold text-[#08243f]">
+            Property details:
+          </h2>
+
+          <div className="mt-4 flex overflow-hidden rounded-full border border-gray-300 bg-white">
+            <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
+              <BedDouble size={18} />
+
+              <span className="text-sm">
+                {selectedProperty.bedrooms} bedrooms
+              </span>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
+              <Bath size={18} />
+
+              <span className="text-sm">
+                {selectedProperty.bathrooms} bathroom
+              </span>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
+              <Maximize size={18} />
+
+              <span className="text-sm">{selectedProperty.size} m²</span>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
+              <Calendar size={18} />
+
+              <span className="text-sm">{selectedProperty.buildingYear}</span>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center gap-2 px-4 py-3">
+              <span>🏠</span>
+
+              <span className="text-sm">{selectedProperty.rooms} rooms</span>
             </div>
           </div>
+
+          {selectedProperty.description && (
+            <div className="mt-6">
+              <h3 className="font-semibold text-[#08243f]">Description</h3>
+
+              <p className="mt-2 text-sm leading-6 text-gray-600">
+                {selectedProperty.description}
+              </p>
+            </div>
+          )}
         </div>
 
+        <div>
+          <h2 className="text-2xl font-semibold text-[#08243f]">Features:</h2>
 
-        <div className="mt-10">
+          <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
+            {selectedProperty.features?.balcony && <div>✓ Balcony</div>}
 
-          <h2 className="mb-5 text-2xl font-semibold text-[#08243f]">
-            Location
-          </h2>
-          <PropertyMap 
-          latitude={latitude}
-          longitude={longitude}
-          address={selectedProperty.address}
-          />
+            {selectedProperty.features?.elevator && <div>✓ Elevator</div>}
 
+            {selectedProperty.features?.parking && <div>✓ Parking</div>}
+
+            {selectedProperty.features?.furnished && <div>✓ Furnished</div>}
+
+            {selectedProperty.features?.petsAllowed && (
+              <div>✓ Pets allowed</div>
+            )}
+
+            {selectedProperty.features?.sauna && <div>✓ Sauna</div>}
+          </div>
         </div>
-
       </div>
+
+      <div className="mt-10">
+        <h2 className="mb-5 text-2xl font-semibold text-[#08243f]">Location</h2>
+        {latitude !== null && longitude !== null ? (
+          <PropertyMap
+            latitude={latitude}
+            longitude={longitude}
+            address={selectedProperty.address}
+          />
+        ) : (
+          <p className="text-sm text-gray-500">Loading map...</p>
+        )}
+      </div>
+    </div>
   );
 };
 

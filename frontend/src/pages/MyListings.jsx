@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
 import houseImage from "../assets/house1.jpg";
 import PhotoManager from "../components/PhotoManager";
-import { Calculator } from "lucide-react";
+// import { Calculator } from "lucide-react";
 import {
   toEditablePhotos,
   toPropertyImages,

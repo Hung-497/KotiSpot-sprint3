@@ -30,7 +30,7 @@ export const validateListing = (listing, listingType) => {
     ["address", "address"],
     ["postalCode", "postal code"],
     ["propertyType", "property type"],
-    ["buildingYear", "year of construction"]
+    ["buildingYear", "year of construction"],
     ["bedrooms", "bedrooms"],
     ["bathrooms", "bathrooms"],
     ["size", "size"],

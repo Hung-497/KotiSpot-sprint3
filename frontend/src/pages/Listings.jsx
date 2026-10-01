@@ -7,7 +7,7 @@ import {
 } from "../utils/listingForm";
 import { toPropertyImages } from "../utils/imageUtils";
 import PhotoManager from "../components/PhotoManager";
-import { Calculator } from "lucide-react";
+// import { Calculator } from "lucide-react";
 
 const Listings = () => {
   const [listingType, setListingType] = useState("");
