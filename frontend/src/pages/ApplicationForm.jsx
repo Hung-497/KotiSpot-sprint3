@@ -121,26 +121,26 @@ const ApplicationForm = ({ userRole }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+    <div className="min-h-screen bg-[#f8faf9] px-6 py-10 dark:bg-[radial-gradient(circle_at_top_left,#123343_0%,#081a26_28%,#06141e_65%,#04111a_100%)]">
       <div className="mx-auto max-w-3xl">
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border border-gray-300 bg-white p-6"
+          className="rounded-2xl border border-gray-300 bg-white p-6 dark:border-[#2c806c]/60 dark:bg-[#0b2233]/72 dark:backdrop-blur-xl dark:shadow-[0_18px_45px_rgba(0,0,0,0.30)]"
         >
           <div className="mb-6">
-            <h1 className="text-center text-2xl font-bold text-[#08243f]">
+            <h1 className="text-center text-2xl font-bold text-[#08243f] dark:text-white">
               Application form
             </h1>
           </div>
 
-          <h2 className="mb-4 text-base font-semibold text-[#08243f]">
+          <h2 className="mb-4 text-base font-semibold text-[#08243f] dark:text-white">
             Personal information
           </h2>
 
           {formError && (
             <p
               role="alert"
-              className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/60 dark:text-red-300"
             >
               {formError}
             </p>
@@ -148,70 +148,72 @@ const ApplicationForm = ({ userRole }) => {
 
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-2 md:grid-cols-[150px_1fr] md:items-center">
-              <label className="text-sm text-gray-700">Full name:</label>
+              <label className="text-sm text-gray-700 dark:text-[#a7b4be]">Full name:</label>
 
               <input
                 type="text"
                 value={fullName}
                 placeholder="Someone Something"
                 onChange={handleFullName}
-                className=" w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                className=" w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:placeholder:text-[#7f929f] dark:focus:border-[#55d4aa]"
               />
             </div>
 
             <div className="grid grid-cols-1 gap-2 md:grid-cols-[150px_1fr] md:items-center">
-              <label className="text-sm text-gray-700">Email:</label>
+              <label className="text-sm text-gray-700 dark:text-[#a7b4be]">Email:</label>
 
               <input
                 type="email"
                 value={email}
                 placeholder="someone.something@gmail.com"
                 onChange={handleEmail}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:placeholder:text-[#7f929f] dark:focus:border-[#55d4aa]"
               />
             </div>
 
             <div className="grid grid-cols-1 gap-2 md:grid-cols-[150px_1fr] md:items-center">
-              <label className="text-sm text-gray-700">Phone number:</label>
+              <label className="text-sm text-gray-700 dark:text-[#a7b4be]">Phone number:</label>
 
               <input
                 type="text"
                 value={phoneNumber}
                 placeholder="+4454556767677777"
                 onChange={handlePhoneNumber}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:placeholder:text-[#7f929f] dark:focus:border-[#55d4aa]"
               />
             </div>
           </div>
 
           {isSeller ? (
-            <p className="mt-7 rounded-lg bg-[#eef6f2] px-4 py-3 text-sm text-[#17634f]">
+            <p className="mt-7 rounded-lg bg-[#eef6f2] px-4 py-3 text-sm text-[#17634f] dark:border dark:border-[#2c806c]/50 dark:bg-[#0d403d]/45 dark:text-[#7cf0ca]">
               You are already a seller. Fill in the form below to upgrade your
               account to a real estate agent.
             </p>
           ) : (
             <div className="mt-7">
-              <h2 className="mb-3 text-sm font-medium text-[#08243f]">
+              <h2 className="mb-3 text-sm font-medium text-[#08243f] dark:text-white">
                 What type of account are you applying for?
               </h2>
 
               <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm">
+                <label className="flex items-center gap-2 text-sm dark:text-[#d7e1e7]">
                   <input
                     type="radio"
                     value="seller"
                     checked={role === "seller"}
                     onChange={handleRole}
+                    className="accent-[#17634f] dark:accent-[#55d4aa]"
                   />
                   Seller
                 </label>
 
-                <label className="flex items-center gap-2 text-sm">
+                <label className="flex items-center gap-2 text-sm dark:text-[#d7e1e7]">
                   <input
                     type="radio"
                     value="agent"
                     checked={role === "agent"}
                     onChange={handleRole}
+                    className="accent-[#17634f] dark:accent-[#55d4aa]"
                   />
                   Real estate agent
                 </label>
@@ -222,7 +224,7 @@ const ApplicationForm = ({ userRole }) => {
           {role === "seller" && (
             <>
               <div className="mb-6">
-                <label className="mb-2 block text-sm text-gray-700">
+                <label className="mb-2 block text-sm text-gray-700 dark:text-[#a7b4be]">
                   Tell us about yourself:
                 </label>
 
@@ -231,17 +233,17 @@ const ApplicationForm = ({ userRole }) => {
                   onChange={(event) => setAbout(event.target.value)}
                   placeholder="A short introduction..."
                   rows="4"
-                  className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                  className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:placeholder:text-[#7f929f] dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div className="mt-7">
-                <h2 className="mb-4 text-sm font-medium text-[#08243f]">
+                <h2 className="mb-4 text-sm font-medium text-[#08243f] dark:text-white">
                   Verification
                 </h2>
 
                 <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                  <label className="text-sm text-gray-700">
+                  <label className="text-sm text-gray-700 dark:text-[#a7b4be]">
                     Government ID:
                   </label>
 
@@ -251,7 +253,7 @@ const ApplicationForm = ({ userRole }) => {
                     onChange={(event) =>
                       setGovernmentId(event.target.files[0] || null)
                     }
-                    className="text-sm"
+                    className="text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-lg dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
                   />
                 </div>
 
@@ -259,15 +261,7 @@ const ApplicationForm = ({ userRole }) => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="
-                    rounded-full
-                    bg-[#08243f]
-                    px-6 py-2
-                    text-sm font-medium
-                    text-white
-                    hover:bg-[#17634f]
-                  "
-                  >
+                    className=" rounded-full bg-[#08243f] px-6 py-2 text-sm font-medium text-white hover:bg-[#17634f] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#20c997] dark:text-[#06241d] dark:shadow-[0_0_22px_rgba(32,201,151,0.18)] dark:hover:bg-[#2bd8a6]">
                     {isSubmitting ? "Submitting..." : "Submit"}
                   </button>
                 </div>
@@ -279,7 +273,7 @@ const ApplicationForm = ({ userRole }) => {
             <div className="mt-7">
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-[190px_1fr] md:items-center">
-                  <label className="text-sm text-gray-700">
+                  <label className="text-sm text-gray-700 dark:text-[#a7b4be]">
                     Company name (optional):
                   </label>
 
@@ -296,12 +290,17 @@ const ApplicationForm = ({ userRole }) => {
                       text-sm
                       outline-none
                       focus:border-[#17634f]
+                      dark:border-[#315064]
+                      dark:bg-[#081a26]
+                      dark:text-white
+                      dark:placeholder:text-[#7f929f]
+                      dark:focus:border-[#55d4aa]
                     "
                   />
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-[190px_1fr] md:items-center">
-                  <label className="text-sm text-gray-700">
+                  <label className="text-sm text-gray-700 dark:text-[#a7b4be]">
                     Where do you operate?
                   </label>
 
@@ -318,12 +317,17 @@ const ApplicationForm = ({ userRole }) => {
                       text-sm
                       outline-none
                       focus:border-[#17634f]
+                      dark:border-[#315064]
+                      dark:bg-[#081a26]
+                      dark:text-white
+                      dark:placeholder:text-[#7f929f]
+                      dark:focus:border-[#55d4aa]
                     "
                   />
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-[190px_1fr] md:items-center">
-                  <label className="text-sm text-gray-700">
+                  <label className="text-sm text-gray-700 dark:text-[#a7b4be]">
                     Real estate licence number:
                   </label>
 
@@ -340,12 +344,17 @@ const ApplicationForm = ({ userRole }) => {
                       text-sm
                       outline-none
                       focus:border-[#17634f]
+                      dark:border-[#315064]
+                      dark:bg-[#081a26]
+                      dark:text-white
+                      dark:placeholder:text-[#7f929f]
+                      dark:focus:border-[#55d4aa]
                     "
                   />
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-[190px_1fr]">
-                  <label className="text-sm text-gray-700">
+                  <label className="text-sm text-gray-700 dark:text-[#a7b4be]">
                     Tell us about yourself:
                   </label>
 
@@ -363,19 +372,24 @@ const ApplicationForm = ({ userRole }) => {
                       text-sm
                       outline-none
                       focus:border-[#17634f]
+                      dark:border-[#315064]
+                      dark:bg-[#081a26]
+                      dark:text-white
+                      dark:placeholder:text-[#7f929f]
+                      dark:focus:border-[#55d4aa]
                     "
                   />
                 </div>
               </div>
 
               <div className="mt-7">
-                <h2 className="mb-4 text-sm font-medium text-[#08243f]">
+                <h2 className="mb-4 text-sm font-medium text-[#08243f] dark:text-white">
                   Verification
                 </h2>
 
                 <div className="space-y-4">
                   <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                    <label className="w-47.5 text-sm text-gray-700">
+                    <label className="w-47.5 text-sm text-gray-700 dark:text-[#a7b4be]">
                       Government ID:
                     </label>
 
@@ -385,12 +399,12 @@ const ApplicationForm = ({ userRole }) => {
                       onChange={(event) =>
                         setGovernmentId(event.target.files[0] || null)
                       }
-                      className="text-sm"
+                      className="text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-lg dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
                     />
                   </div>
 
                   <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                    <label className="w-47.5 text-sm text-gray-700">
+                    <label className="w-47.5 text-sm text-gray-700 dark:text-[#a7b4be]">
                       Real estate licence:
                     </label>
 
@@ -400,7 +414,7 @@ const ApplicationForm = ({ userRole }) => {
                       onChange={(event) =>
                         setRealEstateLicense(event.target.files[0] || null)
                       }
-                      className="text-sm"
+                      className="text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-lg dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
                     />
                   </div>
                 </div>
@@ -416,6 +430,10 @@ const ApplicationForm = ({ userRole }) => {
                     text-sm font-medium
                     text-white
                     hover:bg-[#17634f]
+                    dark:bg-[#20c997]
+                    dark:text-[#06241d]
+                    dark:shadow-[0_0_22px_rgba(32,201,151,0.18)]
+                    dark:hover:bg-[#2bd8a6]
                   "
                 >
                   Submit

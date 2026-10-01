@@ -213,32 +213,36 @@ const MyListings = ({ onListingUpdated }) => {
     }
   };
 
-  if (loading) {
+    if (loading) {
     return (
-      <p className="p-10 text-center text-gray-500">Loading listings...</p>
+      <p className="min-h-screen bg-[#f8faf9] p-10 text-center text-gray-500 dark:bg-[#06141e] dark:text-[#a7b4be]">
+        Loading listings...
+      </p>
     );
   }
 
   if (editingListing) {
     return (
-      <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+      <div className="min-h-screen bg-[#f8faf9] px-6 py-10 dark:bg-[radial-gradient(circle_at_top_left,#123343_0%,#081a26_28%,#06141e_65%,#04111a_100%)]">
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold text-[#08243f]">Edit listing</h1>
+          <h1 className="text-3xl font-bold text-[#08243f] dark:text-white">
+            Edit listing
+          </h1>
 
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 dark:text-[#a7b4be]">
             Update your property information.
           </p>
 
-          <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8">
+          <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8 dark:border-[#234354] dark:bg-[#0b2233]/75 dark:backdrop-blur-xl dark:shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
             {error && (
-              <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/60 dark:text-red-300">
                 {error}
               </p>
             )}
 
             <div className="grid gap-5 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Listing status
                 </label>
 
@@ -246,7 +250,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="status"
                   value={editingListing.status}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -256,18 +260,20 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium">Title</label>
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
+                  Title
+                </label>
 
                 <input
                   name="title"
                   value={editingListing.title}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Property type
                 </label>
 
@@ -275,24 +281,20 @@ const MyListings = ({ onListingUpdated }) => {
                   name="propertySubType"
                   value={editingListing.propertySubType}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 >
                   <option value="apartment">Apartment</option>
-
                   <option value="detached-house">Detached house</option>
-
                   <option value="studio">Studio</option>
-
                   <option value="semi-detached-house">
                     Semi-detached house
                   </option>
-
                   <option value="terraced-house">Terraced house</option>
                 </select>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Price (€)
                 </label>
 
@@ -302,23 +304,25 @@ const MyListings = ({ onListingUpdated }) => {
                   min="1"
                   value={editingListing.price}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">City</label>
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
+                  City
+                </label>
 
                 <input
                   name="city"
                   value={editingListing.city}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Address
                 </label>
 
@@ -326,12 +330,12 @@ const MyListings = ({ onListingUpdated }) => {
                   name="address"
                   value={editingListing.address}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Postal code
                 </label>
 
@@ -339,12 +343,12 @@ const MyListings = ({ onListingUpdated }) => {
                   name="postalCode"
                   value={editingListing.postalCode}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Size (m²)
                 </label>
 
@@ -354,12 +358,14 @@ const MyListings = ({ onListingUpdated }) => {
                   min="1"
                   value={editingListing.size}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">Rooms</label>
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
+                  Rooms
+                </label>
 
                 <input
                   name="rooms"
@@ -368,12 +374,12 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.rooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Bedrooms
                 </label>
 
@@ -384,12 +390,12 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.bedrooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Bathrooms
                 </label>
 
@@ -400,12 +406,12 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.bathrooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Description
                 </label>
 
@@ -414,13 +420,13 @@ const MyListings = ({ onListingUpdated }) => {
                   rows="5"
                   value={editingListing.description}
                   onChange={handleChange}
-                  className="w-full resize-none rounded-lg border px-4 py-3"
+                  className="w-full resize-none rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                 />
               </div>
             </div>
 
-            <div className="mt-8 border-t pt-6">
-              <h2 className="mb-4 text-lg font-semibold text-[#08243f]">
+            <div className="mt-8 border-t pt-6 dark:border-white/10">
+              <h2 className="mb-4 text-lg font-semibold text-[#08243f] dark:text-white">
                 Features
               </h2>
 
@@ -433,12 +439,16 @@ const MyListings = ({ onListingUpdated }) => {
                   ["petsAllowed", "Pets allowed"],
                   ["sauna", "Sauna"],
                 ].map(([name, label]) => (
-                  <label key={name} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={name}
+                    className="flex items-center gap-2 text-sm dark:text-[#d7e1e7]"
+                  >
                     <input
                       type="checkbox"
                       name={name}
                       checked={editingListing.features?.[name] ?? false}
                       onChange={handleFeatureChange}
+                      className="accent-[#17634f] dark:accent-[#55d4aa]"
                     />
 
                     {label}
@@ -448,14 +458,14 @@ const MyListings = ({ onListingUpdated }) => {
             </div>
 
             {editingListing.listingType === "rent" && (
-              <div className="mt-8 border-t pt-6">
-                <h2 className="mb-5 text-lg font-semibold text-[#08243f]">
+              <div className="mt-8 border-t pt-6 dark:border-white/10">
+                <h2 className="mb-5 text-lg font-semibold text-[#08243f] dark:text-white">
                   Rental details
                 </h2>
 
                 <div className="grid gap-5 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium">
+                    <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                       Available from
                     </label>
 
@@ -464,12 +474,12 @@ const MyListings = ({ onListingUpdated }) => {
                       type="date"
                       value={editingListing.rentalDetails?.availableFrom || ""}
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3"
+                      className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium">
+                    <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                       Minimum rental period
                     </label>
 
@@ -482,12 +492,12 @@ const MyListings = ({ onListingUpdated }) => {
                         editingListing.rentalDetails?.minimumRentalPeriod ?? ""
                       }
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3"
+                      className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium">
+                    <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                       Deposit (€)
                     </label>
 
@@ -497,12 +507,12 @@ const MyListings = ({ onListingUpdated }) => {
                       min="0"
                       value={editingListing.rentalDetails?.deposit ?? ""}
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3"
+                      className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium">
+                    <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                       Additional costs
                     </label>
 
@@ -512,15 +522,15 @@ const MyListings = ({ onListingUpdated }) => {
                         editingListing.rentalDetails?.additionalCosts || ""
                       }
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3"
+                      className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
                     />
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="mt-8 border-t pt-6">
-              <h2 className="font-semibold text-[#08243f]">
+            <div className="mt-8 border-t pt-6 dark:border-white/10">
+              <h2 className="font-semibold text-[#08243f] dark:text-white">
                 Property photos
               </h2>
 
@@ -536,7 +546,7 @@ const MyListings = ({ onListingUpdated }) => {
               />
             </div>
 
-            <div className="mt-8 flex justify-end gap-3 border-t pt-6">
+            <div className="mt-8 flex justify-end gap-3 border-t pt-6 dark:border-white/10">
               <button
                 type="button"
                 disabled={isSaving}
@@ -544,7 +554,7 @@ const MyListings = ({ onListingUpdated }) => {
                   setEditingListing(null);
                   setError("");
                 }}
-                className="rounded-lg border px-6 py-2.5"
+                className="rounded-lg border px-6 py-2.5 dark:border-[#315064] dark:text-white dark:hover:border-[#55d4aa] dark:hover:bg-[#102b3b]"
               >
                 Cancel
               </button>
@@ -553,7 +563,7 @@ const MyListings = ({ onListingUpdated }) => {
                 type="button"
                 disabled={isSaving}
                 onClick={saveEdit}
-                className="rounded-lg bg-[#17634f] px-6 py-2.5 font-medium text-white disabled:opacity-60"
+                className="rounded-lg bg-[#17634f] px-6 py-2.5 font-medium text-white disabled:opacity-60 dark:bg-[#20c997] dark:text-[#06241d] dark:shadow-[0_0_22px_rgba(32,201,151,0.18)] dark:hover:bg-[#2bd8a6]"
               >
                 {isSaving ? "Saving..." : "Save changes"}
               </button>
@@ -565,18 +575,26 @@ const MyListings = ({ onListingUpdated }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+    <div className="min-h-screen bg-[#f8faf9] px-6 py-10 dark:bg-[radial-gradient(circle_at_top_left,#123343_0%,#081a26_28%,#06141e_65%,#04111a_100%)]">
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-bold text-[#08243f]">My listings</h1>
+        <h1 className="text-3xl font-bold text-[#08243f] dark:text-white">
+          My listings
+        </h1>
 
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-gray-500 dark:text-[#a7b4be]">
           Manage your property listings.
         </p>
 
-        {error && <p className="mt-5 text-red-600">{error}</p>}
+        {error && (
+          <p className="mt-5 text-red-600 dark:text-red-400">
+            {error}
+          </p>
+        )}
 
         {listings.length === 0 ? (
-          <p className="mt-8">No listings yet.</p>
+          <p className="mt-8 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-gray-500 dark:border-[#315064] dark:bg-[#0b2233]/60 dark:text-[#a7b4be]">
+            No listings yet.
+          </p>
         ) : (
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {listings.map((listing) => {
@@ -585,7 +603,7 @@ const MyListings = ({ onListingUpdated }) => {
               return (
                 <div
                   key={listing.id}
-                  className="overflow-hidden rounded-2xl border border-gray-200 bg-white"
+                  className="overflow-hidden rounded-2xl border border-gray-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-[#315064] dark:bg-[#0b2233]/75 dark:shadow-[0_14px_35px_rgba(0,0,0,0.24)] dark:hover:border-[#2c806c]"
                 >
                   <img
                     src={mainImage?.url || houseImage}
@@ -597,32 +615,38 @@ const MyListings = ({ onListingUpdated }) => {
                   />
 
                   <div className="p-5">
-                    <h2 className="text-lg font-semibold text-[#08243f]">
+                    <h2 className="text-lg font-semibold text-[#08243f] dark:text-white">
                       {listing.title}
                     </h2>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-gray-500 dark:text-[#9eabb5]">
                       {listing.address}, {listing.city}
                     </p>
 
-                    <p className="mt-2 font-semibold">
+                    <p className="mt-2 font-semibold dark:text-[#55d4aa]">
                       {listing.price} €
                       {listing.listingType === "rent" ? " / month" : ""}
                     </p>
 
-                    <p className="mt-1 text-sm capitalize text-gray-500">
-                      Status: {listing.status}
+                    <p className="mt-1 text-sm capitalize text-gray-500 dark:text-[#9eabb5]">
+                      Status:{" "}
+                      <span className="dark:text-[#d7e1e7]">
+                        {listing.status}
+                      </span>
                     </p>
 
-                    <p className="mt-1 text-sm capitalize text-gray-500">
-                      Moderation: {listing.moderation?.status}
+                    <p className="mt-1 text-sm capitalize text-gray-500 dark:text-[#9eabb5]">
+                      Moderation:{" "}
+                      <span className="dark:text-[#d7e1e7]">
+                        {listing.moderation?.status}
+                      </span>
                     </p>
 
                     <div className="mt-4 flex gap-2">
                       <button
                         type="button"
                         onClick={() => startEdit(listing)}
-                        className="rounded-lg border border-[#17634f] px-4 py-2 text-[#17634f]"
+                        className="rounded-lg border border-[#17634f] px-4 py-2 text-[#17634f] transition hover:bg-[#eef6f2] dark:border-[#55d4aa] dark:text-[#55d4aa] dark:hover:bg-[#123b38]"
                       >
                         Edit
                       </button>
@@ -630,7 +654,7 @@ const MyListings = ({ onListingUpdated }) => {
                       <button
                         type="button"
                         onClick={() => deleteListing(listing.id)}
-                        className="rounded-lg border border-red-300 px-4 py-2 text-red-600"
+                        className="rounded-lg border border-red-300 px-4 py-2 text-red-600 transition hover:bg-red-50 dark:border-red-500/70 dark:text-red-400 dark:hover:bg-red-950/40"
                       >
                         Delete
                       </button>

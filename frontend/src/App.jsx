@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Footer from "../src/components/Footer";
 import Navbar from "../src/components/Navbar";
@@ -24,6 +24,18 @@ import { getStoredAuth, saveAuth, clearAuth } from "./utils/authStorage";
 import { apiRequest } from "./services/api";
 import NotFound from "./pages/NotFound";
 import usePreferences from "./hooks/usePreferences";
+
+const PageWrapper = ({ children }) => {
+  const location = useLocation();
+
+  const isHomePage = location.pathname === "/";
+
+  return (
+    <div className={isHomePage ? "" : "pt-17"}>
+      {children}
+    </div>
+  );
+};
 
 function App() {
   const [favorites, setFavorites] = useState([]);
@@ -196,6 +208,7 @@ function App() {
     <>
       <BrowserRouter>
         <Navbar isLoggedIn={isLoggedIn} user={auth?.user} onLogout={logOut} />
+        <PageWrapper>
         <Routes>
           <Route
             path="/"
@@ -354,6 +367,7 @@ function App() {
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </PageWrapper>
         <Footer isAdmin={isAdmin} />
       </BrowserRouter>
     </>
