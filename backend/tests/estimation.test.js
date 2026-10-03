@@ -25,7 +25,6 @@ beforeEach(async () => {
   token = jwt.sign({ _id: owner._id }, JWT_SECRET, { expiresIn: "3d" });
 
 });
-
 describe("POST /api/estimate", () => {
     const newProperty = {
       title: "New test property",
@@ -58,5 +57,116 @@ describe("POST /api/estimate", () => {
       })
       .expect("Content-Type", /application\/json/);
     expect(response.body.estimate).toBe(273000);
+  });
+  it("should reject an invalid property", async () => {
+    const response = await api
+      .post("/api/estimate")
+      .set("Authorization", `Bearer ${token}`)
+      .send({})
+      .expect(400);
+  });
+  it("should reject an invalid property type", async () => {
+    const response = await api
+      .post("/api/estimate")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ 
+        "postalCode":newProperty.postalCode,
+        "size":newProperty.size,
+        "rooms":newProperty.rooms,
+        "buildingYear": newProperty.buildingYear,
+        "buildingType": "invalid type",
+      })
+      .expect(400);
+  });
+  it("should reject an invalid size", async () => {
+    const response = await api
+      .post("/api/estimate")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ 
+        "postalCode":newProperty.postalCode,
+        "size":-3,
+        "rooms":newProperty.rooms,
+        "buildingYear": newProperty.buildingYear,
+        "buildingType": newProperty.propertySubType,
+      })
+      .expect(400);
+  });
+  it("should reject an invalid year", async () => {
+    const response = await api
+      .post("/api/estimate")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ 
+        "postalCode":newProperty.postalCode,
+        "size":newProperty.size,
+        "rooms":newProperty.rooms,
+        "buildingYear": 538,
+        "buildingType": newProperty.propertySubType,
+      })
+      .expect(400);
+  });
+  it("should reject property creation without authentication", async () => {
+    const response = await api
+      .post("/api/estimate")
+      .send({ 
+        "postalCode":newProperty.postalCode,
+        "size":newProperty.size,
+        "rooms":newProperty.rooms,
+        "buildingYear": newProperty.buildingYear,
+        "buildingType": newProperty.propertySubType,
+      })
+      .expect(401);
+  });
+});
+describe("POST /api/estimate/growth", () => {
+  const postalCode = "02100";
+   it("should return estimate as JSON", async () => {
+    const response = await api
+      .post("/api/estimate/growth")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ 
+        "postalCode":postalCode,
+      })
+      .expect("Content-Type", /application\/json/);
+    expect(response.body.postalCode).toBe(postalCode);
+    expect(response.body.currentPpsm).toBe(4048);
+    expect(response.body.annualGrowthPct).toBe(1.68);
+     expect(response.body.forecast).toStrictEqual([
+       {
+         "ppsm": 4116,
+         "year": 2026,
+       },
+       {
+         "ppsm": 4185,
+         "year": 2027,
+       },
+       {
+         "ppsm": 4256,
+         "year": 2028,
+       },
+       {
+         "ppsm": 4327,
+         "year": 2029,
+       },
+       {
+         "ppsm": 4400,
+         "year": 2030,
+       },
+     ]);
+  });
+  it("should reject an invalid request", async () => {
+    const response = await api
+      .post("/api/estimate/growth")
+      .set("Authorization", `Bearer ${token}`)
+      .send({})
+      .expect(400);
+  });
+  it("should reject an invalid property code", async () => {
+    const response = await api
+      .post("/api/estimate/growth")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ 
+        "postalCode":"69",
+      })
+      .expect(400);
   });
 });
