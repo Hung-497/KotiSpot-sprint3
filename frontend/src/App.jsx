@@ -50,7 +50,7 @@ function App() {
     resetPreferences,
   } = usePreferences(isLoggedIn);
 
-  const { properties, othersProperties, syncModeratedProperty } =
+  const { properties, syncModeratedProperty } =
     useProperties(auth?.user?._id);
 
   const { favorites, toggleFavourite, resetFavorites } = useFavorites(
@@ -73,7 +73,7 @@ function App() {
             path="/"
             element={
               <Home
-                properties={othersProperties}
+                properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
@@ -97,7 +97,7 @@ function App() {
             path="/buy"
             element={
               <Buy
-                properties={othersProperties}
+                properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
@@ -206,7 +206,7 @@ function App() {
             path="/rent"
             element={
               <Rent
-                properties={othersProperties}
+                properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />

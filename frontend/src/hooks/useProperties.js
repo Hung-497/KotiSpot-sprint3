@@ -4,11 +4,6 @@ import { apiRequest } from "../services/api";
 const useProperties = (currentUserId) => {
   const [properties, setProperties] = useState([]);
 
-  // Listings made by other people (you don't see your own listings here)
-  const othersProperties = properties.filter(
-    (property) => property.owner !== currentUserId,
-  );
-
   useEffect(() => {
     const loadProperties = async () => {
       try {
@@ -49,7 +44,7 @@ const useProperties = (currentUserId) => {
     });
   };
 
-  return { properties, othersProperties, syncModeratedProperty };
+  return { properties, syncModeratedProperty };
 };
 
 export default useProperties;
