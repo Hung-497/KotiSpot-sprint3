@@ -69,7 +69,7 @@ it("imports the deterministic cross-model development dataset", async () => {
 
   expect(counts).toEqual({
     users: 7,
-    properties: 16,
+    properties: 20,
     favourites: 3,
     inquiries: 4,
     verifications: 4,
@@ -81,7 +81,7 @@ it("imports the deterministic cross-model development dataset", async () => {
   ).toBe(7);
   expect(
     await Property.countDocuments({ _id: { $in: seedPropertyIds } }),
-  ).toBe(16);
+  ).toBe(20);
   expect(
     await Favourite.countDocuments({
       _id: { $in: allIds(seedIds.favourites) },
@@ -240,24 +240,24 @@ it("provides the exact public showcase distribution and filter coverage", async 
     "moderation.status": "approved",
   });
 
-  expect(publicProperties).toHaveLength(10);
+  expect(publicProperties).toHaveLength(14);
   expect(countBy(publicProperties, "listingType")).toEqual({
-    sale: 5,
+    sale: 9,
     rent: 5,
   });
   expect(countBy(publicProperties, "city")).toEqual({
-    Helsinki: 2,
-    Espoo: 2,
+    Helsinki: 4,
+    Espoo: 3,
     Tampere: 2,
-    Vantaa: 2,
+    Vantaa: 3,
     Turku: 2,
   });
   expect(countBy(publicProperties, "propertySubType")).toEqual({
-    apartment: 3,
-    "detached-house": 2,
+    apartment: 4,
+    "detached-house": 3,
     studio: 2,
-    "semi-detached-house": 2,
-    "terraced-house": 1,
+    "semi-detached-house": 3,
+    "terraced-house": 2,
   });
 
   for (const field of ["price", "rooms", "bedrooms", "bathrooms", "size"]) {
@@ -297,8 +297,8 @@ it("provides the exact public showcase distribution and filter coverage", async 
     .get("/api/properties/filter?propertySubType=semi-detached-house")
     .expect(200);
 
-  expect(seedResults(terracedResponse.body)).toHaveLength(1);
-  expect(seedResults(semiDetachedResponse.body)).toHaveLength(2);
+  expect(seedResults(terracedResponse.body)).toHaveLength(2);
+  expect(seedResults(semiDetachedResponse.body)).toHaveLength(3);
 
   const searchResponse = await api
     .get("/api/properties/search?keyword=harbour&listingType=rent")
@@ -313,6 +313,10 @@ it("provides the exact public showcase distribution and filter coverage", async 
     .expect(200);
 
   expect(seedResults(newestResponse.body).map(({ id }) => id)).toEqual([
+    seedIds.properties.myyrmakiCampus,
+    seedIds.properties.myllypuroCampus,
+    seedIds.properties.karamalmiCampus,
+    seedIds.properties.arabiaCampus,
     seedIds.properties.turkuSemiDetached,
     seedIds.properties.vantaaStudio,
     seedIds.properties.tampereHouse,
@@ -324,6 +328,48 @@ it("provides the exact public showcase distribution and filter coverage", async 
     seedIds.properties.espooHouse,
     seedIds.properties.helsinkiApartment,
   ]);
+});
+
+it("publishes one for-sale listing at every Metropolia campus address", async () => {
+  await importSeedData();
+
+  const expectedCampuses = [
+    {
+      id: seedIds.properties.arabiaCampus,
+      address: "Hämeentie 135 D, 00560 Helsinki, Finland",
+    },
+    {
+      id: seedIds.properties.karamalmiCampus,
+      address: "Karaportti 2, 02610 Espoo, Finland",
+    },
+    {
+      id: seedIds.properties.myllypuroCampus,
+      address: "Myllypurontie 1, 00920 Helsinki, Finland",
+    },
+    {
+      id: seedIds.properties.myyrmakiCampus,
+      address: "Leiritie 1, 01600 Vantaa, Finland",
+    },
+  ];
+
+  const campusResponse = await api
+    .get("/api/properties/search?keyword=Metropolia&listingType=sale")
+    .expect(200);
+  const campusResults = seedResults(campusResponse.body);
+
+  expect(campusResults).toHaveLength(4);
+  expect(
+    campusResults.map(({ id: propertyId, address }) => ({
+      id: propertyId,
+      address,
+    })),
+  ).toEqual(expect.arrayContaining(expectedCampuses));
+
+  for (const property of campusResults) {
+    expect(property.listingType).toBe("sale");
+    expect(property.status).toBe("active");
+    expect(property.moderation.status).toBe("approved");
+  }
 });
 
 it("keeps each moderation and listing lifecycle special state independent", async () => {
@@ -407,7 +453,7 @@ it("refuses a second import instead of partially duplicating data", async () => 
 
   expect(
     await Property.countDocuments({ _id: { $in: seedPropertyIds } }),
-  ).toBe(16);
+  ).toBe(20);
 });
 
 it("resets seed-linked manual changes while preserving unrelated data", async () => {
