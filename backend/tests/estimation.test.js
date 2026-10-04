@@ -118,10 +118,10 @@ describe("POST /api/estimate", () => {
   });
   it("should reject an invalid postal code", async () => {
     const response = await api
-      .post("/api/estimate/growth")
+      .post("/api/estimate")
       .set("Authorization", `Bearer ${token}`)
       .send({ 
-        "postalCode":"abc123",
+        "postalCode":"abc02100",
         "size":newProperty.size,
         "rooms":newProperty.rooms,
         "buildingYear": newProperty.buildingYear,
