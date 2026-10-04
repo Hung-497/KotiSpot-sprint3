@@ -150,7 +150,7 @@ const MyListings = ({ onListingUpdated }) => {
     if (
       Number(editingListing.price) <= 0 ||
       Number(editingListing.buildingYear) < 0 ||
-      Number(editingListing.buildingYear) > 2027 ||
+      Number(editingListing.buildingYear) > 2026 ||
       Number(editingListing.rooms) < 1 ||
       Number(editingListing.bedrooms) < 0 ||
       Number(editingListing.bathrooms) < 0 ||

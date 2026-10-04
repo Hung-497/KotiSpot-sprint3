@@ -262,7 +262,7 @@ const propertySchema = new Schema(
       type: Number,
       required: true,
       min: [0, "buildingYear must be positive"],
-      max: [2027, "buildingYear exceeds current year"],
+      max: [2026, "buildingYear exceeds current year"],
       validate: {
         validator: Number.isInteger,
         message: "buildingYear must be a non-negative integer",
