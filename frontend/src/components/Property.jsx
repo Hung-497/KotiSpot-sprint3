@@ -3,11 +3,21 @@ import { Heart } from "lucide-react";
 import houseImage from "../assets/house1.jpg";
 import { getMainImage } from "../utils/imageUtils";
 
-const Property = ({ property, favorites, onToggleFavorite }) => {
+const Property = ({ property, favorites, onToggleFavorite, selectedProperties = [], setSelectedProperties, }) => {
   const isFavorite = favorites.includes(property.id);
+  const isSelected = selectedProperties.includes(property.id);
   const { address, city, price, size, listingType } = property;
   const isRental = listingType === "rent";
-
+  const handleCompare = () => {
+    if (isSelected) {
+      setSelectedProperties(
+        selectedProperties.filter(
+          (id) => id !== property.id)
+      );
+    } else {
+      setSelectedProperties([...selectedProperties, property.id]);
+    }
+  };
   const mainImage = getMainImage(property);
 
   return (
@@ -41,11 +51,10 @@ const Property = ({ property, favorites, onToggleFavorite }) => {
               : "Add property to favorites"
           }
           aria-pressed={isFavorite}
-          className={`favorite-button absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full shadow-sm backdrop-blur-sm transition hover:scale-105 ${
-            isFavorite
+          className={`favorite-button absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full shadow-sm backdrop-blur-sm transition hover:scale-105 ${isFavorite
               ? "bg-[#17634f] text-white hover:bg-[#12503f]"
               : "bg-white/90 text-[#17634f] hover:bg-white"
-          }`}
+            }`}
           onClick={() => {
             onToggleFavorite(property.id);
           }}
@@ -57,6 +66,15 @@ const Property = ({ property, favorites, onToggleFavorite }) => {
           />
         </button>
       </div>
+      <label className="flex w-full items-center gap-2 border-t px-3 py-2 cursor-pointer">
+
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={handleCompare}
+        />
+        Compare
+      </label>
     </div>
   );
 };

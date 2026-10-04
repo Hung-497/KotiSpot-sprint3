@@ -258,6 +258,16 @@ const propertySchema = new Schema(
         message: "size must be positive",
       },
     },
+    buildingYear: {
+      type: Number,
+      required: true,
+      min: [0, "buildingYear must be positive"],
+      max: [2027, "buildingYear exceeds current year"],
+      validate: {
+        validator: Number.isInteger,
+        message: "buildingYear must be a non-negative integer",
+      },
+    },
     features: {
       type: featuresSchema,
       default: () => ({}),

@@ -19,165 +19,49 @@ import Notifications from "./pages/Notifications";
 import MyListings from "./pages/MyListings";
 import Listings from "./pages/Listings";
 import AdminPanel from "./pages/AdminPanel";
-import { useState, useEffect } from "react";
-import { getStoredAuth, saveAuth, clearAuth } from "./utils/authStorage";
-import { apiRequest } from "./services/api";
+import Comparison from "./pages/Comparison";
 import NotFound from "./pages/NotFound";
+import useAuth from "./hooks/useAuth";
+import useProperties from "./hooks/useProperties";
+import useFavorites from "./hooks/useFavorites";
+import usePreferences from "./hooks/usePreferences";
 
 function App() {
-  const [favorites, setFavorites] = useState([]);
-  const [auth, setAuth] = useState(() => getStoredAuth());
-  const isLoggedIn = Boolean(auth?.user && auth?.token);
+  const {
+    auth,
+    isLoggedIn,
+    isAdmin,
+    canManageListings,
+    canApply,
+    noListingsRedirect,
+    logIn,
+    logOut: authLogOut,
+    updateAuthUser,
+  } = useAuth();
 
-  const isAdmin = auth?.user?.role === "administrator";
+  const {
+    preferences,
+    setPreferences,
+    isLoading: preferencesLoading,
+    error: preferencesError,
+    setError: setPreferencesError,
+    message: preferencesMessage,
+    setMessage: setPreferencesMessage,
+    resetPreferences,
+  } = usePreferences(isLoggedIn);
 
-  // Administrators moderate listings but don't sell or own any
-  const canManageListings =
-    ["seller", "agent"].includes(auth?.user?.role) &&
-    Boolean(auth?.user?.verifiedAt);
+  const { properties, syncModeratedProperty } =
+    useProperties(auth?.user?._id);
 
-  const noListingsRedirect = isAdmin ? "/adminpanel" : "/sell";
-
-  // Sellers can still apply to become an agent
-  const canApply =
-    isLoggedIn && !["agent", "administrator"].includes(auth?.user?.role);
-
-  const syncModeratedProperty = (updatedProperty) => {
-    setProperties((currentProperties) => {
-      const isPublic =
-        updatedProperty.status === "active" &&
-        updatedProperty.moderation?.status === "approved";
-
-      const alreadyExists = currentProperties.some(
-        (property) => property.id === updatedProperty.id,
-      );
-
-      if (!isPublic) {
-        return currentProperties.filter(
-          (property) => property.id !== updatedProperty.id,
-        );
-      }
-
-      if (alreadyExists) {
-        return currentProperties.map((property) =>
-          property.id === updatedProperty.id ? updatedProperty : property,
-        );
-      }
-
-      return [...currentProperties, updatedProperty];
-    });
-  };
-
-  const [properties, setProperties] = useState([]);
-
-  // Listings made by other people (you don't see your own listings here)
-  const othersProperties = properties.filter(
-    (property) => property.owner !== auth?.user?._id,
+  const { favorites, toggleFavourite, resetFavorites } = useFavorites(
+    auth?.token,
+    isLoggedIn,
   );
 
-  useEffect(() => {
-    const validateStoredAuth = async () => {
-      const storedAuth = getStoredAuth();
-
-      if (!storedAuth?.token) {
-        return;
-      }
-
-      try {
-        const data = await apiRequest("/users/me");
-
-        const refreshedAuth = saveAuth(data.user, storedAuth.token);
-
-        setAuth(refreshedAuth);
-      } catch {
-        clearAuth();
-        setAuth(null);
-      }
-    };
-
-    validateStoredAuth();
-  }, []);
-
-  useEffect(() => {
-    const loadProperties = async () => {
-      try {
-        const data = await apiRequest("/properties");
-        setProperties(data);
-      } catch (error) {
-        console.error("Failed to load properties:", error);
-      }
-    };
-
-    loadProperties();
-    // Load again whenever someone logs in or out, so new listings show up
-  }, [auth?.user?._id]);
-
-  useEffect(() => {
-    const loadFavorites = async () => {
-      if (!auth?.token) {
-        setFavorites([]);
-        return;
-      }
-
-      try {
-        const data = await apiRequest("/favourites");
-        const favouriteIds = data
-          .filter((item) => item.available && item.property)
-          .map((item) => item.property.id);
-
-        setFavorites(favouriteIds);
-      } catch (error) {
-        console.error("Failed to load favorites:", error);
-        setFavorites([]);
-      }
-    };
-
-    loadFavorites();
-  }, [auth?.token]);
-
-  const updateAuthUser = (user) => {
-    const storedAuth = getStoredAuth();
-
-    if (!storedAuth?.token) {
-      return;
-    }
-
-    const updatedAuth = saveAuth(user, storedAuth.token);
-    setAuth(updatedAuth);
-  };
-
-  const logIn = (user, token) => {
-    const storedAuth = saveAuth(user, token);
-    setAuth(storedAuth);
-  };
-
   const logOut = () => {
-    clearAuth();
-    setAuth(null);
-    setFavorites([]);
-  };
-
-  const toggleFavourite = async (propertyId) => {
-    if (!isLoggedIn) {
-      window.alert("Please log in to manage favorites.");
-      return;
-    }
-
-    const isFavorite = favorites.includes(propertyId);
-
-    try {
-      await apiRequest(`/favourites/${propertyId}`, {
-        method: isFavorite ? "DELETE" : "POST",
-      });
-
-      setFavorites((currentFavorites) =>
-        isFavorite
-          ? currentFavorites.filter((id) => id !== propertyId)
-          : [...currentFavorites, propertyId],
-      );
-    } catch (error) {
-      window.alert(error.message);
-    }
+    authLogOut();
+    resetFavorites();
+    resetPreferences();
   };
 
   return (
@@ -189,7 +73,7 @@ function App() {
             path="/"
             element={
               <Home
-                properties={othersProperties}
+                properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
@@ -213,7 +97,7 @@ function App() {
             path="/buy"
             element={
               <Buy
-                properties={othersProperties}
+                properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
@@ -249,7 +133,20 @@ function App() {
           <Route
             path="/settings"
             element={
-              isLoggedIn ? <Settings /> : <Navigate to="/login" replace />
+              isLoggedIn ? (
+                <Settings
+                  preferences={preferences}
+                  setPreferences={setPreferences}
+                  isLoading={preferencesLoading}
+                  error={preferencesError}
+                  setError={setPreferencesError}
+                  message={preferencesMessage}
+                  setMessage={setPreferencesMessage}
+                  onAccountDeleted={logOut}
+                />
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
           <Route
@@ -309,7 +206,7 @@ function App() {
             path="/rent"
             element={
               <Rent
-                properties={othersProperties}
+                properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
@@ -325,6 +222,14 @@ function App() {
               ) : (
                 <Sell />
               )
+            }
+          />
+          <Route
+            path="/comparison"
+            element={
+              <Comparison 
+              properties={properties}
+              />
             }
           />
           <Route path="*" element={<NotFound />} />

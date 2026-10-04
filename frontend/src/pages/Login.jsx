@@ -1,79 +1,22 @@
 import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
-import logo from "../assets/KotiSpot_Logo.png";
-import { apiRequest } from "../services/api";
+import useOtpAuth from "../hooks/useOtpAuth";
+import logo from "../assets/KotiSpot_logo.png";
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [codeRequested, setCodeRequested] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const requestCode = async (event) => {
-    event.preventDefault();
-
-    if (!email.trim()) {
-      setFormError("Please enter your email.");
-      return;
-    }
-
-    if (!email.includes("@")) {
-      setFormError("Please enter a valid email address.");
-      return;
-    }
-
-    setFormError("");
-    setIsSubmitting(true);
-
-    try {
-      await apiRequest("/account/request-code", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          mode: "login", // only works for emails that already have an account
-        }),
-      });
-
-      setCodeRequested(true);
-    } catch (error) {
-      setFormError(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const verifyCode = async (event) => {
-    event.preventDefault();
-
-    if (!/^\d{6}$/.test(code.trim())) {
-      setFormError("Please enter the 6-digit login code.");
-      return;
-    }
-
-    setFormError("");
-    setIsSubmitting(true);
-
-    try {
-      const data = await apiRequest("/account/verify-code", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          code: code.trim(),
-          mode: "login",
-        }),
-      });
-
-      onLogin(data.user, data.token);
-      navigate("/");
-    } catch (error) {
-      setFormError(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    code,
+    setCode,
+    codeRequested,
+    formError,
+    isSubmitting,
+    requestCode,
+    verifyCode,
+    resetCode,
+  } = useOtpAuth("login");
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f7f9f8] px-4">
@@ -130,7 +73,10 @@ const Login = ({ onLogin }) => {
             </button>
           </form>
         ) : (
-          <form onSubmit={verifyCode}>
+          <form onSubmit={(e) => verifyCode(e, (data) => {
+            onLogin(data.user, data.token);
+            navigate("/");
+          })}>
             {formError && (
               <p
                 role="alert"
@@ -171,11 +117,7 @@ const Login = ({ onLogin }) => {
             <button
               type="button"
               disabled={isSubmitting}
-              onClick={() => {
-                setCode("");
-                setFormError("");
-                setCodeRequested(false);
-              }}
+              onClick={resetCode}
               className="mt-3 w-full text-sm font-medium text-[#1f7356] hover:underline"
             >
               Use a different email

@@ -18,7 +18,7 @@ Deliver an integrated KotiSpot application that uses persisted backend data for 
 
 ## Product Backlog Progress
 
-**Implemented:** 17 / 30 PBIs
+**Implemented:** 19 / 30 PBIs
 
 **Fully DoD-verified:** 0 / 30 PBIs
 
@@ -31,10 +31,10 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | [x]         | PBI-06 | Sign up and log in                      | Selected                               | Implemented    | Needs verification |
 | [x]         | PBI-07 | User roles and permissions              | Selected                               | Implemented    | Needs verification |
 | [x]         | PBI-12 | Security, validation, and error handling | Selected — cross-cutting and S3-US-03 | Implemented    | Needs verification |
-| [ ]         | PBI-28 | Manage account settings                 | Selected                               | Partial        | Needs verification |
+| [x]         | PBI-28 | Manage account settings                 | Selected                               | Implemented        | Needs verification |
 | [x]         | PBI-30 | View and update profile information     | Selected                               | Implemented    | Needs verification |
 
-**Progress:** 4 / 5 implemented
+**Progress:** 5 / 5 implemented
 
 ### Property Discovery & Decision Tools
 
@@ -43,14 +43,14 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | [x]         | PBI-01 | Browse active properties for sale or rent | Selected     | Implemented    | Needs verification |
 | [ ]         | PBI-02 | View complete property details            | Selected     | Partial        | Needs verification |
 | [x]         | PBI-03 | Search properties by location or keyword  | Selected     | Implemented    | Needs verification |
-| [ ]         | PBI-04 | Filter and sort properties                | Selected     | Partial        | Needs verification |
+| [x]         | PBI-04 | Filter and sort properties                | Selected     | Implemented        | Needs verification |
 | [ ]         | PBI-15 | Display properties on a map               | Selected     | Ongoing        | Needs verification |
 | [ ]         | PBI-19 | Compare selected properties               | Selected     | Ongoing        | Needs verification |
-| [ ]         | PBI-20 | Mortgage and affordability calculator     | Selected     | Not started    | Not applicable     |
-| [ ]         | PBI-22 | Real-estate market dashboard              | Selected     | Not started    | Not applicable     |
+| [ ]         | PBI-20 | Mortgage and affordability calculator     | Deferred     | Deferred — required data unavailable    | Not applicable     |
+| [ ]         | PBI-22 | Real-estate market dashboard              | Deferred     | Deferred — required data unavailable    | Not applicable     |
 | [x]         | PBI-25 | View rental-specific terms                | Selected     | Implemented    | Needs verification |
 
-**Progress:** 3 / 9 implemented, 2 ongoing
+**Progress:** 4 / 9 implemented, 2 ongoing
 
 ### Engagement & Communication
 
@@ -61,7 +61,7 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | [x]         | PBI-18 | Inquiry notifications                                   | Selected     | Implemented        | Needs verification |
 | [x]         | PBI-29 | Contact KotiSpot support                                | Selected     | Implemented    | Needs verification |
 
-**Progress:** *4* / 4 implemented
+**Progress:** 4 / 4 implemented
 
 ### Listing Management & Platform Safety
 
@@ -484,9 +484,9 @@ so that I can choose a realistic asking price.
 
 - Only a verified seller or agent can request an estimate for a property they own or manage.
 - The estimate uses the property fields and market-data source approved before implementation.
-- The result provides a price range, is labelled as AI-generated, and explains its inputs, limitations, and uncertainty.
+- The result provides a price range, is labelled as AI-generated, and explains its inputs, limitations.
 - The estimate remains private unless the owner explicitly applies it to the listing price.
-- Missing input data, an unavailable AI service, an invalid response, or a rate limit produces a fallback state without changing the listing.
+- Missing input data, an unavailable AI service or an invalid response produce a fallback state without changing the listing.
 - No secret, private account data, or personal data unnecessary for the estimate is sent to the AI service.
 
 **Needs product clarification:** Which property fields, market-data source, AI service, retention rules, and rate limits are approved for the estimate?
@@ -505,9 +505,9 @@ so that I can understand its possible price direction.
 
 - Only a verified seller or agent can request a prediction for a property they own or manage.
 - The prediction uses the historical regional market-data source approved before implementation.
-- The result shows its time horizon, expected direction, possible price range, and uncertainty, and is labelled as AI-generated.
+- The result shows its time horizon, expected direction, possible price range and is labelled as AI-generated.
 - The prediction remains private to authorized users and is not presented as financial or professional property advice.
-- Insufficient data, an unavailable service, an invalid response, or a rate limit produces a fallback state without changing the listing.
+- Insufficient data, an unavailable service or an invalid response produce a fallback state without changing the listing.
 - No secret, private account data, or personal data unnecessary for the prediction is sent to the AI service.
 
 **Needs product clarification:** Which historical data source, prediction horizon, AI service, retention rules, and rate limits are approved for the prediction?

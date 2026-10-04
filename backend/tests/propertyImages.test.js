@@ -30,6 +30,7 @@ const propertyData = {
   rooms: 2,
   bedrooms: 1,
   bathrooms: 1,
+  buildingYear: 2000,
   size: 55,
 };
 

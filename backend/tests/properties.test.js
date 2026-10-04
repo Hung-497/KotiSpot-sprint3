@@ -42,6 +42,7 @@ beforeEach(async () => {
     rooms: 3,
     bedrooms: 2,
     bathrooms: 1,
+    buildingYear: 2000,
     size: 70,
     status: "active",
     moderation: {
@@ -64,6 +65,7 @@ beforeEach(async () => {
     rooms: 2,
     bedrooms: 1,
     bathrooms: 1,
+    buildingYear: 2000,
     size: 50,
     status: "active",
     moderation: {
@@ -87,6 +89,7 @@ beforeEach(async () => {
     rooms: 2,
     bedrooms: 1,
     bathrooms: 1,
+    buildingYear: 2000,
     size: 45,
     status: "inactive",
     moderation: {
@@ -108,6 +111,131 @@ describe("GET /api/properties", () => {
 
     expect(response.body).toHaveLength(1);
     expect(response.body[0].title).toBe("Test apartment");
+  });
+});
+
+describe("GET /api/properties/filter", () => {
+  beforeEach(async () => {
+    await Property.create({
+      owner: owner._id,
+      title: "Espoo family house",
+      description: "House with a sauna",
+      listingType: "rent",
+      propertyType: "residential",
+      propertySubType: "detached-house",
+      price: 1800,
+      currency: "EUR",
+      city: "Espoo",
+      address: "Talotie 5",
+      postalCode: "02100",
+      rooms: 5,
+      bedrooms: 3,
+      bathrooms: 2,
+      buildingYear: 2000,
+      size: 120,
+      features: { sauna: true },
+      rentalDetails: { availableFrom: "2026-10-01", minimumRentalPeriod: 12 },
+      status: "active",
+      moderation: { status: "approved" },
+    });
+  });
+
+  it("should return only public properties when no filters are given", async () => {
+    const response = await api.get("/api/properties/filter").expect(200);
+
+    expect(response.body.map((property) => property.title).sort()).toEqual([
+      "Espoo family house",
+      "Test apartment",
+    ]);
+  });
+
+  it("should combine listing type, price and feature filters", async () => {
+    const response = await api
+      .get("/api/properties/filter")
+      .query({ listingType: "rent", maxPrice: "2000", sauna: "true" })
+      .expect(200);
+
+    expect(response.body).toHaveLength(1);
+    expect(response.body[0].title).toBe("Espoo family house");
+  });
+
+  it("should match keyword, city and postal code partially, ignoring case", async () => {
+    const byKeyword = await api
+      .get("/api/properties/filter")
+      .query({ keyword: "FAMILY" })
+      .expect(200);
+    const byCity = await api
+      .get("/api/properties/filter")
+      .query({ city: "espoo" })
+      .expect(200);
+    const byPostalCode = await api
+      .get("/api/properties/filter")
+      .query({ postalCode: "001" })
+      .expect(200);
+
+    expect(byKeyword.body.map((property) => property.title)).toEqual([
+      "Espoo family house",
+    ]);
+    expect(byCity.body.map((property) => property.title)).toEqual([
+      "Espoo family house",
+    ]);
+    expect(byPostalCode.body.map((property) => property.title)).toEqual([
+      "Test apartment",
+    ]);
+  });
+
+  it("should sort by price, highest first", async () => {
+    const response = await api
+      .get("/api/properties/filter")
+      .query({ sort: "price-desc" })
+      .expect(200);
+
+    expect(response.body.map((property) => property.price)).toEqual([
+      250000, 1800,
+    ]);
+  });
+
+  it("should sort by price, lowest first", async () => {
+    const response = await api
+      .get("/api/properties/filter")
+      .query({ sort: "price-asc" })
+      .expect(200);
+
+    expect(response.body.map((property) => property.price)).toEqual([
+      1800, 250000,
+    ]);
+  });
+
+  it("should sort by newest first", async () => {
+    // Give the listings clearly different creation dates. The collection is
+    // updated directly because Mongoose does not let createdAt be changed.
+    await Property.collection.updateOne(
+      { title: "Test apartment" },
+      { $set: { createdAt: new Date("2026-01-01T00:00:00.000Z") } },
+    );
+    await Property.collection.updateOne(
+      { title: "Espoo family house" },
+      { $set: { createdAt: new Date("2026-02-01T00:00:00.000Z") } },
+    );
+
+    const response = await api
+      .get("/api/properties/filter")
+      .query({ sort: "newest" })
+      .expect(200);
+
+    expect(response.body.map((property) => property.title)).toEqual([
+      "Espoo family house",
+      "Test apartment",
+    ]);
+  });
+
+  it("should reject invalid filter and sort values", async () => {
+    await api.get("/api/properties/filter").query({ sort: "cheapest" }).expect(400);
+    await api
+      .get("/api/properties/filter")
+      .query({ minPrice: "500", maxPrice: "100" })
+      .expect(400);
+    await api.get("/api/properties/filter").query({ keyword: " " }).expect(400);
   });
 });
 
@@ -269,6 +397,7 @@ describe("POST /api/properties", () => {
       rooms: 2,
       bedrooms: 1,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 55,
       status: "inactive",
     };
@@ -325,6 +454,7 @@ describe("POST /api/properties", () => {
       rooms: 3,
       bedrooms: 2,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 70,
       status: "active",
     };
@@ -363,6 +493,7 @@ describe("POST /api/properties", () => {
       rooms: 3,
       bedrooms: 2,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 70,
       status: "inactive",
     };
@@ -396,6 +527,7 @@ describe("POST /api/properties", () => {
       rooms: 3,
       bedrooms: 2,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 70,
       moderation: {
         status: "approved",
@@ -440,6 +572,7 @@ describe("GET /api/properties/mine", () => {
       rooms: 2,
       bedrooms: 1,
       bathrooms: 1,
+      buildingYear: 2000,
       size: 50,
       status: "active",
       moderation: {

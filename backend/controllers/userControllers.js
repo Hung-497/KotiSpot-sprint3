@@ -89,9 +89,96 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const PREFERENCE_FIELDS = [
+  "theme",
+  "emailNotifications",
+  "marketingEmails",
+  "smsNotifications",
+];
+
+const VALID_THEMES = ["light", "dark", "system"];
+
+const getUserPreferences = async (req, res) => {
+  res.status(200).json({
+    preferences: req.user.preferences,
+  });
+};
+
+const updateUserPreferences = async (req, res) => {
+  if (
+    !req.body ||
+    typeof req.body !== "object" ||
+    Array.isArray(req.body) ||
+    Object.keys(req.body).length === 0
+  ) {
+    return res.status(400).json({
+      message: "Preferences data is required",
+    });
+  }
+
+  const requestedFields = Object.keys(req.body);
+
+  const invalidField = requestedFields.find(
+    (field) => !PREFERENCE_FIELDS.includes(field),
+  );
+
+  if (invalidField) {
+    return res.status(400).json({
+      message: `Invalid preference field: ${invalidField}`,
+    });
+  }
+
+  if (req.body.theme !== undefined && !VALID_THEMES.includes(req.body.theme)) {
+    return res.status(400).json({
+      message: "Theme must be light, dark, or system",
+    });
+  }
+
+  const booleanFields = [
+    "emailNotifications",
+    "marketingEmails",
+    "smsNotifications",
+  ];
+
+  const invalidBooleanField = booleanFields.find(
+    (field) =>
+      req.body[field] !== undefined && typeof req.body[field] !== "boolean",
+  );
+
+  if (invalidBooleanField) {
+    return res.status(400).json({
+      message: `${invalidBooleanField} must be a boolean`,
+    });
+  }
+
+  try {
+    requestedFields.forEach((field) => {
+      req.user.preferences[field] = req.body[field];
+    });
+
+    await req.user.save();
+
+    res.status(200).json({
+      preferences: req.user.preferences,
+    });
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        message: "Invalid preferences data",
+      });
+    }
+
+    res.status(500).json({
+      message: "Failed to update user preferences",
+    });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getCurrentUser,
   updateUser,
   deleteUser,
+  getUserPreferences,
+  updateUserPreferences,
 };

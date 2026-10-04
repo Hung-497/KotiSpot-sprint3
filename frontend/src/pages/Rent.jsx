@@ -34,8 +34,8 @@ const Rent = ({ properties, favorites, onToggleFavorite }) => {
           </p>
 
           <PropertySearch
-            properties={forRentProperties}
             onResults={setFilteredProperties}
+            listingType="rent"
             placeholder="Search city, neighborhood or postal code"
           />
         </div>

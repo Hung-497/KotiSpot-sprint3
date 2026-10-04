@@ -97,6 +97,26 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  preferences: {
+    theme: {
+      type: String,
+      enum: ["light", "dark", "system"],
+      default: "system",
+    },
+    emailNotifications: {
+      type: Boolean,
+      default: true,
+    },
+    marketingEmails: {
+      type: Boolean,
+      default: false,
+    },
+    smsNotifications: {
+      type: Boolean,
+      default: false,
+    },
+  },
 });
 
 const User = mongoose.model("User", userSchema);
