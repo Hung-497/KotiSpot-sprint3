@@ -66,13 +66,18 @@ const buildTextMatch = (text, fields) => {
   };
 };
 
-// Listings anyone can see: active and approved by moderation
+// Moderation statuses that stay visible to the public. Flagged listings stay
+// visible while an administrator investigates them.
+const publicModerationStatuses = ["approved", "flagged"];
+
+// Listings anyone can see: active and approved or flagged by moderation
 const publicPropertyScope = {
   status: "active",
-  "moderation.status": "approved",
+  "moderation.status": { $in: publicModerationStatuses },
 };
 
 module.exports = {
+  publicModerationStatuses,
   publicPropertyScope,
   addNumericRangeFilter,
   addBooleanFilter,

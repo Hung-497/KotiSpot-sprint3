@@ -20,9 +20,10 @@ const useProperties = (currentUserId) => {
 
   const syncModeratedProperty = (updatedProperty) => {
     setProperties((currentProperties) => {
+      // Flagged listings stay public while an administrator investigates
       const isPublic =
         updatedProperty.status === "active" &&
-        updatedProperty.moderation?.status === "approved";
+        ["approved", "flagged"].includes(updatedProperty.moderation?.status);
 
       const alreadyExists = currentProperties.some(
         (property) => property.id === updatedProperty.id,

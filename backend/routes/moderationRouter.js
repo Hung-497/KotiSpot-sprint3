@@ -2,6 +2,7 @@ const express = require("express");
 const {
   getModerationCandidates,
   updateModerationStatus,
+  getReports,
 } = require("../controllers/moderationControllers");
 const { requireAuth, requireRole } = require("../middleware/authMiddleware");
 
@@ -11,5 +12,6 @@ router.use(requireAuth, requireRole("administrator"));
 
 router.get("/properties", getModerationCandidates);
 router.patch("/properties/:propertyId", updateModerationStatus);
+router.get("/reports", getReports);
 
 module.exports = router;

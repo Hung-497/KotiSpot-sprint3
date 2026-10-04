@@ -10,6 +10,7 @@ import {
   User,
 } from "lucide-react";
 import { apiRequest } from "../services/api";
+import useDialog from "../hooks/useDialog";
 
 const Settings = ({
   preferences,
@@ -21,6 +22,7 @@ const Settings = ({
   setMessage,
   onAccountDeleted,
 }) => {
+  const { showConfirm } = useDialog();
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -47,9 +49,13 @@ const Settings = ({
   };
 
   const deleteAccount = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete your account?",
-    );
+    const confirmed = await showConfirm({
+      title: "Delete account",
+      message:
+        "Are you sure you want to delete your account?\nThis cannot be undone.",
+      confirmLabel: "Delete account",
+      danger: true,
+    });
 
     if (!confirmed) {
       return;

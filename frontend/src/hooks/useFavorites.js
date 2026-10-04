@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { apiRequest } from "../services/api";
+import useDialog from "./useDialog";
 
 const useFavorites = (authToken, isLoggedIn) => {
   const [favorites, setFavorites] = useState([]);
+  const { showAlert } = useDialog();
 
   useEffect(() => {
     const loadFavorites = async () => {
@@ -29,7 +31,7 @@ const useFavorites = (authToken, isLoggedIn) => {
 
   const toggleFavourite = async (propertyId) => {
     if (!isLoggedIn) {
-      window.alert("Please log in to manage favorites.");
+      showAlert("Please log in to manage favorites.", "Log in required");
       return;
     }
 
@@ -46,7 +48,7 @@ const useFavorites = (authToken, isLoggedIn) => {
           : [...currentFavorites, propertyId],
       );
     } catch (error) {
-      window.alert(error.message);
+      showAlert(error.message, "Something went wrong");
     }
   };
 
