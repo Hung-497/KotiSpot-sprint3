@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
 const Property = require("../models/propertyModel");
+const { publicPropertyScope } = require("../utils/propertyQueryHelpers");
 
 const listingStatuses = ["active", "inactive", "sold", "rented"];
 const moderationStatuses = ["unreviewed", "flagged", "approved", "removed"];
 const moderationActionStatuses = ["flagged", "approved", "removed"];
+
+const maxReportReasonLength = 500;
 
 const isSingleNonBlankString = (value) =>
   typeof value === "string" && value.trim() !== "";
@@ -126,7 +129,81 @@ const updateModerationStatus = async (req, res) => {
   }
 };
 
+// POST /properties/:propertyId/report
+// Any signed-in user except administrators can report a public listing.
+// The listing is flagged so administrators see it in the moderation panel.
+const reportProperty = async (req, res) => {
+  const { propertyId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+    return res.status(400).json({ message: "Invalid property ID" });
+  }
+
+  if (req.user.role === "administrator") {
+    return res.status(403).json({
+      message: "Administrators moderate listings from the admin panel",
+    });
+  }
+
+  const reason = req.body?.reason;
+
+  if (!isSingleNonBlankString(reason)) {
+    return res.status(400).json({
+      message: "Report reason must be a non-blank string",
+    });
+  }
+
+  if (reason.trim().length > maxReportReasonLength) {
+    return res.status(400).json({
+      message: `Report reason must be at most ${maxReportReasonLength} characters`,
+    });
+  }
+
+  try {
+    const property = await Property.findOne({
+      _id: propertyId,
+      ...publicPropertyScope,
+    });
+
+    if (!property) {
+      return res.status(404).json({ message: "Property not found" });
+    }
+
+    if (property.owner.equals(req.user._id)) {
+      return res.status(403).json({
+        message: "You cannot report your own listing",
+      });
+    }
+
+    const reportReason = `User report: ${reason.trim()}`;
+
+    // Keep earlier reasons when a flagged listing is reported again
+    const previousReason =
+      property.moderation?.status === "flagged" && property.moderation.reason;
+
+    await Property.updateOne(
+      { _id: property._id },
+      {
+        moderation: {
+          status: "flagged",
+          reason: previousReason
+            ? `${previousReason}
+${reportReason}`
+            : reportReason,
+          moderatedAt: new Date(),
+        },
+      },
+      { runValidators: true },
+    );
+
+    res.status(201).json({ message: "Report submitted" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to submit report" });
+  }
+};
+
 module.exports = {
   getModerationCandidates,
   updateModerationStatus,
+  reportProperty,
 };

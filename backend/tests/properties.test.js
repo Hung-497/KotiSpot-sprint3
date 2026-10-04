@@ -109,8 +109,11 @@ describe("GET /api/properties", () => {
       .expect(200)
       .expect("Content-Type", /application\/json/);
 
-    expect(response.body).toHaveLength(1);
-    expect(response.body[0].title).toBe("Test apartment");
+    // Flagged listings stay public while under investigation
+    expect(response.body.map((property) => property.title).sort()).toEqual([
+      "Flagged apartment",
+      "Test apartment",
+    ]);
   });
 });
 
@@ -145,6 +148,7 @@ describe("GET /api/properties/filter", () => {
 
     expect(response.body.map((property) => property.title).sort()).toEqual([
       "Espoo family house",
+      "Flagged apartment",
       "Test apartment",
     ]);
   });
@@ -181,6 +185,7 @@ describe("GET /api/properties/filter", () => {
     ]);
     expect(byPostalCode.body.map((property) => property.title)).toEqual([
       "Test apartment",
+      "Flagged apartment",
     ]);
   });
 
@@ -191,7 +196,7 @@ describe("GET /api/properties/filter", () => {
       .expect(200);
 
     expect(response.body.map((property) => property.price)).toEqual([
-      250000, 1800,
+      300000, 250000, 1800,
     ]);
   });
 
@@ -202,7 +207,7 @@ describe("GET /api/properties/filter", () => {
       .expect(200);
 
     expect(response.body.map((property) => property.price)).toEqual([
-      1800, 250000,
+      1800, 250000, 300000,
     ]);
   });
 
@@ -223,7 +228,9 @@ describe("GET /api/properties/filter", () => {
       .query({ sort: "newest" })
       .expect(200);
 
+    // The flagged listing keeps its real creation date, so it is newest
     expect(response.body.map((property) => property.title)).toEqual([
+      "Flagged apartment",
       "Espoo family house",
       "Test apartment",
     ]);
@@ -251,8 +258,21 @@ describe("GET /api/properties/:propertyId", () => {
     expect(response.body.title).toBe("Test apartment");
   });
 
-  it("should not return a flagged property publicly", async () => {
+  it("should still return a flagged property publicly", async () => {
     const property = await Property.findOne({ title: "Flagged apartment" });
+
+    const response = await api
+      .get(`/api/properties/${property._id}`)
+      .expect(200);
+
+    expect(response.body.moderation.status).toBe("flagged");
+  });
+
+  it("should not return a property removed by moderation", async () => {
+    const property = await Property.findOneAndUpdate(
+      { title: "Flagged apartment" },
+      { "moderation.status": "removed" },
+    );
 
     await api.get(`/api/properties/${property._id}`).expect(404);
   });
@@ -724,5 +744,99 @@ describe("DELETE /api/properties/:propertyId", () => {
     const deletedProperty = await Property.findById(property._id);
 
     expect(deletedProperty).toBeNull();
+  });
+});
+
+describe("POST /api/properties/:propertyId/report", () => {
+  let buyerToken;
+  let property;
+
+  const tokenFor = (user) =>
+    jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "3d" });
+
+  const report = (propertyId, authToken, body) => {
+    const request = api.post(`/api/properties/${propertyId}/report`);
+
+    if (authToken) {
+      request.set("Authorization", `Bearer ${authToken}`);
+    }
+
+    return request.send(body);
+  };
+
+  beforeEach(async () => {
+    const buyer = await User.create({ email: "buyer@example.com" });
+    buyerToken = tokenFor(buyer);
+    property = await Property.findOne({ title: "Test apartment" });
+  });
+
+  it("should flag the listing with the report reason", async () => {
+    await report(property._id, buyerToken, {
+      reason: "  Photos are copied from another listing  ",
+    }).expect(201);
+
+    const reported = await Property.findById(property._id);
+
+    expect(reported.moderation.status).toBe("flagged");
+    expect(reported.moderation.reason).toBe(
+      "User report: Photos are copied from another listing",
+    );
+    expect(reported.moderation.moderatedAt).toBeInstanceOf(Date);
+  });
+
+  it("should keep earlier reasons when a flagged listing is reported again", async () => {
+    const flagged = await Property.findOne({ title: "Flagged apartment" });
+
+    await report(flagged._id, buyerToken, { reason: "Asks for a deposit first" })
+      .expect(201);
+
+    const reported = await Property.findById(flagged._id);
+
+    expect(reported.moderation.reason).toBe(
+      "Under investigation\nUser report: Asks for a deposit first",
+    );
+  });
+
+  it("should require authentication", async () => {
+    await report(property._id, null, { reason: "Suspicious" }).expect(401);
+  });
+
+  it("should not let administrators report listings", async () => {
+    const admin = await User.create({
+      email: "admin@example.com",
+      role: "administrator",
+    });
+
+    await report(property._id, tokenFor(admin), { reason: "Suspicious" })
+      .expect(403);
+  });
+
+  it("should not let owners report their own listing", async () => {
+    await report(property._id, token, { reason: "Suspicious" }).expect(403);
+  });
+
+  it.each([
+    ["missing", {}],
+    ["blank", { reason: "   " }],
+    ["not a string", { reason: ["Suspicious"] }],
+    ["too long", { reason: "a".repeat(501) }],
+  ])("should reject a reason that is %s", async (_, body) => {
+    await report(property._id, buyerToken, body).expect(400);
+
+    const unchanged = await Property.findById(property._id);
+    expect(unchanged.moderation.status).toBe("approved");
+  });
+
+  it("should return 404 for a listing that is not public", async () => {
+    const inactive = await Property.findOne({ title: "Inactive apartment" });
+
+    await report(inactive._id, buyerToken, { reason: "Suspicious" }).expect(404);
+    await report(new mongoose.Types.ObjectId(), buyerToken, {
+      reason: "Suspicious",
+    }).expect(404);
+  });
+
+  it("should reject an invalid property ID", async () => {
+    await report("not-an-id", buyerToken, { reason: "Suspicious" }).expect(400);
   });
 });

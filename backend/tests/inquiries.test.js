@@ -177,7 +177,6 @@ describe("POST /api/inquiries/:propertyId", () => {
     ["inactive", { status: "inactive" }],
     ["sold", { status: "sold" }],
     ["waiting for moderation", { "moderation.status": "unreviewed" }],
-    ["flagged", { "moderation.status": "flagged" }],
     ["removed by moderation", { "moderation.status": "removed" }],
   ])(
     "should not accept an inquiry for a listing that is %s",
@@ -189,6 +188,16 @@ describe("POST /api/inquiries/:propertyId", () => {
       expect(await Inquiry.countDocuments()).toBe(0);
     },
   );
+  it("should accept an inquiry for a flagged listing that is still public", async () => {
+    await Property.updateOne(
+      { _id: property._id },
+      { $set: { "moderation.status": "flagged" } },
+    );
+
+    await sendInquiry().expect(201);
+
+    expect(await Inquiry.countDocuments()).toBe(1);
+  });
 });
 
 describe("GET /api/inquiries/mine and /sent", () => {

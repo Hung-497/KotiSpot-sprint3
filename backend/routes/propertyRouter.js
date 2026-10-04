@@ -14,6 +14,7 @@ const {
 const {
   getLongLatById   
 } =  require("../utils/locationHelper");
+const { reportProperty } = require("../controllers/moderationControllers");
 const {
   requireAuth,
   requireRole,
@@ -44,6 +45,9 @@ router.get("/geocode/:propertyId", getLongLatById)
 
 // GET /properties/:propertyId
 router.get("/:propertyId", getPropertyById);
+
+// POST /properties/:propertyId/report
+router.post("/:propertyId/report", requireAuth, reportProperty);
 
 // PATCH /properties/:propertyId
 router.patch(

@@ -3,6 +3,7 @@ import { Bell } from "lucide-react";
 import ApplicationCard from "../components/ApplicationCard";
 import ConversationCard from "../components/ConversationCard";
 import { apiRequest } from "../services/api";
+import useDialog from "../hooks/useDialog";
 
 const getInquiryPropertyLabel = (property) => {
   if (!property) {
@@ -10,12 +11,14 @@ const getInquiryPropertyLabel = (property) => {
   }
 
   const isAvailable =
-    property.status === "active" && property.moderation?.status === "approved";
+    property.status === "active" &&
+    ["approved", "flagged"].includes(property.moderation?.status);
 
   return isAvailable ? property.title : `${property.title} (unavailable)`;
 };
 
 function Notifications({ isAdmin }) {
+  const { showAlert } = useDialog();
   // Only for admins
   const [applications, setApplications] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
@@ -69,7 +72,7 @@ function Notifications({ isAdmin }) {
         applications.filter((application) => application._id !== id),
       );
     } catch (error) {
-      window.alert(error.message);
+      showAlert(error.message, "Could not delete notification");
     }
   };
 
@@ -80,7 +83,7 @@ function Notifications({ isAdmin }) {
         contactMessages.filter((message) => message._id !== id),
       );
     } catch (error) {
-      window.alert(error.message);
+      showAlert(error.message, "Could not delete notification");
     }
   };
 
@@ -89,7 +92,7 @@ function Notifications({ isAdmin }) {
       await deleteNotification(`/inquiries/${id}`);
       setInquiries(inquiries.filter((inquiry) => inquiry._id !== id));
     } catch (error) {
-      window.alert(error.message);
+      showAlert(error.message, "Could not delete notification");
     }
   };
 
@@ -98,7 +101,7 @@ function Notifications({ isAdmin }) {
       await deleteNotification(`/inquiries/${id}`);
       setSentInquiries(sentInquiries.filter((inquiry) => inquiry._id !== id));
     } catch (error) {
-      window.alert(error.message);
+      showAlert(error.message, "Could not delete notification");
     }
   };
 
@@ -107,7 +110,7 @@ function Notifications({ isAdmin }) {
       await deleteNotification(`/contact-messages/${id}`);
       setMyMessages(myMessages.filter((message) => message._id !== id));
     } catch (error) {
-      window.alert(error.message);
+      showAlert(error.message, "Could not delete notification");
     }
   };
 

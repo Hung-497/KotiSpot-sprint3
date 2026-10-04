@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiRequest } from "../services/api";
+import useDialog from "../hooks/useDialog";
 import {
   createEmptyListing,
   validateListing,
@@ -10,6 +11,7 @@ import PhotoManager from "../components/PhotoManager";
 // import { Calculator } from "lucide-react";
 
 const Listings = () => {
+  const { showAlert } = useDialog();
   const [listingType, setListingType] = useState("");
   const [formMessage, setFormMessage] = useState("");
   const [formError, setFormError] = useState("");
@@ -72,7 +74,10 @@ const Listings = () => {
       setGrowth(proposedGrowth.annualGrowthPct)
     } catch (error) {
       console.error("Error getting estimate:", error);
-      alert("Estimation is currently unavailable, please try again later");
+      showAlert(
+        "Estimation is currently unavailable, please try again later",
+        "Estimate unavailable",
+      );
     }
   };
 

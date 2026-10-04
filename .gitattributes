@@ -1,2 +1,0 @@
-# LightGBM model files store byte offsets; CRLF conversion corrupts them
-backend/utils/estimation_models/*.txt -text

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
+import useDialog from "../hooks/useDialog";
 import houseImage from "../assets/house1.jpg";
 import PhotoManager from "../components/PhotoManager";
 // import { Calculator } from "lucide-react";
@@ -19,6 +20,7 @@ const emptyFeatures = {
 };
 
 const MyListings = ({ onListingUpdated }) => {
+  const { showAlert, showConfirm } = useDialog();
   const [listings, setListings] = useState([]);
   const [editingListing, setEditingListing] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -123,7 +125,10 @@ const MyListings = ({ onListingUpdated }) => {
       setGrowth(proposedGrowth.annualGrowthPct)
     } catch (error) {
       console.error("Error getting estimate:", error);
-      alert("Estimation is currently unavailable, please try again later");
+      showAlert(
+        "Estimation is currently unavailable, please try again later",
+        "Estimate unavailable",
+      );
     }
   };
     const applyEstimate = () => {
@@ -243,7 +248,14 @@ const MyListings = ({ onListingUpdated }) => {
   };
 
   const deleteListing = async (propertyId) => {
-    if (!window.confirm("Delete this listing?")) {
+    const confirmed = await showConfirm({
+      title: "Delete listing",
+      message: "Are you sure you want to delete this listing?\nThis cannot be undone.",
+      confirmLabel: "Delete",
+      danger: true,
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -256,7 +268,7 @@ const MyListings = ({ onListingUpdated }) => {
         current.filter((listing) => listing.id !== propertyId),
       );
     } catch (error) {
-      window.alert(error.message);
+      showAlert(error.message, "Could not delete listing");
     }
   };
 
