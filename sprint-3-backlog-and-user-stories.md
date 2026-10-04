@@ -13,12 +13,12 @@ Deliver an integrated KotiSpot application that uses persisted backend data for 
 - Arranging a property viewing is part of an inquiry to the seller or agent; it is not a separate workflow.
 - PBI-09 remained optional Sprint 3 scope but property-image upload and management were implemented during the sprint.
 - Listing analytics (PBI-21) and the AI-assisted support chatbot (PBI-31) remain in the Product Backlog and are not selected for Sprint 3.
-- Suspicious-listing moderation has an existing foundation: the backend already supports flagged listings and moderation reasons. User report submission and frontend integration remain in Sprint 3.
+- Suspicious-listing reporting is implemented. Flagged listings remain publicly visible while an administrator investigates them; removed listings are excluded from public discovery.
 - S3-US-07 is no longer a standalone user story. PBI-11 and the cross-cutting quality requirements from PBI-12 are covered by the Definition of Done; S3-US-03 retains the role, permission, and ownership requirements from PBI-12.
 
 ## Product Backlog Progress
 
-**Implemented:** 21 / 30 PBIs
+**Implemented:** 22 / 30 PBIs
 
 **Fully DoD-verified:** 0 / 30 PBIs
 
@@ -71,12 +71,12 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | [x]         | PBI-09 | Upload and manage property images              | Optional future work | Implemented       | Needs verification     |
 | [x]         | PBI-10 | Edit, deactivate, and delete property listings | Selected             | Implemented        | Needs verification |
 | [x]         | PBI-16 | Admin listing moderation                      | Selected             | Implemented    | Needs verification |
-| [ ]         | PBI-17 | Report suspicious listings                    | Selected             | Not started    | Not applicable     |
+| [x]         | PBI-17 | Report suspicious listings                    | Selected             | Not started    | Not applicable     |
 | [ ]         | PBI-21 | Listing analytics for sellers and agents      | Deferred             | Deferred       | Not applicable     |
 | [x]         | PBI-26 | Manage rental-specific terms                  | Selected             | Implemented    | Needs verification |
 | [x]         | PBI-27 | Verify seller and agent accounts              | Selected             | Implemented        | Needs verification |
 
-**Progress:** 6 / 8 implemented
+**Progress:** 7 / 8 implemented
 
 ### AI Property Intelligence
 
@@ -443,7 +443,7 @@ so that privileged publishing and public content remain controlled.
 **Moderation**
 
 - An authenticated administrator can retrieve moderation candidates, including listings with an unreviewed moderation status, and set the moderation status to flagged, approved, or removed with a required reason.
-- A flagged moderation status means that a listing is under administrator investigation; listings with a flagged or removed moderation status do not appear in public discovery.
+- A flagged moderation status means that a listing is under administrator investigation; listings with a flagged or removed moderati- A flagged moderation status means that a listing is under administrator investigation and remains visible in public discovery; removed listings do not appear in public discovery.on status do not appear in public discovery.
 - Non-administrators cannot retrieve private review data or perform verification or moderation actions.
 
 ### S3-US-10: Report a suspicious listing
@@ -464,9 +464,9 @@ so that an administrator can investigate it.
 - Successful submission displays confirmation and does not automatically hide or remove the listing.
 - An authorized administrator can retrieve unresolved reports and the related listing information.
 - Reporter information is not exposed publicly or to the listing owner unless an explicitly authorized workflow permits it.
-- The system rejects duplicate reports and rate-limits repeated submissions according to thresholds documented before implementation.
+- The system rejects duplicate reports from the same user for the same listing.
 
-**Needs product clarification:** What report-reason length, duplicate-report rule, and submission rate limit apply?
+**Implementation decision:** Report reasons are limited to 500 characters, a user can report the same listing only once.
 
 ## 5. AI Property Intelligence
 
