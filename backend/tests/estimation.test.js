@@ -104,7 +104,7 @@ describe("POST /api/estimate", () => {
       })
       .expect(400);
   });
-  it("should reject property creation without authentication", async () => {
+  it("should reject estimate creation without authentication", async () => {
     const response = await api
       .post("/api/estimate")
       .send({ 
@@ -115,6 +115,19 @@ describe("POST /api/estimate", () => {
         "buildingType": newProperty.propertySubType,
       })
       .expect(401);
+  });
+  it("should reject an invalid postal code", async () => {
+    const response = await api
+      .post("/api/estimate/growth")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ 
+        "postalCode":"abc123",
+        "size":newProperty.size,
+        "rooms":newProperty.rooms,
+        "buildingYear": newProperty.buildingYear,
+        "buildingType": newProperty.propertySubType,
+      })
+      .expect(400);
   });
 });
 describe("POST /api/estimate/growth", () => {

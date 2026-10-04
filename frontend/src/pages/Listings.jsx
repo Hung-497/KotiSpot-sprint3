@@ -72,6 +72,7 @@ const Listings = () => {
       setGrowth(proposedGrowth.annualGrowthPct)
     } catch (error) {
       console.error("Error getting estimate:", error);
+      alert("Estimation is currently unavailable, please try again later");
     }
   };
 

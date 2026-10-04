@@ -50,7 +50,7 @@ export const validateListing = (listing, listingType) => {
     Number(listing.rooms) < 1 ||
     Number(listing.bedrooms) < 0 ||
     Number(listing.buildingYear) < 0 ||
-    Number(listing.buildingYear) > 2027 ||
+    Number(listing.buildingYear) > 2026 ||
     Number(listing.bathrooms) < 0 ||
     Number(listing.size) <= 0
   ) {
