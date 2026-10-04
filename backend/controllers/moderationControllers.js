@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
 const Property = require("../models/propertyModel");
+const Report = require("../models/reportModel");
 const { publicPropertyScope } = require("../utils/propertyQueryHelpers");
 
 const listingStatuses = ["active", "inactive", "sold", "rented"];
 const moderationStatuses = ["unreviewed", "flagged", "approved", "removed"];
 const moderationActionStatuses = ["flagged", "approved", "removed"];
+const reportStatuses = ["open", "resolved"];
+// Approving or removing a listing closes its open reports
+const resolvingModerationStatuses = ["approved", "removed"];
 
 const maxReportReasonLength = 500;
 
@@ -98,12 +102,14 @@ const updateModerationStatus = async (req, res) => {
     });
   }
 
+  const normalizedStatus = status.trim();
+
   try {
     const updatedProperty = await Property.findByIdAndUpdate(
       propertyId,
       {
         moderation: {
-          status: status.trim(),
+          status: normalizedStatus,
           reason: reason.trim(),
           moderatedAt: new Date(),
         },
@@ -113,6 +119,13 @@ const updateModerationStatus = async (req, res) => {
 
     if (!updatedProperty) {
       return res.status(404).json({ message: "Property not found" });
+    }
+
+    if (resolvingModerationStatuses.includes(normalizedStatus)) {
+      await Report.updateMany(
+        { property: updatedProperty._id, status: "open" },
+        { status: "resolved" },
+      );
     }
 
     res.status(200).json(updatedProperty);
@@ -130,8 +143,9 @@ const updateModerationStatus = async (req, res) => {
 };
 
 // POST /properties/:propertyId/report
-// Any signed-in user except administrators can report a public listing.
-// The listing is flagged so administrators see it in the moderation panel.
+// Any signed-in user except administrators can report a public listing once.
+// The report is saved with the reporter, listing, reason and time, and the
+// listing is flagged so administrators see it in the moderation panel.
 const reportProperty = async (req, res) => {
   const { propertyId } = req.params;
 
@@ -175,30 +189,96 @@ const reportProperty = async (req, res) => {
       });
     }
 
-    const reportReason = `User report: ${reason.trim()}`;
+    let report;
+
+    try {
+      report = await Report.create({
+        reporter: req.user._id,
+        property: property._id,
+        reason: reason.trim(),
+      });
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(409).json({
+          message: "You have already reported this listing",
+        });
+      }
+
+      throw error;
+    }
+
+    const reportReason = `User report: ${report.reason}`;
 
     // Keep earlier reasons when a flagged listing is reported again
     const previousReason =
       property.moderation?.status === "flagged" && property.moderation.reason;
 
-    await Property.updateOne(
-      { _id: property._id },
-      {
-        moderation: {
-          status: "flagged",
-          reason: previousReason
-            ? `${previousReason}
+    try {
+      await Property.updateOne(
+        { _id: property._id },
+        {
+          moderation: {
+            status: "flagged",
+            reason: previousReason
+              ? `${previousReason}
 ${reportReason}`
-            : reportReason,
-          moderatedAt: new Date(),
+              : reportReason,
+            moderatedAt: report.createdAt,
+          },
         },
-      },
-      { runValidators: true },
-    );
+        { runValidators: true },
+      );
+    } catch (error) {
+      // Don't keep a report for a listing that could not be flagged
+      await Report.deleteOne({ _id: report._id });
+      throw error;
+    }
 
-    res.status(201).json({ message: "Report submitted" });
+    res.status(201).json({ message: "Report submitted", report });
   } catch (error) {
     res.status(500).json({ message: "Failed to submit report" });
+  }
+};
+
+// GET /moderation/reports?status=open&propertyId=...
+// Administrators see who reported which listing, why and when (newest first)
+const getReports = async (req, res) => {
+  const { status, propertyId } = req.query;
+
+  if (
+    status !== undefined &&
+    (!isSingleNonBlankString(status) || !reportStatuses.includes(status.trim()))
+  ) {
+    return res.status(400).json({ message: "Invalid report status" });
+  }
+
+  if (
+    propertyId !== undefined &&
+    (typeof propertyId !== "string" ||
+      !mongoose.Types.ObjectId.isValid(propertyId))
+  ) {
+    return res.status(400).json({ message: "Invalid property ID" });
+  }
+
+  const query = {};
+
+  if (status !== undefined) {
+    query.status = status.trim();
+  }
+
+  if (propertyId !== undefined) {
+    query.property = propertyId;
+  }
+
+  try {
+    const reports = await Report.find(query)
+      .sort({ createdAt: -1 })
+      .populate("reporter", "email firstName lastName")
+      .populate("property", "title city address status moderation");
+
+    res.status(200).json(reports);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve reports" });
   }
 };
 
@@ -206,4 +286,5 @@ module.exports = {
   getModerationCandidates,
   updateModerationStatus,
   reportProperty,
+  getReports,
 };

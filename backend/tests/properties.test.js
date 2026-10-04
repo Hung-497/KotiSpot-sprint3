@@ -4,6 +4,7 @@ const app = require("../app");
 const connectDB = require("../config/db");
 const Property = require("../models/propertyModel");
 const User = require("../models/userModel");
+const Report = require("../models/reportModel");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config/config");
 
@@ -13,9 +14,12 @@ let token;
 
 beforeAll(async () => {
   await connectDB();
+  // Build the unique reporter + property index before duplicate report tests
+  await Report.init();
 });
 
 beforeEach(async () => {
+  await Report.deleteMany({});
   await Property.deleteMany({});
   await User.deleteMany({});
 
@@ -764,10 +768,53 @@ describe("POST /api/properties/:propertyId/report", () => {
     return request.send(body);
   };
 
+  let buyer;
+
   beforeEach(async () => {
-    const buyer = await User.create({ email: "buyer@example.com" });
+    buyer = await User.create({ email: "buyer@example.com" });
     buyerToken = tokenFor(buyer);
     property = await Property.findOne({ title: "Test apartment" });
+  });
+
+  it("should save who reported which listing, why and when", async () => {
+    const before = new Date();
+
+    const response = await report(property._id, buyerToken, {
+      reason: "  Photos are copied from another listing  ",
+    }).expect(201);
+
+    const reports = await Report.find({});
+
+    expect(reports).toHaveLength(1);
+    expect(reports[0].reporter.equals(buyer._id)).toBe(true);
+    expect(reports[0].property.equals(property._id)).toBe(true);
+    expect(reports[0].reason).toBe("Photos are copied from another listing");
+    expect(reports[0].status).toBe("open");
+    expect(reports[0].createdAt.getTime()).toBeGreaterThanOrEqual(
+      before.getTime(),
+    );
+    expect(response.body.report.id).toBe(reports[0]._id.toString());
+  });
+
+  it("should not let a user report the same listing twice", async () => {
+    await report(property._id, buyerToken, { reason: "Suspicious" }).expect(201);
+    await report(property._id, buyerToken, { reason: "Still suspicious" })
+      .expect(409);
+
+    const reported = await Property.findById(property._id);
+
+    expect(await Report.countDocuments({})).toBe(1);
+    expect(reported.moderation.reason).toBe("User report: Suspicious");
+  });
+
+  it("should let different users report the same listing", async () => {
+    const otherBuyer = await User.create({ email: "other@example.com" });
+
+    await report(property._id, buyerToken, { reason: "Suspicious" }).expect(201);
+    await report(property._id, tokenFor(otherBuyer), { reason: "Fake photos" })
+      .expect(201);
+
+    expect(await Report.countDocuments({ property: property._id })).toBe(2);
   });
 
   it("should flag the listing with the report reason", async () => {
@@ -825,6 +872,7 @@ describe("POST /api/properties/:propertyId/report", () => {
 
     const unchanged = await Property.findById(property._id);
     expect(unchanged.moderation.status).toBe("approved");
+    expect(await Report.countDocuments({})).toBe(0);
   });
 
   it("should return 404 for a listing that is not public", async () => {
@@ -838,5 +886,115 @@ describe("POST /api/properties/:propertyId/report", () => {
 
   it("should reject an invalid property ID", async () => {
     await report("not-an-id", buyerToken, { reason: "Suspicious" }).expect(400);
+  });
+});
+
+describe("GET /api/moderation/reports", () => {
+  let adminToken;
+  let buyer;
+  let property;
+  let flagged;
+
+  const getReports = (query = "", authToken = adminToken) =>
+    api
+      .get(`/api/moderation/reports${query}`)
+      .set("Authorization", `Bearer ${authToken}`);
+
+  beforeEach(async () => {
+    const admin = await User.create({
+      email: "admin@example.com",
+      role: "administrator",
+    });
+    adminToken = jwt.sign({ _id: admin._id }, JWT_SECRET, { expiresIn: "3d" });
+
+    buyer = await User.create({
+      email: "buyer@example.com",
+      firstName: "Bea",
+      lastName: "Buyer",
+    });
+    property = await Property.findOne({ title: "Test apartment" });
+    flagged = await Property.findOne({ title: "Flagged apartment" });
+
+    await Report.create({
+      reporter: buyer._id,
+      property: property._id,
+      reason: "Photos are copied",
+      createdAt: new Date("2026-01-01T10:00:00Z"),
+    });
+    await Report.create({
+      reporter: buyer._id,
+      property: flagged._id,
+      reason: "Asks for a deposit first",
+      status: "resolved",
+      createdAt: new Date("2026-01-02T10:00:00Z"),
+    });
+  });
+
+  it("should require authentication", async () => {
+    await api.get("/api/moderation/reports").expect(401);
+  });
+
+  it("should reject non-administrators", async () => {
+    await getReports("", token).expect(403);
+  });
+
+  it("should list reports newest first with reporter and listing details", async () => {
+    const response = await getReports()
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    expect(response.body).toHaveLength(2);
+
+    const [newest, oldest] = response.body;
+
+    expect(newest.reason).toBe("Asks for a deposit first");
+    expect(oldest.reason).toBe("Photos are copied");
+    expect(oldest.reporter).toMatchObject({
+      email: "buyer@example.com",
+      firstName: "Bea",
+      lastName: "Buyer",
+    });
+    expect(oldest.property.title).toBe("Test apartment");
+    expect(oldest.status).toBe("open");
+    expect(oldest.createdAt).toBe("2026-01-01T10:00:00.000Z");
+  });
+
+  it("should filter reports by status and listing", async () => {
+    const open = await getReports("?status=open").expect(200);
+    expect(open.body.map((item) => item.reason)).toEqual(["Photos are copied"]);
+
+    const forFlagged = await getReports(`?propertyId=${flagged._id}`).expect(200);
+    expect(forFlagged.body.map((item) => item.reason)).toEqual([
+      "Asks for a deposit first",
+    ]);
+  });
+
+  it.each([
+    ["an unknown status", "?status=closed"],
+    ["an invalid property ID", "?propertyId=not-an-id"],
+  ])("should reject %s", async (_, query) => {
+    await getReports(query).expect(400);
+  });
+
+  it("should resolve open reports when the listing is approved", async () => {
+    await api
+      .patch(`/api/moderation/properties/${property._id}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "approved", reason: "Photos checked" })
+      .expect(200);
+
+    const open = await getReports("?status=open").expect(200);
+    expect(open.body).toHaveLength(0);
+  });
+
+  it("should keep reports open when the listing stays flagged", async () => {
+    await api
+      .patch(`/api/moderation/properties/${property._id}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "flagged", reason: "Still investigating" })
+      .expect(200);
+
+    const open = await getReports("?status=open").expect(200);
+    expect(open.body).toHaveLength(1);
   });
 });
