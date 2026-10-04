@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
 const supertest = require("supertest");
 const jwt = require("jsonwebtoken");
 const app = require("../app");
@@ -117,7 +119,7 @@ it("imports the deterministic cross-model development dataset", async () => {
       _id: { $in: seedPropertyIds },
       images: { $ne: [] },
     }),
-  ).toBe(0);
+  ).toBe(4);
 });
 
 it("seeds derived notification conversations with deterministic read states", async () => {
@@ -329,25 +331,49 @@ it("provides the exact public showcase distribution and filter coverage", async 
   ]);
 });
 
-it("publishes one for-sale listing at every Metropolia campus address", async () => {
+it("publishes campus-scale demo sales with three distinct local photos at every campus address", async () => {
   await importSeedData();
 
   const expectedCampuses = [
     {
       id: seedIds.properties.arabiaCampus,
       address: "Hämeentie 135 D, 00560 Helsinki, Finland",
+      imageName: "arabia",
+      size: 16000,
+      rooms: 160,
+      bathrooms: 18,
+      buildingYear: 0,
+      pricePerSquareMetre: 3600,
     },
     {
       id: seedIds.properties.karamalmiCampus,
       address: "Karaportti 2, 02610 Espoo, Finland",
+      imageName: "karamalmi",
+      size: 8000,
+      rooms: 100,
+      bathrooms: 12,
+      buildingYear: 0,
+      pricePerSquareMetre: 2500,
     },
     {
       id: seedIds.properties.myllypuroCampus,
       address: "Myllypurontie 1, 00920 Helsinki, Finland",
+      imageName: "myllypuro",
+      size: 56000,
+      rooms: 400,
+      bathrooms: 64,
+      buildingYear: 2019,
+      pricePerSquareMetre: 3200,
     },
     {
       id: seedIds.properties.myyrmakiCampus,
       address: "Leiritie 1, 01600 Vantaa, Finland",
+      imageName: "myyrmaki",
+      size: 26000,
+      rooms: 260,
+      bathrooms: 36,
+      buildingYear: 1988,
+      pricePerSquareMetre: 2400,
     },
   ];
 
@@ -362,13 +388,73 @@ it("publishes one for-sale listing at every Metropolia campus address", async ()
       id: propertyId,
       address,
     })),
-  ).toEqual(expect.arrayContaining(expectedCampuses));
+  ).toEqual(
+    expect.arrayContaining(expectedCampuses.map(({ id, address }) => ({ id, address }))),
+  );
 
   for (const property of campusResults) {
+    const expectedCampus = expectedCampuses.find(({ id }) => id === property.id);
     expect(property.listingType).toBe("sale");
     expect(property.status).toBe("active");
     expect(property.moderation.status).toBe("approved");
+    expect(property.title).toContain("campus — demo sale");
+    expect(property.description).toContain("demo estimates");
+    expect(property.description).toContain("not a market valuation");
+    expect(property.description).toContain("not an actual offer by Metropolia");
+    expect(property.size).toBe(expectedCampus.size);
+    expect(property.rooms).toBe(expectedCampus.rooms);
+    expect(property.bedrooms).toBe(0);
+    expect(property.bathrooms).toBe(expectedCampus.bathrooms);
+    expect(property.buildingYear).toBe(expectedCampus.buildingYear);
+    expect(property.price).toBe(expectedCampus.size * expectedCampus.pricePerSquareMetre);
+    expect(property.features).toMatchObject({
+      balcony: false,
+      elevator: true,
+      furnished: true,
+      petsAllowed: false,
+      sauna: false,
+    });
+    expect(property.images).toHaveLength(3);
+    expect(new Set(property.images.map(({ url }) => url)).size).toBe(3);
+
+    for (const [index, suffix] of ["", "-library", "-cafeteria"].entries()) {
+      const photo = property.images[index];
+      expect(photo.id).toBe(index + 1);
+      expect(photo.isMain).toBe(index === 0);
+      expect(photo.description).toContain("Metropolia");
+      expect(photo.url).toMatch(/^data:image\/jpeg;base64,/);
+      expect(photo.url.length).toBeLessThanOrEqual(1_000_000);
+
+      const savedPhoto = readFileSync(
+        path.join(__dirname, "../../frontend/src/assets", `metropolia-${expectedCampus.imageName}${suffix}.jpg`),
+      );
+      expect(
+        Buffer.from(photo.url.split(",")[1], "base64").equals(savedPhoto),
+      ).toBe(true);
+      expect(savedPhoto.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]));
+    }
+
+    const detailResponse = await api
+      .get(`/api/properties/${property.id}`)
+      .expect(200);
+    expect(detailResponse.body.images).toEqual(property.images);
   }
+
+  const largeCampusResponse = await api
+    .get("/api/properties/filter?minRooms=100&minSize=8000&minPrice=20000000")
+    .expect(200);
+  expect(seedResults(largeCampusResponse.body).map(({ id }) => id)).toEqual(
+    expect.arrayContaining(expectedCampuses.map(({ id }) => id)),
+  );
+  expect(seedResults(largeCampusResponse.body)).toHaveLength(4);
+
+  const recommendedResponse = await api.get("/api/properties").expect(200);
+  expect(seedResults(recommendedResponse.body).slice(0, 4).map(({ id }) => id)).toEqual([
+    seedIds.properties.myyrmakiCampus,
+    seedIds.properties.myllypuroCampus,
+    seedIds.properties.karamalmiCampus,
+    seedIds.properties.arabiaCampus,
+  ]);
 });
 
 it("keeps each moderation and listing lifecycle special state independent", async () => {
@@ -461,6 +547,11 @@ it("resets seed-linked manual changes while preserving unrelated data", async ()
   await Property.findByIdAndUpdate(seedIds.properties.helsinkiApartment, {
     price: 1,
   });
+  const originalCampus = await Property.findById(seedIds.properties.arabiaCampus);
+  const originalCampusImages = originalCampus.toJSON().images;
+  await Property.findByIdAndUpdate(seedIds.properties.arabiaCampus, {
+    images: [],
+  });
   const manualProperty = await Property.create({
     owner: seedIds.users.seller,
     title: "Manual listing created during development",
@@ -531,6 +622,9 @@ it("resets seed-linked manual changes while preserving unrelated data", async ()
   expect(
     (await Property.findById(seedIds.properties.helsinkiApartment)).price,
   ).toBe(349000);
+  expect(
+    (await Property.findById(seedIds.properties.arabiaCampus)).toJSON().images,
+  ).toEqual(originalCampusImages);
   expect(await User.findById(unrelatedUserId)).not.toBeNull();
   expect(await Property.findById(unrelatedPropertyId)).not.toBeNull();
 
