@@ -243,6 +243,25 @@ const AdminPanel = ({ onModerationUpdated }) => {
               </div>
             </div>
 
+            {selectedProperty.moderation?.reason && (
+              <div className="mx-6 mb-6 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
+                <p className="font-semibold capitalize">
+                  {selectedProperty.moderation.status} reason
+                </p>
+                <p className="mt-1 whitespace-pre-line">
+                  {selectedProperty.moderation.reason}
+                </p>
+                {selectedProperty.moderation.moderatedAt && (
+                  <p className="mt-2 text-xs text-amber-700">
+                    Updated{" "}
+                    {new Date(
+                      selectedProperty.moderation.moderatedAt,
+                    ).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="border-t border-gray-200 p-6">
               <p className="text-sm font-semibold text-[#08243f]">
                 Choose a moderation action

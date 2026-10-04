@@ -325,6 +325,8 @@ it("provides the exact public showcase distribution and filter coverage", async 
     seedIds.properties.vantaaTerraced,
     seedIds.properties.espooSemiDetached,
     seedIds.properties.helsinkiRental,
+    // Flagged listings stay public while under investigation
+    seedIds.properties.ouluHouse,
     seedIds.properties.tampereStudio,
     seedIds.properties.espooHouse,
     seedIds.properties.helsinkiApartment,

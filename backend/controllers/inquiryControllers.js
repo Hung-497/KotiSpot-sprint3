@@ -28,7 +28,7 @@ const createInquiry = async (req, res) => {
 
   try {
     // Only listings the public can see can receive inquiries. Inactive,
-    // sold, rented, unreviewed, flagged and removed listings look missing.
+    // sold, rented, unreviewed and removed listings look missing.
     const property = await Property.findOne({
       _id: propertyId,
       ...publicPropertyScope,

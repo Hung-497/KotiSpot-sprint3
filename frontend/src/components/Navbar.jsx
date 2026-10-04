@@ -2,6 +2,7 @@ import { navLinks, authLinks } from "../../data";
 import logo from "../assets/KotiSpot_logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import useDialog from "../hooks/useDialog";
 import {
   User,
   Heart,
@@ -14,7 +15,7 @@ import {
 
 const Navbar = ({ isLoggedIn, user, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { showConfirm } = useDialog();
   const navigate = useNavigate();
 
   const isAdmin = user?.role === "administrator";
@@ -27,9 +28,21 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
   const canApply = !["agent", "administrator"].includes(user?.role);
   const isSeller = user?.role === "seller";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsMenuOpen(false);
-    setShowLogoutConfirm(false);
+
+    const confirmed = await showConfirm({
+      title: "Log out",
+      message:
+        "Are you sure you want to log out?\nYou will need to log in again to access your account",
+      confirmLabel: "Log out",
+      danger: true,
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     onLogout();
     navigate("/");
   };
@@ -176,10 +189,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    setShowLogoutConfirm(true);
-                  }}
+                  onClick={handleLogout}
                   className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left text-sm font-medium text-[#08243f] transition hover:bg-red-50 hover:text-red-600"
                 >
                   <LogOut size={20} strokeWidth={1.8} />
@@ -188,39 +198,6 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
               </div>
             )}
 
-            {isLoggedIn && showLogoutConfirm && (
-              <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/30">
-                <div className="w-87.5 rounded-2xl bg-white p-6 shadow-xl">
-                  <h2 className="text-lg font-semibold text-[#08243f]">
-                    Log out
-                  </h2>
-
-                  <p className="mt-2 text-sm text-gray-500">
-                    Are you sủe you want to log out?
-                    <br />
-                    You will need to log in again to access your account
-                  </p>
-
-                  <div className="mt-6 flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowLogoutConfirm(false)}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-[#08243f]"
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white"
-                    >
-                      Log out
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </li>
         ) : (
           authLinks.map((link, index) => (

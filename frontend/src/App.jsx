@@ -109,6 +109,7 @@ function App() {
               <PropertyInfo
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
+                currentUser={auth?.user}
               />
             }
           />
