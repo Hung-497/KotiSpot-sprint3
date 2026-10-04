@@ -6,12 +6,14 @@ import houseImage from "../assets/house1.jpg";
 const statusStyles = {
   active: "bg-green-50 text-green-700",
   approved: "bg-green-50 text-green-700",
+  unreviewed: "bg-blue-50 text-blue-700",
   flagged: "bg-amber-50 text-amber-700",
   removed: "bg-red-50 text-red-700",
 };
 
 const AdminPanel = ({ onModerationUpdated }) => {
   const [properties, setProperties] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState("unreviewed");
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [pendingAction, setPendingAction] = useState(null);
   const [reason, setReason] = useState("");
@@ -22,7 +24,7 @@ const AdminPanel = ({ onModerationUpdated }) => {
   useEffect(() => {
     const loadProperties = async () => {
       try {
-        const data = await apiRequest("/moderation/properties");
+        const data = await apiRequest(`/moderation/properties?moderationStatus=${selectedStatus}`);
         setProperties(data);
       } catch (error) {
         setError(error.message);
@@ -32,7 +34,7 @@ const AdminPanel = ({ onModerationUpdated }) => {
     };
 
     loadProperties();
-  }, []);
+  }, [selectedStatus]);
 
   const chooseAction = (action) => {
     setPendingAction(action);
@@ -105,6 +107,10 @@ const AdminPanel = ({ onModerationUpdated }) => {
               Review every property listing and record its moderation status.
             </p>
           </div>
+          <button onClick={() => setSelectedStatus("unreviewed")} className="mt-5 w-1/4 rounded-lg bg-[#1f3C73] py-3 font-medium text-white transition hover:bg-[#162d59] disabled:cursor-not-allowed disabled:opacity-60">Unreviewed</button>
+          <button onClick={() => setSelectedStatus("flagged")} className="mt-5 w-1/4 rounded-lg bg-[#73561f] py-3 font-medium text-white transition hover:bg-[#594216] disabled:cursor-not-allowed disabled:opacity-60">Flagged</button>
+          <button onClick={() => setSelectedStatus("removed")} className="mt-5 w-1/4 rounded-lg bg-[#731f3c] py-3 font-medium text-white transition hover:bg-[#59162d] disabled:cursor-not-allowed disabled:opacity-60">Removed</button>
+          <button onClick={() => setSelectedStatus("approved")} className="mt-5 w-1/4 rounded-lg bg-[#1f7356] py-3 font-medium text-white transition hover:bg-[#165942] disabled:cursor-not-allowed disabled:opacity-60">Approved</button>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <ShieldCheck size={18} className="text-[#17634f]" />
             {properties.length} listings to review
