@@ -34,7 +34,10 @@ const getImageErrorMessage = (error) => {
 // GET /properties
 const getActiveProperties = async (req, res) => {
   try {
-    const properties = await Property.find(publicPropertyScope);
+    const properties = await Property.find(publicPropertyScope).sort({
+      createdAt: -1,
+      _id: -1,
+    });
     res.json(properties);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve properties" });

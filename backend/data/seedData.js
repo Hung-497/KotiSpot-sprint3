@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
 
 const seedIds = Object.freeze({
   users: Object.freeze({
@@ -27,6 +29,10 @@ const seedIds = Object.freeze({
     turkuSemiDetached: "65f00000000000000000000e",
     lahtiRented: "65f00000000000000000000f",
     kuopioRemoved: "65f000000000000000000010",
+    arabiaCampus: "65f000000000000000000011",
+    karamalmiCampus: "65f000000000000000000012",
+    myllypuroCampus: "65f000000000000000000013",
+    myyrmakiCampus: "65f000000000000000000014",
   }),
   favourites: Object.freeze({
     buyerHelsinki: "66f000000000000000000001",
@@ -55,6 +61,17 @@ const seedIds = Object.freeze({
 const id = (value) => new mongoose.Types.ObjectId(value);
 const at = (value) => new Date(value);
 
+// Match the app's persisted image format using local, versioned campus photos.
+const campusImages = (name, descriptions) =>
+  ["", "-library", "-cafeteria"].map((suffix, index) => ({
+    id: index + 1,
+    url: `data:image/jpeg;base64,${readFileSync(
+      path.join(__dirname, "../../frontend/src/assets", `metropolia-${name}${suffix}.jpg`),
+    ).toString("base64")}`,
+    description: descriptions[index],
+    isMain: index === 0,
+  }));
+
 const defaultFeatures = Object.freeze({
   balcony: false,
   elevator: false,
@@ -73,13 +90,14 @@ const buildProperty = ({
   moderationReason,
   moderatedAt,
   features,
+  images = [],
   ...values
 }) => ({
   _id: id(seedIds.properties[seedKey]),
   owner: id(seedIds.users[ownerKey]),
   ...values,
   features: { ...defaultFeatures, ...features },
-  images: [],
+  images,
   moderation: {
     status: moderationStatus,
     ...(moderationReason ? { reason: moderationReason } : {}),
@@ -603,6 +621,134 @@ const buildSeedData = () => {
       status: "active",
       createdAt: "2026-09-07T09:00:00.000Z",
       updatedAt: "2026-09-07T10:00:00.000Z",
+    }),
+    buildProperty({
+      seedKey: "arabiaCampus",
+      ownerKey: "seller",
+      images: campusImages("arabia", [
+        "Metropolia Arabia Campus entrance on Hämeentie in Helsinki",
+        "Library interior at Metropolia Arabia Campus",
+        "Luova cafeteria interior at Metropolia Arabia Campus",
+      ]),
+      title: "Metropolia Arabia creative campus — demo sale",
+      description:
+        "Metropolia's arts and design campus in the Arabia135 block on Hämeentie, with creative studios, a library, and tram connections. Fictional demo sale, not an actual offer by Metropolia. The 16,000 m² area and 160 teaching rooms, studios, and offices are demo estimates, not a published campus inventory. The 18 washrooms and furnishing are also demo assumptions; there are no bedrooms. Demo asking price: EUR 57,600,000, calculated as 16,000 m² × an assumed EUR 3,600/m². This is not a market valuation. Original construction year is unknown (stored as 0). Residential subtype is a demo compatibility label only.",
+      listingType: "sale",
+      propertyType: "residential",
+      propertySubType: "apartment",
+      price: 57600000,
+      currency: "EUR",
+      city: "Helsinki",
+      address: "Hämeentie 135 D, 00560 Helsinki, Finland",
+      postalCode: "00560",
+      rooms: 160,
+      bedrooms: 0,
+      bathrooms: 18,
+      buildingYear: 0,
+      size: 16000,
+      features: { elevator: true, furnished: true },
+      moderationStatus: "approved",
+      moderationReason: "Campus demo approved; addresses sourced, estimates labelled",
+      moderatedAt: "2026-09-08T10:00:00.000Z",
+      status: "active",
+      createdAt: "2026-09-08T09:00:00.000Z",
+      updatedAt: "2026-09-08T10:00:00.000Z",
+    }),
+    buildProperty({
+      seedKey: "karamalmiCampus",
+      ownerKey: "agent",
+      images: campusImages("karamalmi", [
+        "Metropolia Karamalmi Campus exterior in Espoo",
+        "Library shelves at Metropolia Karamalmi Campus",
+        "Cafeteria buffet at Metropolia Karamalmi Campus",
+      ]),
+      title: "Metropolia Karamalmi technology campus — demo sale",
+      description:
+        "Metropolia's ICT and industrial management campus at Karaportti 2 in Espoo, with project-based learning spaces, a library, elevators, and visitor parking. Fictional demo sale, not an actual offer by Metropolia or a sale of the entire Nokia property. The 8,000 m² area, 100 teaching rooms and offices, 12 washrooms, and furnishing are demo estimates, not verified totals; there are no bedrooms. Demo asking price: EUR 20,000,000, calculated as 8,000 m² × an assumed EUR 2,500/m². This is not a market valuation. Original construction year is unknown (stored as 0). Residential subtype is a demo compatibility label only.",
+      listingType: "sale",
+      propertyType: "residential",
+      propertySubType: "semi-detached-house",
+      price: 20000000,
+      currency: "EUR",
+      city: "Espoo",
+      address: "Karaportti 2, 02610 Espoo, Finland",
+      postalCode: "02610",
+      rooms: 100,
+      bedrooms: 0,
+      bathrooms: 12,
+      buildingYear: 0,
+      size: 8000,
+      features: { elevator: true, parking: true, furnished: true },
+      moderationStatus: "approved",
+      moderationReason: "Campus demo approved; addresses sourced, estimates labelled",
+      moderatedAt: "2026-09-09T10:00:00.000Z",
+      status: "active",
+      createdAt: "2026-09-09T09:00:00.000Z",
+      updatedAt: "2026-09-09T10:00:00.000Z",
+    }),
+    buildProperty({
+      seedKey: "myllypuroCampus",
+      ownerKey: "seller",
+      images: campusImages("myllypuro", [
+        "Aerial view of Metropolia Myllypuro Campus in Helsinki",
+        "Library interior at Metropolia Myllypuro Campus",
+        "Cafeteria interior at Metropolia Myllypuro Campus",
+      ]),
+      title: "Metropolia Myllypuro modern campus — demo sale",
+      description:
+        "Metropolia's wellbeing, business, technology, and construction campus next to Myllypuro metro, with practical learning environments, a library, and a cafeteria. Published campus area: 56,000 m² gross (41,000 m² usable); construction completed in phases in 2018 and 2019. Fictional demo sale, not an actual offer by Metropolia. The 400 teaching rooms, laboratories, and offices, 64 washrooms, and furnishing are demo estimates, not a verified inventory; there are no bedrooms. Demo asking price: EUR 179,200,000, calculated as 56,000 m² × an assumed EUR 3,200/m². This is not a market valuation. Residential subtype is a demo compatibility label only.",
+      listingType: "sale",
+      propertyType: "residential",
+      propertySubType: "detached-house",
+      price: 179200000,
+      currency: "EUR",
+      city: "Helsinki",
+      address: "Myllypurontie 1, 00920 Helsinki, Finland",
+      postalCode: "00920",
+      rooms: 400,
+      bedrooms: 0,
+      bathrooms: 64,
+      buildingYear: 2019,
+      size: 56000,
+      features: { elevator: true, parking: true, furnished: true },
+      moderationStatus: "approved",
+      moderationReason: "Campus demo approved; addresses sourced, estimates labelled",
+      moderatedAt: "2026-09-10T10:00:00.000Z",
+      status: "active",
+      createdAt: "2026-09-10T09:00:00.000Z",
+      updatedAt: "2026-09-10T10:00:00.000Z",
+    }),
+    buildProperty({
+      seedKey: "myyrmakiCampus",
+      ownerKey: "agent",
+      images: campusImages("myyrmaki", [
+        "Aerial view of Metropolia Myyrmäki Campus in Vantaa",
+        "Library interior at Metropolia Myyrmäki Campus",
+        "Cafeteria interior at Metropolia Myyrmäki Campus",
+      ]),
+      title: "Metropolia Myyrmäki engineering campus — demo sale",
+      description:
+        "Metropolia's technology campus near Myyrmäki railway station, with engineering laboratories, modern learning environments, and a library. Published area: approximately 26,000 m² usable. The original A wing dates from 1988; the campus expanded in 2018. Fictional demo sale, not an actual offer by Metropolia. The 260 teaching rooms, laboratories, and offices, 36 washrooms, and furnishing are demo estimates, not verified totals; there are no bedrooms. Demo asking price: EUR 62,400,000, calculated as 26,000 m² × an assumed EUR 2,400/m². This is not a market valuation. Residential subtype is a demo compatibility label only.",
+      listingType: "sale",
+      propertyType: "residential",
+      propertySubType: "terraced-house",
+      price: 62400000,
+      currency: "EUR",
+      city: "Vantaa",
+      address: "Leiritie 1, 01600 Vantaa, Finland",
+      postalCode: "01600",
+      rooms: 260,
+      bedrooms: 0,
+      bathrooms: 36,
+      buildingYear: 1988,
+      size: 26000,
+      features: { elevator: true, parking: true, furnished: true },
+      moderationStatus: "approved",
+      moderationReason: "Campus demo approved; addresses sourced, estimates labelled",
+      moderatedAt: "2026-09-11T10:00:00.000Z",
+      status: "active",
+      createdAt: "2026-09-11T09:00:00.000Z",
+      updatedAt: "2026-09-11T10:00:00.000Z",
     }),
     buildProperty({
       seedKey: "lahtiRented",

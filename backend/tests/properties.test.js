@@ -48,6 +48,7 @@ beforeEach(async () => {
     moderation: {
       status: "approved",
     },
+    createdAt: new Date("2026-01-01T09:00:00.000Z"),
   });
 
   const flaggedProperty = await Property.create({
@@ -111,6 +112,42 @@ describe("GET /api/properties", () => {
 
     expect(response.body).toHaveLength(1);
     expect(response.body[0].title).toBe("Test apartment");
+  });
+
+  it("returns public listings newest first with a stable order for matching dates", async () => {
+    const template = (await Property.findOne({ title: "Test apartment" })).toObject();
+    delete template._id;
+    delete template.__v;
+    const newestDate = new Date("2026-02-01T09:00:00.000Z");
+
+    const [older, newer, newest] = await Property.create([
+      {
+        ...template,
+        title: "Older listing",
+        createdAt: new Date("2025-12-01T09:00:00.000Z"),
+      },
+      {
+        ...template,
+        _id: new mongoose.Types.ObjectId("65f000000000000000000001"),
+        title: "Newer listing",
+        createdAt: newestDate,
+      },
+      {
+        ...template,
+        _id: new mongoose.Types.ObjectId("65f000000000000000000002"),
+        title: "Newest listing",
+        createdAt: newestDate,
+      },
+    ]);
+
+    const response = await api.get("/api/properties").expect(200);
+
+    expect(response.body.map(({ title }) => title)).toEqual([
+      newest.title,
+      newer.title,
+      "Test apartment",
+      older.title,
+    ]);
   });
 });
 
