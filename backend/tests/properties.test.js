@@ -150,6 +150,7 @@ describe("GET /api/properties", () => {
     const response = await api.get("/api/properties").expect(200);
 
     expect(response.body.map(({ title }) => title)).toEqual([
+      "Flagged apartment",
       newest.title,
       newer.title,
       "Test apartment",
