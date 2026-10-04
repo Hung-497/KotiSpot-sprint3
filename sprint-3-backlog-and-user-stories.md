@@ -18,7 +18,7 @@ Deliver an integrated KotiSpot application that uses persisted backend data for 
 
 ## Product Backlog Progress
 
-**Implemented:** 19 / 30 PBIs
+**Implemented:** 21 / 30 PBIs
 
 **Fully DoD-verified:** 0 / 30 PBIs
 
@@ -82,11 +82,11 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 
 | Implemented | PBI    | Product Backlog Item                | Sprint Scope | Implementation | DoD            |
 | ----------- | ------ | ----------------------------------- | ------------ | -------------- | -------------- |
-| [ ]         | PBI-23 | AI property-price estimate          | Selected     | Ongoing        | Needs verification |
-| [ ]         | PBI-24 | AI future property-price prediction | Selected     | Ongoing        | Needs verification |
+| [x]         | PBI-23 | AI property-price estimate          | Selected     | Ongoing        | Needs verification |
+| [x]         | PBI-24 | AI future property-price prediction | Selected     | Ongoing        | Needs verification |
 | [ ]         | PBI-31 | AI-assisted support chatbot         | Deferred     | Deferred       | Not applicable |
 
-**Progress:** 0 / 3 implemented, 2 ongoing
+**Progress:** 2 / 3 implemented,
 
 ### Cross-cutting Quality
 
