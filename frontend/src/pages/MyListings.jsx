@@ -1,3 +1,6 @@
+import PageLoader from "../components/PageLoader";
+import useMinimumDuration, { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
+import SavingOverlay from "../components/SavingOverlay";
 import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
 import houseImage from "../assets/house1.jpg";
@@ -20,6 +23,7 @@ const emptyFeatures = {
 const MyListings = ({ onListingUpdated }) => {
   const [listings, setListings] = useState([]);
   const [editingListing, setEditingListing] = useState(null);
+  const hasMinimumLoadingElapsed = useMinimumDuration(PAGE_LOADING_MS);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
@@ -212,30 +216,26 @@ const MyListings = ({ onListingUpdated }) => {
       window.alert(error.message);
     }
   };
-
-    if (loading) {
-    return (
-      <p className="min-h-screen bg-[#f8faf9] p-10 text-center text-gray-500 dark:bg-[#06141e] dark:text-[#a7b4be]">
-        Loading listings...
-      </p>
-    );
+  if (loading || !hasMinimumLoadingElapsed) {
+    return <PageLoader label="Loading your listings…" fullPage />;
   }
 
   if (editingListing) {
     return (
-      <div className="min-h-screen bg-[#f8faf9] px-6 py-10 dark:bg-[radial-gradient(circle_at_top_left,#123343_0%,#081a26_28%,#06141e_65%,#04111a_100%)]">
+      <div className="min-h-screen bg-canvas px-6 py-10" aria-busy={isSaving}>
+      {isSaving && <SavingOverlay label="Saving changes…" />}
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold text-[#08243f] dark:text-white">
+          <h1 className="ks-page-title">
             Edit listing
           </h1>
 
-          <p className="mt-2 text-sm text-gray-500 dark:text-[#a7b4be]">
+          <p className="mt-2 text-sm text-ink-muted">
             Update your property information.
           </p>
 
-          <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8 dark:border-[#234354] dark:bg-[#0b2233]/75 dark:backdrop-blur-xl dark:shadow-[0_18px_45px_rgba(0,0,0,0.28)]">
+          <div className="mt-8 rounded-card border border-line bg-surface p-8">
             {error && (
-              <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/60 dark:text-red-300">
+              <p className="mb-5 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger">
                 {error}
               </p>
             )}
@@ -250,7 +250,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="status"
                   value={editingListing.status}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -268,7 +268,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="title"
                   value={editingListing.title}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -281,7 +281,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="propertySubType"
                   value={editingListing.propertySubType}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 >
                   <option value="apartment">Apartment</option>
                   <option value="detached-house">Detached house</option>
@@ -304,7 +304,7 @@ const MyListings = ({ onListingUpdated }) => {
                   min="1"
                   value={editingListing.price}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -317,7 +317,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="city"
                   value={editingListing.city}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -330,7 +330,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="address"
                   value={editingListing.address}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -343,7 +343,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="postalCode"
                   value={editingListing.postalCode}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -358,7 +358,7 @@ const MyListings = ({ onListingUpdated }) => {
                   min="1"
                   value={editingListing.size}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -374,7 +374,7 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.rooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -390,7 +390,7 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.bedrooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -406,7 +406,7 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.bathrooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -420,13 +420,13 @@ const MyListings = ({ onListingUpdated }) => {
                   rows="5"
                   value={editingListing.description}
                   onChange={handleChange}
-                  className="w-full resize-none rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                  className="ks-input w-full resize-none border"
                 />
               </div>
             </div>
 
             <div className="mt-8 border-t pt-6 dark:border-white/10">
-              <h2 className="mb-4 text-lg font-semibold text-[#08243f] dark:text-white">
+              <h2 className="mb-4 text-lg font-semibold text-ink">
                 Features
               </h2>
 
@@ -448,7 +448,7 @@ const MyListings = ({ onListingUpdated }) => {
                       name={name}
                       checked={editingListing.features?.[name] ?? false}
                       onChange={handleFeatureChange}
-                      className="accent-[#17634f] dark:accent-[#55d4aa]"
+                      className="accent-pine-700 dark:accent-[#55d4aa]"
                     />
 
                     {label}
@@ -459,7 +459,7 @@ const MyListings = ({ onListingUpdated }) => {
 
             {editingListing.listingType === "rent" && (
               <div className="mt-8 border-t pt-6 dark:border-white/10">
-                <h2 className="mb-5 text-lg font-semibold text-[#08243f] dark:text-white">
+                <h2 className="mb-5 text-lg font-semibold text-ink">
                   Rental details
                 </h2>
 
@@ -474,7 +474,7 @@ const MyListings = ({ onListingUpdated }) => {
                       type="date"
                       value={editingListing.rentalDetails?.availableFrom || ""}
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                      className="ks-input w-full border"
                     />
                   </div>
 
@@ -492,7 +492,7 @@ const MyListings = ({ onListingUpdated }) => {
                         editingListing.rentalDetails?.minimumRentalPeriod ?? ""
                       }
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                      className="ks-input w-full border"
                     />
                   </div>
 
@@ -507,7 +507,7 @@ const MyListings = ({ onListingUpdated }) => {
                       min="0"
                       value={editingListing.rentalDetails?.deposit ?? ""}
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                      className="ks-input w-full border"
                     />
                   </div>
 
@@ -522,7 +522,7 @@ const MyListings = ({ onListingUpdated }) => {
                         editingListing.rentalDetails?.additionalCosts || ""
                       }
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3 dark:border-[#315064] dark:bg-[#081a26] dark:text-white dark:outline-none dark:focus:border-[#55d4aa]"
+                      className="ks-input w-full border"
                     />
                   </div>
                 </div>
@@ -530,7 +530,7 @@ const MyListings = ({ onListingUpdated }) => {
             )}
 
             <div className="mt-8 border-t pt-6 dark:border-white/10">
-              <h2 className="font-semibold text-[#08243f] dark:text-white">
+              <h2 className="font-semibold text-ink">
                 Property photos
               </h2>
 
@@ -554,7 +554,7 @@ const MyListings = ({ onListingUpdated }) => {
                   setEditingListing(null);
                   setError("");
                 }}
-                className="rounded-lg border px-6 py-2.5 dark:border-[#315064] dark:text-white dark:hover:border-[#55d4aa] dark:hover:bg-[#102b3b]"
+                className="rounded-control border px-6 py-2.5 dark:border-[#315064] dark:text-white"
               >
                 Cancel
               </button>
@@ -563,7 +563,7 @@ const MyListings = ({ onListingUpdated }) => {
                 type="button"
                 disabled={isSaving}
                 onClick={saveEdit}
-                className="rounded-lg bg-[#17634f] px-6 py-2.5 font-medium text-white disabled:opacity-60 dark:bg-[#20c997] dark:text-[#06241d] dark:shadow-[0_0_22px_rgba(32,201,151,0.18)] dark:hover:bg-[#2bd8a6]"
+                className="ks-btn ks-btn-primary font-medium disabled:opacity-60"
               >
                 {isSaving ? "Saving..." : "Save changes"}
               </button>
@@ -575,24 +575,25 @@ const MyListings = ({ onListingUpdated }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] px-6 py-10 dark:bg-[radial-gradient(circle_at_top_left,#123343_0%,#081a26_28%,#06141e_65%,#04111a_100%)]">
+    <div className="min-h-screen bg-canvas px-6 py-10" aria-busy={isSaving}>
+      {isSaving && <SavingOverlay label="Saving changes…" />}
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-bold text-[#08243f] dark:text-white">
+        <h1 className="ks-page-title">
           My listings
         </h1>
 
-        <p className="mt-2 text-sm text-gray-500 dark:text-[#a7b4be]">
+        <p className="mt-2 text-sm text-ink-muted">
           Manage your property listings.
         </p>
 
         {error && (
-          <p className="mt-5 text-red-600 dark:text-red-400">
+          <p className="mt-5 text-danger dark:text-red-400">
             {error}
           </p>
         )}
 
         {listings.length === 0 ? (
-          <p className="mt-8 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-gray-500 dark:border-[#315064] dark:bg-[#0b2233]/60 dark:text-[#a7b4be]">
+          <p className="mt-8 rounded-card border border-dashed border-line bg-surface px-6 py-12 text-center text-ink-muted">
             No listings yet.
           </p>
         ) : (
@@ -603,7 +604,7 @@ const MyListings = ({ onListingUpdated }) => {
               return (
                 <div
                   key={listing.id}
-                  className="overflow-hidden rounded-2xl border border-gray-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-[#315064] dark:bg-[#0b2233]/75 dark:shadow-[0_14px_35px_rgba(0,0,0,0.24)] dark:hover:border-[#2c806c]"
+                  className="overflow-hidden rounded-card border border-line bg-surface transition duration-200 hover:-translate-y-1 hover:shadow-raised"
                 >
                   <img
                     src={mainImage?.url || houseImage}
@@ -615,11 +616,11 @@ const MyListings = ({ onListingUpdated }) => {
                   />
 
                   <div className="p-5">
-                    <h2 className="text-lg font-semibold text-[#08243f] dark:text-white">
+                    <h2 className="text-lg font-semibold text-ink">
                       {listing.title}
                     </h2>
 
-                    <p className="mt-1 text-sm text-gray-500 dark:text-[#9eabb5]">
+                    <p className="mt-1 text-sm text-ink-muted">
                       {listing.address}, {listing.city}
                     </p>
 
@@ -628,14 +629,14 @@ const MyListings = ({ onListingUpdated }) => {
                       {listing.listingType === "rent" ? " / month" : ""}
                     </p>
 
-                    <p className="mt-1 text-sm capitalize text-gray-500 dark:text-[#9eabb5]">
+                    <p className="mt-1 text-sm capitalize text-ink-muted">
                       Status:{" "}
                       <span className="dark:text-[#d7e1e7]">
                         {listing.status}
                       </span>
                     </p>
 
-                    <p className="mt-1 text-sm capitalize text-gray-500 dark:text-[#9eabb5]">
+                    <p className="mt-1 text-sm capitalize text-ink-muted">
                       Moderation:{" "}
                       <span className="dark:text-[#d7e1e7]">
                         {listing.moderation?.status}
@@ -646,7 +647,7 @@ const MyListings = ({ onListingUpdated }) => {
                       <button
                         type="button"
                         onClick={() => startEdit(listing)}
-                        className="rounded-lg border border-[#17634f] px-4 py-2 text-[#17634f] transition hover:bg-[#eef6f2] dark:border-[#55d4aa] dark:text-[#55d4aa] dark:hover:bg-[#123b38]"
+                        className="rounded-control border border-pine-700 px-4 py-2 text-pine-700 transition hover:bg-pine-50"
                       >
                         Edit
                       </button>
@@ -654,7 +655,7 @@ const MyListings = ({ onListingUpdated }) => {
                       <button
                         type="button"
                         onClick={() => deleteListing(listing.id)}
-                        className="rounded-lg border border-red-300 px-4 py-2 text-red-600 transition hover:bg-red-50 dark:border-red-500/70 dark:text-red-400 dark:hover:bg-red-950/40"
+                        className="rounded-control border border-red-300 px-4 py-2 text-danger transition hover:bg-red-50 dark:border-red-500/70 dark:text-red-400"
                       >
                         Delete
                       </button>

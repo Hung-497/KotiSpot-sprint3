@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.6.0",
     "mongoose": "^9.9.5",
+    "node-geocoder": "^4.4.1",
     "nodemailer": "^10.0.10"
   },
   "devDependencies": {

@@ -1,8 +1,9 @@
+import PropertySkeletons from "./PropertySkeletons";
 import { useState } from "react"
-import Properties from "./Properties"
+import Properties from "./HomeProperties"
 import { Star, Heart } from "lucide-react";
 
-const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFavorite }) => {
+const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFavorite, isLoading = false }) => {
 
     const [activeTab, setActiveTab] = useState("recommendations")
     const favoriteProperties = visibleProperties.filter((property) =>
@@ -16,8 +17,8 @@ const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFa
                     <button onClick={() => setActiveTab("recommendations")}
                     className={
                         activeTab === "recommendations"
-                            ? "flex items-center gap-2 rounded-full bg-[#17634f] px-5 py-2 text-xs font-medium text-white transition-all dark:bg-[linear-gradient(135deg,#17a77c,#0f8b68)] dark:shadow-[0_4px_14px_rgba(23,167,124,0.25)]"
-                            : "flex items-center gap-2 rounded-full bg-[#eef6f2] px-5 py-2 text-xs font-medium text-[#08243f] transition-all hover:bg-[#e1eee8] dark:border dark:border-[#31586a] dark:bg-transparent dark:text-gray-200 dark:hover:border-[#55d4aa] dark:hover:bg-[#102738]"
+                            ? "flex items-center gap-2 rounded-full bg-pine-700 px-5 py-2 text-xs font-medium text-white transition-all dark:bg-[linear-gradient(135deg,#17a77c,#0f8b68)] dark:shadow-[0_4px_14px_rgba(23,167,124,0.25)]"
+                            : "flex items-center gap-2 rounded-full bg-pine-50 px-5 py-2 text-xs font-medium text-[#08243f] transition-all hover:bg-[#e1eee8] dark:border dark:border-[#31586a] dark:bg-transparent dark:text-gray-200 dark:hover:border-[#55d4aa] dark:hover:bg-[#102738]"
                     }
                     >
                     <Star size={16} fill={ activeTab === "recommendations" ? "currentColor" : "none"}/>
@@ -26,15 +27,15 @@ const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFa
                     <button onClick={() => setActiveTab("favorites")}
                     className={
                         activeTab === "favorites"
-                            ? "flex items-center gap-2 rounded-full bg-[#17634f] px-5 py-2 text-xs font-medium text-white transition-all dark:bg-[linear-gradient(135deg,#17a77c,#0f8b68)] dark:shadow-[0_4px_14px_rgba(23,167,124,0.25)]"
-                            : "flex items-center gap-2 rounded-full bg-[#eef6f2] px-5 py-2 text-xs font-medium text-[#08243f] transition-all hover:bg-[#e1eee8] dark:border dark:border-[#31586a] dark:bg-transparent dark:text-gray-200 dark:hover:border-[#55d4aa] dark:hover:bg-[#102738]"
+                            ? "flex items-center gap-2 rounded-full bg-pine-700 px-5 py-2 text-xs font-medium text-white transition-all dark:bg-[linear-gradient(135deg,#17a77c,#0f8b68)] dark:shadow-[0_4px_14px_rgba(23,167,124,0.25)]"
+                            : "flex items-center gap-2 rounded-full bg-pine-50 px-5 py-2 text-xs font-medium text-[#08243f] transition-all hover:bg-[#e1eee8] dark:border dark:border-[#31586a] dark:bg-transparent dark:text-gray-200 dark:hover:border-[#55d4aa] dark:hover:bg-[#102738]"
                     }
                     >
-                    <Heart size={16} fill={activeTab === "favorites" ? "currentColor" : "none"}/>    
+                    <Heart size={16} fill={activeTab === "favorites" ? "currentColor" : "none"}/>
                         Favourites</button>
                 </div>
-                
-                {activeTab === "recommendations" ? (
+
+                {isLoading ? <PropertySkeletons home /> : activeTab === "recommendations" ? (
                     <Properties
                         properties={visibleProperties}
                         favorites={favorites}

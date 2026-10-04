@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import PageTransition from "./components/PageTransition";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Footer from "../src/components/Footer";
 import Navbar from "../src/components/Navbar";
@@ -6,6 +7,7 @@ import Buy from "./pages/Buy";
 import Contact from "./pages/Contact";
 import ContactThankMessage from "./pages/ContactThankMessage";
 import PropertyInfo from "./pages/PropertyInfo";
+import Comparison from "./pages/Comparison";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Rent from "./pages/Rent";
@@ -25,17 +27,6 @@ import { apiRequest } from "./services/api";
 import NotFound from "./pages/NotFound";
 import usePreferences from "./hooks/usePreferences";
 
-const PageWrapper = ({ children }) => {
-  const location = useLocation();
-
-  const isHomePage = location.pathname === "/";
-
-  return (
-    <div className={isHomePage ? "" : "pt-17"}>
-      {children}
-    </div>
-  );
-};
 
 function App() {
   const [favorites, setFavorites] = useState([]);
@@ -92,6 +83,8 @@ function App() {
   };
 
   const [properties, setProperties] = useState([]);
+  const [propertiesLoading, setPropertiesLoading] = useState(true);
+  const [favoritesLoading, setFavoritesLoading] = useState(Boolean(auth?.token));
 
   // Listings made by other people (you don't see your own listings here)
   const othersProperties = properties.filter(
@@ -122,40 +115,51 @@ function App() {
   }, []);
 
   useEffect(() => {
+    let active = true;
     const loadProperties = async () => {
+      setPropertiesLoading(true);
       try {
         const data = await apiRequest("/properties");
-        setProperties(data);
+        if (active) setProperties(data);
       } catch (error) {
         console.error("Failed to load properties:", error);
+      } finally {
+        if (active) setPropertiesLoading(false);
       }
     };
 
     loadProperties();
     // Load again whenever someone logs in or out, so new listings show up
+    return () => { active = false; };
   }, [auth?.user?._id]);
 
   useEffect(() => {
+    let active = true;
     const loadFavorites = async () => {
       if (!auth?.token) {
         setFavorites([]);
+        setFavoritesLoading(false);
         return;
       }
 
+      setFavoritesLoading(true);
       try {
         const data = await apiRequest("/favourites");
         const favouriteIds = data
           .filter((item) => item.available && item.property)
           .map((item) => item.property.id);
 
-        setFavorites(favouriteIds);
+        if (active) setFavorites(favouriteIds);
       } catch (error) {
         console.error("Failed to load favorites:", error);
-        setFavorites([]);
+        if (active) setFavorites([]);
+      } finally {
+        if (active) setFavoritesLoading(false);
       }
     };
 
     loadFavorites();
+    return () => { active = false; };
   }, [auth?.token]);
 
   const updateAuthUser = (user) => {
@@ -208,12 +212,13 @@ function App() {
     <>
       <BrowserRouter>
         <Navbar isLoggedIn={isLoggedIn} user={auth?.user} onLogout={logOut} />
-        <PageWrapper>
+        <PageTransition>
         <Routes>
           <Route
             path="/"
             element={
               <Home
+                isLoading={propertiesLoading}
                 properties={othersProperties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
@@ -225,6 +230,7 @@ function App() {
             element={
               isLoggedIn ? (
                 <Favorites
+                  isLoading={propertiesLoading || favoritesLoading}
                   properties={properties}
                   favorites={favorites}
                   onToggleFavorite={toggleFavourite}
@@ -238,11 +244,16 @@ function App() {
             path="/buy"
             element={
               <Buy
+                isLoading={propertiesLoading}
                 properties={othersProperties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
               />
             }
+          />
+          <Route
+            path="/comparison"
+            element={<Comparison properties={properties} isLoading={propertiesLoading} />}
           />
           <Route
             path="/properties/:id"
@@ -347,6 +358,7 @@ function App() {
             path="/rent"
             element={
               <Rent
+                isLoading={propertiesLoading}
                 properties={othersProperties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
@@ -367,7 +379,7 @@ function App() {
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </PageWrapper>
+        </PageTransition>
         <Footer isAdmin={isAdmin} />
       </BrowserRouter>
     </>

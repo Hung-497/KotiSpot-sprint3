@@ -12,6 +12,9 @@ const {
   getMyProperties,
 } = require("../controllers/propertyControllers");
 const {
+  getLongLatById   
+} =  require("../utils/locationHelper");
+const {
   requireAuth,
   requireRole,
   requireVerifiedSellerOrAgent,
@@ -35,6 +38,9 @@ router.get("/filter", filterProperties);
 
 //GET /properties/search
 router.get("/search", getPropertyByKeyword);
+
+//GET /properties/geocode/:propertyId
+router.get("/geocode/:propertyId", getLongLatById)
 
 // GET /properties/:propertyId
 router.get("/:propertyId", getPropertyById);

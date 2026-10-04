@@ -1,17 +1,17 @@
 import DiscoverProperty from "../components/DiscoverProperty";
-import PropertySearch from "../components/PropertySearch";
+import PropertySearch from "../components/HomePropertySearch";
 import realestate from "../assets/realestate.png";
 import realestateDark from "../assets/realestate_dark.png";
 import { useState } from "react";
 import { House, ShieldCheck, Users, Leaf } from "lucide-react";
 
-const Home = ({ properties, favorites, onToggleFavorite }) => {
+const Home = ({ properties, favorites, onToggleFavorite, isLoading = false }) => {
   const [filteredProperties, setFilteredProperties] = useState(null);
 
   const visibleProperties = filteredProperties ?? properties;
 
   return (
-    <main className="bg-[#f8faf9] dark:bg-[#081520]">
+    <main className="bg-canvas dark:bg-[#081520]">
       <section className="relative h-110 overflow-visible bg-cover bg-center ">
       <div
       className="absolute inset-0 bg-cover bg-center dark:hidden"
@@ -149,6 +149,7 @@ const Home = ({ properties, favorites, onToggleFavorite }) => {
 
           <div className="mt-4">
             <DiscoverProperty
+              isLoading={isLoading}
               properties={visibleProperties}
               favorites={favorites}
               onToggleFavorite={onToggleFavorite}

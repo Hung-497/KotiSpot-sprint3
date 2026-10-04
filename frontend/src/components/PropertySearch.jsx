@@ -71,15 +71,16 @@ const PropertySearch = ({
 
   return (
     <div
-      className={`relative z-50 ${compact ? "" : "rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[#294457] dark:bg-[#0b1d2b]"}`}
+      className={` relative z-50 ${compact ? "" : "rounded-card border border-line bg-surface p-5 shadow-card"}  `}
     >
       <div
-        className={`relative flex items-center ${compact ? "gap-2 rounded-full bg-white p-2 shadow-md dark:border dark:border-[#2f8f78] dark:bg-[#0b2233]/95 dark:shadow-[0_12px_35px_rgba(0,0,0,0.35)]" 
-                                            : "overflow-hidden rounded-xl border border-gray-300 dark:border-[#294457] dark:bg-[#0b1d2b]"}`}
+        className={` relative flex flex-wrap items-center gap-2 ${compact ? "gap-2 rounded-full bg-surface p-2 shadow-raised dark:border dark:border-[#2f8f78]"
+                                            : "rounded-control"}  `}
       >
+        <div className="relative min-w-40 flex-1">
         <Search
           size={compact ? 18 : 20}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/80"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-subtle"
         />
         <input
           type="text"
@@ -87,31 +88,22 @@ const PropertySearch = ({
           onChange={(event) => setSearch(event.target.value)}
           onKeyDown={(event) => event.key === "Enter" && applyFilters()}
           placeholder={placeholder}
-          className={
-            compact
-              ? "flex-1 bg-transparent px-4 py-2 pl-10 text-sm text-[#08243f] outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-400"
-              : "w-full bg-transparent py-4 pl-12 pr-4 text-sm text-[#08243f] outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-400"
-          }
+          aria-label={placeholder || "Search properties"}
+          className="ks-input pl-11 text-sm"
         />
+        </div>
         <button
           type="button"
           onClick={applyFilters}
-          className={
-            compact
-              ? "rounded-full bg-[#03654b] px-7 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0e9873] dark:bg-[#10b981] dark:hover:bg-[#0d9f70]"
-              : "rounded-full bg-[#12ad83] px-7 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0e9873] dark:bg-[#20c997] dark:text-[#06241d] dark:hover:bg-[#2bd8a6] dark:shadow-[0_0_20px_rgba(32,201,151,0.18)]"
-          }
+          className="ks-btn ks-btn-primary shrink-0"
         >
           Search
         </button>
         <button
           type="button"
+          aria-expanded={isFilterOpen}
           onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className={
-            compact
-              ? "flex items-center gap-2 rounded-full bg-[#09004f] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#00115f] dark:bg-white dark:text-[#08243f] dark:hover:bg-[#f0f0f0]"
-              : "flex items-center gap-2 rounded-full border border-gray-200 bg-white px-6 py-2.5 font-medium text-[#08243f] transition hover:bg-gray-50 dark:border-[#315064] dark:bg-[#0a1e2c] dark:text-white dark:hover:bg-[#102b3b]"
-          }
+          className="ks-btn ks-btn-secondary shrink-0"
         >
           <SlidersHorizontal size={compact ? 17 : 19} />
           Filter
@@ -119,9 +111,9 @@ const PropertySearch = ({
       </div>
 
       {isFilterOpen && (
-        <div className={`${compact ? "absolute left-0 right-0 z-100" : "relative"} mt-2 grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-lg sm:grid-cols-2 lg:grid-cols-3 dark:border-[#294457] dark:bg-[#0b1d2b] dark:shadow-[0_15px_35px_rgba(0,0,0,0.35)]`}>
+        <div className={`  ${compact ? "absolute left-0 right-0 z-100" : "relative"} mt-2 grid grid-cols-1 gap-3 rounded-card border border-line bg-surface p-4 shadow-raised sm:grid-cols-2 lg:grid-cols-3 `}>
           {!compact && (
-            <p className="col-span-full text-sm font-medium text-black dark:text-[#f3f4f5]">
+            <p className="col-span-full text-sm font-medium text-ink">
               Filter properties
             </p>
           )}
@@ -130,12 +122,12 @@ const PropertySearch = ({
             placeholder="Location or postal code"
             value={location}
             onChange={(event) => setLocation(event.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#294457] dark:bg-[#0a1e2c] dark:text-white dark:placeholder:text-gray-400 dark:focus:border-[#55d4aa]"
+            className="ks-input border text-sm"
           />
           <select
             value={propertyType}
             onChange={(event) => setPropertyType(event.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#294457] dark:bg-[#0a1e2c] dark:text-white dark:focus:border-[#55d4aa]"
+            className="ks-input border text-sm"
           >
             <option value="">Property type</option>
             <option value="apartment">Apartment</option>
@@ -147,7 +139,7 @@ const PropertySearch = ({
           <select
             value={listingType}
             onChange={(event) => setListingType(event.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#294457] dark:bg-[#0a1e2c] dark:text-white dark:focus:border-[#55d4aa]"
+            className="ks-input border text-sm"
           >
             <option value="">Buy or rent</option>
             <option value="sale">Buy</option>
@@ -156,7 +148,7 @@ const PropertySearch = ({
           <select
             value={rooms}
             onChange={(event) => setRooms(event.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#294457] dark:bg-[#0a1e2c] dark:text-white dark:focus:border-[#55d4aa]"
+            className="ks-input border text-sm"
           >
             <option value="">Rooms</option>
             {[1, 2, 3, 4, 5].map((room) => (
@@ -171,7 +163,7 @@ const PropertySearch = ({
             placeholder="Minimum price"
             value={minPrice}
             onChange={(event) => setMinPrice(event.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#294457] dark:bg-[#0a1e2c] dark:text-white dark:placeholder:text-gray-400 dark:focus:border-[#55d4aa]"
+            className="ks-input border text-sm"
           />
           <input
             type="number"
@@ -179,7 +171,7 @@ const PropertySearch = ({
             placeholder="Maximum price"
             value={maxPrice}
             onChange={(event) => setMaxPrice(event.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#294457] dark:bg-[#0a1e2c] dark:text-white dark:placeholder:text-gray-400 dark:focus:border-[#55d4aa]"
+            className="ks-input border text-sm"
           />
           <input
             type="number"
@@ -187,7 +179,7 @@ const PropertySearch = ({
             placeholder="Minimum size m²"
             value={minSize}
             onChange={(event) => setMinSize(event.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#294457] dark:bg-[#0a1e2c] dark:text-white dark:placeholder:text-gray-400 dark:focus:border-[#55d4aa]"
+            className="ks-input border text-sm"
           />
           <input
             type="number"
@@ -195,7 +187,7 @@ const PropertySearch = ({
             placeholder="Maximum size m²"
             value={maxSize}
             onChange={(event) => setMaxSize(event.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f] dark:border-[#294457] dark:bg-[#0a1e2c] dark:text-white dark:placeholder:text-gray-400 dark:focus:border-[#55d4aa]"
+            className="ks-input border text-sm"
           />
           <button
             type="button"
@@ -203,7 +195,7 @@ const PropertySearch = ({
               applyFilters();
               setIsFilterOpen(false);
             }}
-            className="rounded-lg bg-[#17634f] px-4 py-2 text-sm font-medium text-white hover:bg-[#12503f]"
+            className="ks-btn ks-btn-primary text-sm font-medium"
           >
             Apply filters
           </button>
