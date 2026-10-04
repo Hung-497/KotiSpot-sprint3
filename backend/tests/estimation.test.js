@@ -178,7 +178,7 @@ describe("POST /api/estimate/growth", () => {
       .post("/api/estimate/growth")
       .set("Authorization", `Bearer ${token}`)
       .send({ 
-        "postalCode":"69",
+        "postalCode":"abc02100",
       })
       .expect(400);
   });

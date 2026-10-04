@@ -66,7 +66,7 @@ async function getGrowth(req, res, next) {
     if (postalCode == null) {
       return res.status(400).json({ error: "postalCode is required" });
     }
-    if (postalCode.match(/\d\d\d\d\d/) == null) {
+    if (typeof postalCode !== "string" || !/^\d{5}$/.test(postalCode.trim())) {
       return res.status(400).json({ error: "invalid postalCode" });
     }
     const result = await predictGrowth({ postalCode });
