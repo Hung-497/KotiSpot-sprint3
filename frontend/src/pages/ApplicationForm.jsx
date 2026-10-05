@@ -129,12 +129,12 @@ const ApplicationForm = ({ userRole }) => {
   }
 
   return (
-    <div className="min-h-screen bg-canvas px-6 py-10" aria-busy={isSubmitting}>
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10" aria-busy={isSubmitting}>
       {isSubmitting && <SavingOverlay label="Submitting application…" />}
       <div className="mx-auto max-w-3xl">
         <form
           onSubmit={handleSubmit}
-          className="rounded-card border border-line bg-surface p-6"
+          className="rounded-card border border-line bg-surface p-4 sm:p-6"
         >
           <div className="mb-6">
             <h1 className="ks-page-title text-center">
@@ -262,7 +262,7 @@ const ApplicationForm = ({ userRole }) => {
                     onChange={(event) =>
                       setGovernmentId(event.target.files[0] || null)
                     }
-                    className="ks-file text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-control dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
+                    className="ks-file w-full min-w-0 max-w-full text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-control dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
                   />
                 </div>
 
@@ -345,7 +345,7 @@ const ApplicationForm = ({ userRole }) => {
 
                 <div className="space-y-4">
                   <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                    <label className="w-47.5 text-sm text-ink-muted">
+                    <label className="w-full text-sm md:w-47.5 md:shrink-0 text-ink-muted">
                       Government ID:
                     </label>
 
@@ -355,12 +355,12 @@ const ApplicationForm = ({ userRole }) => {
                       onChange={(event) =>
                         setGovernmentId(event.target.files[0] || null)
                       }
-                      className="ks-file text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-control dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
+                      className="ks-file w-full min-w-0 max-w-full text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-control dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
                     />
                   </div>
 
                   <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                    <label className="w-47.5 text-sm text-ink-muted">
+                    <label className="w-full text-sm md:w-47.5 md:shrink-0 text-ink-muted">
                       Real estate licence:
                     </label>
 
@@ -370,7 +370,7 @@ const ApplicationForm = ({ userRole }) => {
                       onChange={(event) =>
                         setRealEstateLicense(event.target.files[0] || null)
                       }
-                      className="ks-file text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-control dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
+                      className="ks-file w-full min-w-0 max-w-full text-sm dark:text-[#a7b4be] dark:file:mr-4 dark:file:rounded-control dark:file:border-0 dark:file:bg-[#123b38] dark:file:px-4 dark:file:py-2 dark:file:text-[#55d4aa]"
                     />
                   </div>
                 </div>

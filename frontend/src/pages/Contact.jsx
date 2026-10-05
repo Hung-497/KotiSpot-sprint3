@@ -72,7 +72,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-canvas px-6 py-10" aria-busy={isSubmitting}>
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10" aria-busy={isSubmitting}>
       {isSubmitting && <SavingOverlay label="Sending message…" />}
       <div className="mx-auto max-w-5xl">
         <h1 className="ks-page-title">Contact Us</h1>
@@ -83,7 +83,7 @@ const Contact = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="mt-8 rounded-card border border-line bg-surface p-6"
+          className="mt-8 rounded-card border border-line bg-surface p-4 sm:p-6"
         >
           <h2 className="mb-6 text-lg font-semibold text-ink">
             Send us a message
@@ -172,7 +172,7 @@ const Contact = () => {
           </button>
         </form>
 
-        <div className="mt-5 rounded-card border border-line bg-surface p-6">
+        <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
           <h2 className="mb-5 text-lg font-semibold text-ink">
             Other ways to reach us
           </h2>
@@ -196,7 +196,7 @@ const Contact = () => {
           </div>
         </div>
 
-        <div className="mt-5 rounded-card border border-line bg-surface p-6">
+        <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-ink">FAQ</h2>
 
           <div className="mt-4 flex items-center justify-between">

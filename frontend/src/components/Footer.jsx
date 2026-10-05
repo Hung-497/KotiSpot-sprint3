@@ -35,7 +35,7 @@ const Footer = ({ isAdmin }) => {
                 key={label}
                 href="#"
                 aria-label={label}
-                className="flex h-9 w-9 items-center justify-center rounded-control transition-colors hover:bg-pine-50 hover:text-pine-700"
+                className="flex h-11 w-11 items-center justify-center rounded-control transition-colors hover:bg-pine-50 hover:text-pine-700 sm:h-9 sm:w-9"
               >
                 <Icon aria-hidden="true" />
               </a>
@@ -95,10 +95,10 @@ const Footer = ({ isAdmin }) => {
               type="email"
               placeholder="Enter your email"
               aria-label="Email address"
-              className="ks-input min-w-0 flex-1"
+              className="ks-input min-h-11 min-w-0 flex-1 text-base sm:text-sm"
             />
 
-            <button type="submit" className="ks-btn ks-btn-primary shrink-0">
+            <button type="submit" className="ks-btn ks-btn-primary min-h-11 shrink-0">
               Sign Up
             </button>
           </form>

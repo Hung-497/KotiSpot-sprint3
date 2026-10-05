@@ -79,18 +79,18 @@ const ConversationCard = ({
 
   return (
     <div
-      className={` flex items-start justify-between gap-4 rounded-card border bg-surface p-5 shadow-card ${
+      className={` flex items-start justify-between gap-2 rounded-card border bg-surface p-4 sm:gap-4 sm:p-5 shadow-card ${
         read
           ? "border-line"
           : "border-pine-700 ring-1 ring-pine-700 dark:ring-[#55d4aa]/60"
       }  `}
     >
-      <div className="flex flex-1 gap-4">
+      <div className="flex min-w-0 flex-1 gap-2 sm:gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-pine-50 text-pine-700">
           <Mail size={22} />
         </div>
 
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-semibold text-ink">{title}</h2>
 

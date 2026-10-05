@@ -48,7 +48,7 @@ const SegmentedControl = ({
 
   return (
     <div
-      className={`relative inline-flex rounded-control border border-line bg-surface p-1 ${className}`}
+      className={`relative flex w-full min-w-0 rounded-control sm:inline-flex sm:w-auto border border-line bg-surface p-1 ${className}`}
     >
       <span
         ref={indicatorRef}
@@ -70,7 +70,7 @@ const SegmentedControl = ({
             disabled={disabled}
             aria-pressed={isActive}
             onClick={() => onChange(optionValue)}
-            className={`relative z-10 flex items-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors duration-220 active:scale-[0.97] ${
+            className={`relative z-10 flex min-w-0 flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs sm:flex-none sm:gap-2 sm:px-3.5 sm:text-sm font-medium transition-colors duration-220 active:scale-[0.97] ${
               isActive ? "text-white" : "text-ink-muted hover:text-ink"
             }`}
           >

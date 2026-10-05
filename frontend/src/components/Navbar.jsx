@@ -170,22 +170,22 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
 
   return (
     <nav className="sticky top-0 z-60 border-b border-line bg-surface">
-      <div className="ks-container flex h-16 items-center gap-4 md:h-18">
+      <div className="ks-container flex h-16 items-center gap-2 sm:gap-4 lg:h-18">
         <Link
           to="/"
           className="flex shrink-0 items-center rounded-control"
         >
           <img
-            className="h-auto w-30 sm:w-34 lg:w-40 dark:hidden"
+            className="h-auto w-28 sm:w-34 lg:w-40 dark:hidden"
             src={logo}
             alt="Kotispot"
           />
-          <img src={darkLogo} alt="Kotispot" className="hidden h-auto w-30 sm:w-34 lg:w-40 dark:block" />
+          <img src={darkLogo} alt="Kotispot" className="hidden h-auto w-28 sm:w-34 lg:w-40 dark:block" />
         </Link>
 
         <ul
           ref={desktopListRef}
-          className="relative mx-auto hidden h-full items-stretch md:flex"
+          className="relative mx-auto hidden h-full items-stretch lg:flex"
         >
           {navItems.map((item) => {
             const isActive = item.href === activeHref;
@@ -213,7 +213,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
           />
         </ul>
 
-        <ul className="ml-auto flex items-center gap-2 md:ml-0">
+        <ul className="ml-auto flex items-center gap-2 lg:ml-0">
           {isLoggedIn ? (
             <li ref={profileMenuRef} className="relative">
               <button
@@ -226,7 +226,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
                   setIsMobileNavOpen(false);
                   setIsMenuOpen((current) => !current);
                 }}
-                className={`flex h-10 items-center gap-1 rounded-full border py-1 pl-1 pr-2 transition-colors ${
+                className={`flex h-11 items-center gap-1 rounded-full border py-1 pl-1 pr-2 transition-colors sm:h-10 ${
                   isMenuOpen
                     ? "border-pine-200 bg-pine-50"
                     : "border-line bg-surface hover:border-line-strong"
@@ -406,7 +406,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
             ))
           )}
 
-          <li className="md:hidden">
+          <li className="lg:hidden">
             <button
               type="button"
               aria-label={isMobileNavOpen ? "Close menu" : "Open menu"}
@@ -416,7 +416,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
                 setIsMenuOpen(false);
                 setIsMobileNavOpen(!isMobileNavOpen);
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-control text-ink transition-colors hover:bg-surface-muted"
+              className="flex h-11 w-11 items-center justify-center rounded-control text-ink transition-colors hover:bg-surface-muted"
             >
               {isMobileNavOpen ? (
                 <X size={22} strokeWidth={2} aria-hidden="true" />
@@ -437,7 +437,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
       {isMobileNavOpen && (
         <div
           id="mobile-nav"
-          className="border-t border-line bg-surface px-4 pb-4 pt-2 sm:px-6 md:hidden"
+          className="border-t border-line bg-surface px-4 pb-4 pt-2 sm:px-6 lg:hidden"
         >
           <ul className="space-y-0.5">
             {navItems.map((item) => {

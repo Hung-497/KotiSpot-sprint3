@@ -62,12 +62,12 @@ const ApplicationCard = ({ application, onDelete }) => {
           : "border-pine-700 ring-1 ring-pine-700 dark:ring-[#55d4aa]/50"
       }  `}
     >
-      <div className="flex min-w-0 flex-1 gap-4">
+      <div className="flex min-w-0 flex-1 gap-2 sm:gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-pine-50 text-pine-700">
           <UserCheck size={22} />
         </div>
 
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold text-ink">
               {application.fullName} wants to become{" "}
@@ -140,7 +140,7 @@ const ApplicationCard = ({ application, onDelete }) => {
                 </>
               )}
 
-              <div className="flex flex-wrap gap-4 pt-2">
+              <div className="grid grid-cols-1 gap-4 pt-2 xl:grid-cols-2">
                 <div>
                   <p className="mb-1 font-medium text-ink">
                     Government ID
@@ -149,7 +149,7 @@ const ApplicationCard = ({ application, onDelete }) => {
                     src={application.idDocument}
                     alt="Government ID"
                     onClick={() => setBigPicture(application.idDocument)}
-                    className="h-40 w-60 cursor-zoom-in rounded-control border border-line bg-surface object-cover"
+                    className="h-40 w-full max-w-60 cursor-zoom-in rounded-control border border-line bg-surface object-cover"
                   />
                 </div>
 
@@ -162,7 +162,7 @@ const ApplicationCard = ({ application, onDelete }) => {
                       src={application.licenseDocument}
                       alt="Real estate licence"
                       onClick={() => setBigPicture(application.licenseDocument)}
-                      className="h-40 w-60 cursor-zoom-in rounded-control border border-line bg-surface object-cover"
+                      className="h-40 w-full max-w-60 cursor-zoom-in rounded-control border border-line bg-surface object-cover"
                     />
                   </div>
                 )}
@@ -223,7 +223,7 @@ const ApplicationCard = ({ application, onDelete }) => {
                 className="ks-input mt-4 w-full border text-sm"
               />
 
-              <div className="mt-3 flex gap-3">
+              <div className="mt-3 flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => reviewApplication("approved")}

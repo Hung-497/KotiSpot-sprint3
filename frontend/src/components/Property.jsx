@@ -5,6 +5,7 @@ import CardPhotos from "./CardPhotos";
 import useCardPhotoCycle from "../hooks/useCardPhotoCycle";
 import { getCardPhotos } from "../utils/cardPhotos";
 import { formatPrice } from "../utils/formatPrice";
+import { MAX_COMPARISON_PROPERTIES } from "./ComparisonActions";
 
 const Property = ({
   property,
@@ -22,11 +23,22 @@ const Property = ({
   const detailPath = `/properties/${property.id}`;
 
   const handleCompare = () => {
-    setSelectedProperties((current) =>
-      current.includes(property.id)
-        ? current.filter((id) => id !== property.id)
-        : [...current, property.id],
-    );
+    if (!isSelected && selectedProperties.length >= MAX_COMPARISON_PROPERTIES) {
+      window.alert(`You can compare up to ${MAX_COMPARISON_PROPERTIES} properties. Deselect one before adding another.`);
+      return;
+    }
+
+    setSelectedProperties((current) => {
+      if (current.includes(property.id)) {
+        return current.filter((id) => id !== property.id);
+      }
+
+      if (current.length >= MAX_COMPARISON_PROPERTIES) {
+        return current;
+      }
+
+      return [...current, property.id];
+    });
   };
 
   return (
@@ -106,7 +118,7 @@ const Property = ({
         </button>
       </div>
       {setSelectedProperties && (
-        <label className="ks-compare-row mt-auto flex w-full cursor-pointer items-center gap-2 border-t border-line px-4 py-2.5 text-sm text-ink-muted transition-colors hover:bg-surface-muted">
+        <label className="ks-compare-row mt-auto flex min-h-11 w-full cursor-pointer items-center gap-2 border-t border-line px-4 py-2.5 text-sm text-ink-muted transition-colors hover:bg-surface-muted">
           <input
             type="checkbox"
             checked={isSelected}

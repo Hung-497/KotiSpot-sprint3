@@ -60,7 +60,7 @@ const PropertyGallery = ({ property }) => {
               type="button"
               aria-label="Previous image"
               onClick={showPreviousImage}
-              className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface/95 text-ink shadow transition hover:bg-surface"
+              className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface/95 text-ink shadow transition hover:bg-surface"
             >
               <ChevronLeft size={22} aria-hidden="true" />
             </button>
@@ -68,7 +68,7 @@ const PropertyGallery = ({ property }) => {
               type="button"
               aria-label="Next image"
               onClick={showNextImage}
-              className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface/95 text-ink shadow transition hover:bg-surface"
+              className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface/95 text-ink shadow transition hover:bg-surface"
             >
               <ChevronRight size={22} aria-hidden="true" />
             </button>

@@ -222,7 +222,7 @@ const MyListings = ({ onListingUpdated }) => {
 
   if (editingListing) {
     return (
-      <div className="min-h-screen bg-canvas px-6 py-10" aria-busy={isSaving}>
+      <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10" aria-busy={isSaving}>
       {isSaving && <SavingOverlay label="Saving changes…" />}
         <div className="mx-auto max-w-4xl">
           <h1 className="ks-page-title">
@@ -233,7 +233,7 @@ const MyListings = ({ onListingUpdated }) => {
             Update your property information.
           </p>
 
-          <div className="mt-8 rounded-card border border-line bg-surface p-8">
+          <div className="mt-8 rounded-card border border-line bg-surface p-4 sm:p-8">
             {error && (
               <p className="mb-5 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger">
                 {error}
@@ -546,7 +546,7 @@ const MyListings = ({ onListingUpdated }) => {
               />
             </div>
 
-            <div className="mt-8 flex justify-end gap-3 border-t pt-6 dark:border-white/10">
+            <div className="mt-8 flex flex-wrap justify-end gap-3 border-t pt-6 dark:border-white/10">
               <button
                 type="button"
                 disabled={isSaving}
@@ -575,7 +575,7 @@ const MyListings = ({ onListingUpdated }) => {
   }
 
   return (
-    <div className="min-h-screen bg-canvas px-6 py-10" aria-busy={isSaving}>
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10" aria-busy={isSaving}>
       {isSaving && <SavingOverlay label="Saving changes…" />}
       <div className="mx-auto max-w-6xl">
         <h1 className="ks-page-title">

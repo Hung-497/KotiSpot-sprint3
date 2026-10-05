@@ -77,7 +77,7 @@ const PropertySearch = ({
         className={` relative flex flex-wrap items-center gap-2 ${compact ? "gap-2 rounded-full bg-surface p-2 shadow-raised dark:border dark:border-[#2f8f78]"
                                             : "rounded-control"}  `}
       >
-        <div className="relative min-w-40 flex-1">
+        <div className="relative min-w-0 basis-full sm:min-w-40 sm:flex-1 sm:basis-auto">
         <Search
           size={compact ? 18 : 20}
           className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-subtle"
@@ -95,7 +95,7 @@ const PropertySearch = ({
         <button
           type="button"
           onClick={applyFilters}
-          className="ks-btn ks-btn-primary shrink-0"
+          className="ks-btn ks-btn-primary flex-1 sm:flex-none"
         >
           Search
         </button>
@@ -103,7 +103,7 @@ const PropertySearch = ({
           type="button"
           aria-expanded={isFilterOpen}
           onClick={() => setIsFilterOpen(!isFilterOpen)}
-          className="ks-btn ks-btn-secondary shrink-0"
+          className="ks-btn ks-btn-secondary flex-1 sm:flex-none"
         >
           <SlidersHorizontal size={compact ? 17 : 19} />
           Filter

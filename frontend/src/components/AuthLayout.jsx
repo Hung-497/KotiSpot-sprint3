@@ -31,7 +31,7 @@ const AuthLayout = ({
 }) => (
   <div className="ks-container flex grow items-center py-6 md:py-12">
     <div className="grid w-full overflow-hidden rounded-card border border-line bg-surface shadow-card lg:min-h-136 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-    <aside className="relative flex flex-col gap-6 overflow-hidden bg-pine-800 px-6 py-8 text-white sm:px-10 lg:justify-between lg:px-12 lg:py-12">
+    <aside className="relative flex flex-col gap-6 overflow-hidden bg-pine-800 px-4 py-6 text-white sm:px-10 sm:py-8 lg:justify-between lg:px-12 lg:py-12">
       <Contours variant="left" className="text-white opacity-15" />
 
       <div className="relative">
@@ -46,7 +46,7 @@ const AuthLayout = ({
       </div>
     </aside>
 
-    <section className="flex items-center justify-center px-5 py-10 sm:px-10 lg:py-12">
+    <section className="flex items-center justify-center px-4 py-6 sm:px-10 sm:py-10 lg:py-12">
       <div className="w-full max-w-sm">
         <h1 className="ks-page-title">{title}</h1>
         <p className="mt-2 text-ink-muted">{subtitle}</p>

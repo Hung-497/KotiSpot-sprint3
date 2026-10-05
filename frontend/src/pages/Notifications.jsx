@@ -133,7 +133,7 @@ function Notifications({ isAdmin }) {
   }
 
   return (
-    <div className="min-h-screen bg-canvas px-6 py-10">
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
           <h1 className="ks-page-title">Notifications</h1>

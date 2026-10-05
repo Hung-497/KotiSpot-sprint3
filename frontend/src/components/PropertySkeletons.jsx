@@ -1,9 +1,9 @@
 const PropertySkeletons = ({ home = false }) => (
   <div role="status" aria-label="Loading properties" aria-busy="true">
     <span className="sr-only">Loading properties…</span>
-    <ul className={home ? "properties" : "grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"}>
+    <ul className={home ? "grid list-none grid-cols-1 gap-4 p-0 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"}>
       {Array.from({ length: 8 }, (_, index) => (
-        <li key={index} aria-hidden="true" className={home ? "w-60" : ""}>
+        <li key={index} aria-hidden="true" className="min-w-0">
           <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
             <div className={home ? "ks-skeleton h-28.75" : "ks-skeleton aspect-4/3"} />
             <div className="space-y-2.5 px-4 pb-4 pt-3.5">

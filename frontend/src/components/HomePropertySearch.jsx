@@ -71,15 +71,15 @@ const HomePropertySearch = ({
 
   return (
     <div
-      className={`relative z-50 ${compact ? "" : "rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[#294457] dark:bg-[#0b1d2b]"}`}
+      className={`relative z-50 max-sm:[&_input]:min-h-11 max-sm:[&_input]:min-w-0 max-sm:[&_input]:text-base max-sm:[&_select]:min-h-11 max-sm:[&_select]:min-w-0 max-sm:[&_select]:text-base ${compact ? "" : "rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-[#294457] dark:bg-[#0b1d2b]"}`}
     >
       <div
-        className={`relative flex items-center ${compact ? "gap-2 rounded-full bg-white p-2 shadow-md dark:border dark:border-[#2f8f78] dark:bg-[#0b2233]/95 dark:shadow-[0_12px_35px_rgba(0,0,0,0.35)]" 
-                                            : "overflow-hidden rounded-xl border border-gray-300 dark:border-[#294457] dark:bg-[#0b1d2b]"}`}
+        className={`relative grid grid-cols-[minmax(0,1fr)_auto] items-center sm:flex ${compact ? "gap-2 rounded-2xl bg-white p-2 shadow-md sm:rounded-full dark:border dark:border-[#2f8f78] dark:bg-[#0b2233]/95 dark:shadow-[0_12px_35px_rgba(0,0,0,0.35)]"
+                                            : "gap-2 rounded-xl border border-gray-300 p-2 sm:gap-0 sm:p-0 dark:border-[#294457] dark:bg-[#0b1d2b]"}`}
       >
         <Search
           size={compact ? 18 : 20}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/80"
+          className="absolute left-4 top-7 -translate-y-1/2 text-gray-400 sm:top-1/2 dark:text-white/80"
         />
         <input
           type="text"
@@ -89,8 +89,8 @@ const HomePropertySearch = ({
           placeholder={placeholder}
           className={
             compact
-              ? "flex-1 bg-transparent px-4 py-2 pl-10 text-sm text-[#08243f] outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-400"
-              : "w-full bg-transparent py-4 pl-12 pr-4 text-sm text-[#08243f] outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-400"
+              ? "col-span-2 min-w-0 flex-1 bg-transparent px-4 py-2 pl-10 text-base text-[#08243f] outline-none placeholder:text-gray-400 sm:text-sm dark:text-white dark:placeholder:text-gray-400"
+              : "col-span-2 min-w-0 w-full bg-transparent py-4 pl-12 pr-4 text-base text-[#08243f] outline-none placeholder:text-gray-400 sm:text-sm dark:text-white dark:placeholder:text-gray-400"
           }
         />
         <button
@@ -119,7 +119,7 @@ const HomePropertySearch = ({
       </div>
 
       {isFilterOpen && (
-        <div className={`${compact ? "absolute left-0 right-0 z-100" : "relative"} mt-2 grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-lg sm:grid-cols-2 lg:grid-cols-3 dark:border-[#294457] dark:bg-[#0b1d2b] dark:shadow-[0_15px_35px_rgba(0,0,0,0.35)]`}>
+        <div className={`${compact ? "absolute left-0 right-0 z-100 max-h-[60dvh] overflow-y-auto" : "relative"} mt-2 grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-lg sm:grid-cols-2 lg:grid-cols-3 dark:border-[#294457] dark:bg-[#0b1d2b] dark:shadow-[0_15px_35px_rgba(0,0,0,0.35)]`}>
           {!compact && (
             <p className="col-span-full text-sm font-medium text-black dark:text-[#f3f4f5]">
               Filter properties

@@ -35,7 +35,7 @@ const PropertyMap = ({ latitude, longitude, address }) => {
       className={
         fullscreen
           ? "fixed inset-0 z-9999 bg-white"
-          : "relative w-full h-100 rounded-xl overflow-hidden"
+          : "relative h-72 w-full sm:h-100 rounded-xl overflow-hidden"
       }
     >
       <MapContainer

@@ -3,7 +3,7 @@ import { FilePlus2, ShieldCheck, HousePlus, House, FilePenLine, ChartNoAxesCombi
 
 const Sell = () => {
   return (
-    <div className="min-h-screen bg-canvas px-6 py-10">
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-6xl">
 
         <h1 className="ks-page-title">
@@ -17,7 +17,7 @@ const Sell = () => {
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-          <div className="lg:col-span-2 rounded-card border border-line bg-surface p-6">
+          <div className="lg:col-span-2 rounded-card border border-line bg-surface p-4 sm:p-6">
 
             <h2 className="text-xl font-semibold text-ink">
               How it works
@@ -99,7 +99,7 @@ const Sell = () => {
 
           </div>
 
-          <div className="rounded-card border border-line bg-surface p-6">
+          <div className="rounded-card border border-line bg-surface p-4 sm:p-6">
 
             <p className="text-xs text-ink-muted">
               Regular account

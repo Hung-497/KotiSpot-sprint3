@@ -147,14 +147,14 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
   };
 
   return (
-    <div className="min-h-screen bg-canvas px-6 py-10">
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-6xl">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="min-w-0 lg:col-span-2">
             <PropertyGallery key={selectedProperty.id} property={selectedProperty} />
           </div>
 
-          <div className="rounded-card border border-line bg-surface p-6">
+          <div className="rounded-card border border-line bg-surface p-4 sm:p-6">
             <h1 className="ks-page-title">
               {selectedProperty.address}
             </h1>
@@ -166,7 +166,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
               </span>
             </div>
 
-            <h2 className="mt-4 text-3xl font-medium text-ink">
+            <h2 className="mt-4 text-2xl font-medium sm:text-3xl text-ink">
               {selectedProperty.price} €{isRental && " / month"}
             </h2>
 
@@ -329,7 +329,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
             <h2 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">Features</h2>
 
             {listedFeatures.length > 0 ? (
-              <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 text-lg leading-7 text-ink sm:grid-cols-3">
+              <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 text-base sm:text-lg leading-7 text-ink sm:grid-cols-3">
                 {listedFeatures.map(([key, label]) => (
                   <li key={key} className="flex items-center gap-2">
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pine-50 text-pine-700">

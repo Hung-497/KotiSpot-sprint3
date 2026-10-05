@@ -84,10 +84,10 @@ const Profile = ({ onProfileUpdate }) => {
   }
 
   return (
-    <div className="min-h-screen bg-canvas px-6 py-10" aria-busy={isSaving}>
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10" aria-busy={isSaving}>
       {isSaving && <SavingOverlay label="Saving changes…" />}
       <div className="mx-auto max-w-3xl">
-        <div className="rounded-card border border-line bg-surface p-6">
+        <div className="rounded-card border border-line bg-surface p-4 sm:p-6">
           <div className="flex items-center gap-5 border-b border-line pb-5">
             <img
               src={profilePic}
@@ -110,37 +110,37 @@ const Profile = ({ onProfileUpdate }) => {
           {!edit ? (
             <div>
               <div className="mt-6 space-y-5">
-                <div className="grid grid-cols-[150px_1fr]">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)]">
                   <p className="font-medium text-ink">First name:</p>
 
                   <p className="dark:text-white">{firstName || "-"}</p>
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr]">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)]">
                   <p className="font-medium text-ink">Last name:</p>
 
                   <p className="dark:text-white">{lastName || "-"}</p>
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr]">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)]">
                   <p className="font-medium text-ink">Email:</p>
 
                   <p className="dark:text-white">{email}</p>
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr]">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)]">
                   <p className="font-medium text-ink">Phone number:</p>
 
                   <p className="dark:text-white">{phoneNumber || "-"}</p>
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr]">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)]">
                   <p className="font-medium text-ink">Role:</p>
 
                   <p className="capitalize dark:text-white">{role || "-"}</p>
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr]">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)]">
                   <p className="font-medium text-ink">Bio:</p>
 
                   <p className="dark:text-white">{bio || "-"}</p>
@@ -171,12 +171,12 @@ const Profile = ({ onProfileUpdate }) => {
                   type="file"
                   accept="image/*"
                   onChange={handleProfilePic}
-                  className="ks-file text-sm dark:text-[#a7b4be]"
+                  className="ks-file w-full min-w-0 max-w-full text-sm dark:text-[#a7b4be]"
                 />
               </div>
 
               <div className="mt-6 space-y-4">
-                <div className="grid grid-cols-[150px_1fr] items-center">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)] items-center">
                   <label className="text-sm dark:text-[#a7b4be]">First name:</label>
 
                   <input
@@ -187,7 +187,7 @@ const Profile = ({ onProfileUpdate }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr] items-center">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)] items-center">
                   <label className="text-sm dark:text-[#a7b4be]">Last name:</label>
 
                   <input
@@ -198,7 +198,7 @@ const Profile = ({ onProfileUpdate }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr] items-center">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)] items-center">
                   <label className="text-sm dark:text-[#a7b4be]">Email:</label>
 
                   <input
@@ -209,7 +209,7 @@ const Profile = ({ onProfileUpdate }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr] items-center">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)] items-center">
                   <label className="text-sm dark:text-[#a7b4be]">Phone number:</label>
 
                   <input
@@ -220,7 +220,7 @@ const Profile = ({ onProfileUpdate }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-[150px_1fr] items-center">
+                <div className="grid grid-cols-1 gap-1 sm:grid-cols-[150px_minmax(0,1fr)] items-center">
                   <label className="text-sm dark:text-[#a7b4be]">Bio:</label>
 
                   <input
@@ -232,7 +232,7 @@ const Profile = ({ onProfileUpdate }) => {
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end gap-3">
+              <div className="mt-8 flex flex-wrap justify-end gap-3">
                 <button
                   type="button"
                   disabled={isSaving}

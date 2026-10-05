@@ -120,7 +120,7 @@ const Settings = ({
   }
 
   return (
-    <div className="min-h-screen bg-surface-muted px-6 py-10" aria-busy={isDeleting}>
+    <div className="min-h-screen bg-surface-muted px-4 py-6 sm:px-6 sm:py-10" aria-busy={isDeleting}>
       {isDeleting && <SavingOverlay label="Deleting account…" />}
       <div className="mx-auto max-w-5xl">
         <h1 className="ks-page-title">
@@ -167,7 +167,7 @@ const Settings = ({
 
         {/* APPEARANCE */}
         <div className="mb-5 rounded-card border border-line bg-surface">
-          <div className="flex items-center gap-4 p-6">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4 p-4 sm:p-6">
             <div className="rounded-full bg-pine-50 p-3 text-pine-700">
               <Monitor size={21} />
             </div>
@@ -183,13 +183,13 @@ const Settings = ({
             </div>
           </div>
 
-          <hr className="mx-6 border-line" />
+          <hr className="mx-4 sm:mx-6 border-line" />
 
-          <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-4 p-4 sm:p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Moon
                 size={21}
-                className="text-ink-muted"
+                className="shrink-0 text-ink-muted"
               />
 
               <div>
@@ -216,7 +216,7 @@ const Settings = ({
 
         {/* NOTIFICATIONS */}
         <div className="mb-5 rounded-card border border-line bg-surface">
-          <div className="flex items-center gap-4 p-6">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4 p-4 sm:p-6">
             <div className="rounded-full bg-pine-50 p-3 text-pine-700">
               <Bell size={21} />
             </div>
@@ -233,11 +233,11 @@ const Settings = ({
           </div>
 
           {/* EMAIL */}
-          <div className="mx-6 flex items-center justify-between border-b border-line py-5">
-            <div className="flex items-center gap-4">
+          <div className="mx-4 sm:mx-6 flex items-center justify-between gap-3 border-b border-line py-5">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Mail
                 size={21}
-                className="text-ink-muted"
+                className="shrink-0 text-ink-muted"
               />
 
               <div>
@@ -282,11 +282,11 @@ const Settings = ({
           </div>
 
           {/* MARKETING */}
-          <div className="mx-6 flex items-center justify-between border-b border-line py-5">
-            <div className="flex items-center gap-4">
+          <div className="mx-4 sm:mx-6 flex items-center justify-between gap-3 border-b border-line py-5">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Megaphone
                 size={21}
-                className="text-ink-muted"
+                className="shrink-0 text-ink-muted"
               />
 
               <div>
@@ -329,11 +329,11 @@ const Settings = ({
           </div>
 
           {/* SMS */}
-          <div className="mx-6 flex items-center justify-between py-5">
-            <div className="flex items-center gap-4">
+          <div className="mx-4 sm:mx-6 flex items-center justify-between gap-3 py-5">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Smartphone
                 size={21}
-                className="text-ink-muted"
+                className="shrink-0 text-ink-muted"
               />
 
               <div>
@@ -378,7 +378,7 @@ const Settings = ({
 
         {/* ACCOUNT */}
         <div className="rounded-card border border-line bg-surface">
-          <div className="flex items-center gap-4 p-6">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4 p-4 sm:p-6">
             <div className="rounded-full bg-pine-50 p-3 text-pine-700">
               <User size={21} />
             </div>
@@ -394,13 +394,13 @@ const Settings = ({
             </div>
           </div>
 
-          <hr className="mx-6 border-line" />
+          <hr className="mx-4 sm:mx-6 border-line" />
 
-          <div className="flex items-center justify-between p-6">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Trash2
                 size={21}
-                className="text-ink-muted"
+                className="shrink-0 text-ink-muted"
               />
 
               <div>

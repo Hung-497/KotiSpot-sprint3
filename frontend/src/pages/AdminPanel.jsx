@@ -95,7 +95,7 @@ const AdminPanel = ({ onModerationUpdated }) => {
   return (
     <>
       {isSubmitting && <SavingOverlay label="Saving moderation…" />}
-    <main className="min-h-screen bg-canvas px-6 py-10">
+    <main className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
           <div>
@@ -186,7 +186,7 @@ const AdminPanel = ({ onModerationUpdated }) => {
 
       {selectedProperty && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#08243f]/40 px-6 py-8"
+          className="fixed inset-0 z-80 flex items-center justify-center bg-[#08243f]/40 px-4 py-4 sm:px-6 sm:py-8"
           role="presentation"
           onClick={closeDetails}
         >
@@ -197,7 +197,7 @@ const AdminPanel = ({ onModerationUpdated }) => {
             aria-labelledby="property-details-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-line p-6">
+            <div className="flex items-center justify-between border-b border-line p-4 sm:p-6">
               <div>
                 <p className="text-sm text-ink-muted">
                   Property details
@@ -221,7 +221,7 @@ const AdminPanel = ({ onModerationUpdated }) => {
               </button>
             </div>
 
-            <div className="grid gap-6 p-6 md:grid-cols-[220px_1fr]">
+            <div className="grid gap-4 p-4 sm:gap-6 sm:p-6 md:grid-cols-[220px_1fr]">
               <img
                 src={
                   selectedProperty.images?.find((image) => image.isMain)?.url ||
@@ -257,7 +257,7 @@ const AdminPanel = ({ onModerationUpdated }) => {
               </div>
             </div>
 
-            <div className="border-t border-line p-6">
+            <div className="border-t border-line p-4 sm:p-6">
               <p className="text-sm font-semibold text-ink">
                 Choose a moderation action
               </p>
@@ -311,7 +311,7 @@ const AdminPanel = ({ onModerationUpdated }) => {
                     placeholder="Add a note for the moderation decision"
                   />
 
-                  <div className="mt-3 flex justify-end gap-3">
+                  <div className="mt-3 flex flex-wrap justify-end gap-3">
                     <button
                       type="button"
                       onClick={() => setPendingAction(null)}

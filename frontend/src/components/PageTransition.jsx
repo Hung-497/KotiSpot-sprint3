@@ -65,7 +65,10 @@ const PageTransition = ({ children }) => {
   }, [pathname]);
 
   return (
-    <div ref={contentRef} className="flex grow flex-col">
+    <div
+      ref={contentRef}
+      className="flex min-w-0 grow flex-col [overflow-wrap:anywhere] max-sm:[&_.ks-input]:min-w-0 max-sm:[&_.ks-input]:min-h-11 max-sm:[&_.ks-input]:text-base max-sm:[&_.ks-file]:max-w-full max-sm:[&_button:not([role=switch])]:min-h-11 max-sm:[&_button:not([role=switch])]:min-w-11"
+    >
       {children}
     </div>
   );

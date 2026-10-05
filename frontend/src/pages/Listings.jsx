@@ -85,7 +85,7 @@ const Listings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-canvas px-6 py-10" aria-busy={isSubmitting}>
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10" aria-busy={isSubmitting}>
       {isSubmitting && <SavingOverlay label="Publishing listing…" />}
       <div className="mx-auto max-w-6xl">
         <h1 className="ks-page-title mt-4">
@@ -115,7 +115,7 @@ const Listings = () => {
         )}
 
         {/* LISTING PURPOSE */}
-        <div className="mt-6 rounded-card border border-line bg-surface p-6">
+        <div className="mt-6 rounded-card border border-line bg-surface p-4 sm:p-6">
           <h2 className="font-semibold text-ink">Listing purpose</h2>
 
           <div className="mt-4 flex gap-10">
@@ -142,7 +142,7 @@ const Listings = () => {
         </div>
 
         {/* PROPERTY INFORMATION */}
-        <div className="mt-5 rounded-card border border-line bg-surface p-6">
+        <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
           <h2 className="mb-5 font-semibold text-ink">
             Property information
           </h2>
@@ -362,7 +362,7 @@ const Listings = () => {
 
         {/* RENTAL DETAILS */}
         {listingType === "rent" && (
-          <div className="mt-5 rounded-card border border-line bg-surface p-6">
+          <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
             <h2 className="mb-5 font-semibold text-ink">
               Rental details
             </h2>
@@ -448,7 +448,7 @@ const Listings = () => {
 
         {/* SALE DETAILS */}
         {listingType === "sale" && (
-          <div className="mt-5 rounded-card border border-line bg-surface p-6">
+          <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
             <h2 className="mb-5 font-semibold text-ink">Sale details</h2>
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -470,7 +470,7 @@ const Listings = () => {
         )}
 
         {/* PHOTOS */}
-        <div className="mt-5 rounded-card border border-line bg-surface p-6">
+        <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
           <h2 className="font-semibold text-ink">Property photos</h2>
 
           <PhotoManager
