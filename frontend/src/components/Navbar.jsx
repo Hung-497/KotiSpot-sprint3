@@ -195,7 +195,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
     >
       {isLoggingOut && <SavingOverlay label="Logging out…" />}
       <div className="ks-container flex h-16 items-center gap-2 sm:gap-4 lg:h-18">
-        <Link to="/" className="flex shrink-0 items-center rounded-control">
+        <Link to="/" reloadDocument className="flex shrink-0 items-center rounded-control">
           <img
             className="h-auto w-28 sm:w-34 lg:w-40 dark:hidden"
             src={logo}

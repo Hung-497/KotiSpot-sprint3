@@ -15,6 +15,7 @@ import {
 import { apiRequest } from "../services/api";
 import useDialog from "../hooks/useDialog";
 import PageLoader from "../components/PageLoader";
+import useMinimumDuration, { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 import SavingOverlay from "../components/SavingOverlay";
 import SegmentedControl from "../components/SegmentedControl";
 
@@ -35,6 +36,7 @@ const Settings = ({
   onAccountDeleted,
 }) => {
   const { showConfirm } = useDialog();
+  const hasMinimumLoadingElapsed = useMinimumDuration(PAGE_LOADING_MS);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const saveQueue = useRef(Promise.resolve());
@@ -135,8 +137,8 @@ const Settings = ({
     }
   };
 
-  if (isLoading) {
-    return <PageLoader label="Loading settings…" fullPage />;
+  if (isLoading || !hasMinimumLoadingElapsed) {
+    return <PageLoader label="Loading settings…" fullPage variant="bar" />;
   }
 
   return (
@@ -437,7 +439,7 @@ const Settings = ({
             <button
               type="button"
               onClick={deleteAccount}
-              disabled={isDeleting}
+              disabled={isDeleting || isSaving}
               className="flex items-center gap-2 rounded-control border border-red-400 px-5 py-2 text-red-500"
             >
               <Trash2 size={17} />

@@ -597,12 +597,12 @@ const Listings = () => {
                             w-full
                             items-center justify-center gap-2
                             rounded-lg
-                            bg-[#08243f]
+                            bg-pine-700
                             px-4 py-3
                             text-sm font-medium
                             text-white
                             transition
-                            hover:bg-[#17634f]
+                            hover:bg-[#08243f]
                           "
                       >
                         {/* <Calculator size={18} /> */}

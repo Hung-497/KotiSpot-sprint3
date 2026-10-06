@@ -5,6 +5,7 @@ import ConversationCard from "../components/ConversationCard";
 import { apiRequest } from "../services/api";
 import useDialog from "../hooks/useDialog";
 import PageLoader from "../components/PageLoader";
+import useMinimumDuration, { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 
 const getInquiryPropertyLabel = (property) => {
   if (!property) {
@@ -20,6 +21,7 @@ const getInquiryPropertyLabel = (property) => {
 
 function Notifications({ isAdmin }) {
   const { showAlert } = useDialog();
+  const hasMinimumLoadingElapsed = useMinimumDuration(PAGE_LOADING_MS);
   const [adminLoading, setAdminLoading] = useState(isAdmin);
   const [conversationsLoading, setConversationsLoading] = useState(true);
   // Only for admins
@@ -129,8 +131,8 @@ function Notifications({ isAdmin }) {
     myMessages.length === 0 &&
     (!isAdmin || (applications.length === 0 && contactMessages.length === 0));
 
-  if (conversationsLoading || (isAdmin && adminLoading)) {
-    return <PageLoader label="Loading notifications…" fullPage />;
+  if (!hasMinimumLoadingElapsed || conversationsLoading || (isAdmin && adminLoading)) {
+    return <PageLoader label="Loading notifications…" fullPage variant="bar" />;
   }
   return (
     <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10">

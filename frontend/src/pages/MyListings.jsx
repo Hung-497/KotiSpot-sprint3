@@ -5,7 +5,7 @@ import houseImage from "../assets/house1.jpg";
 import PhotoManager from "../components/PhotoManager";
 import PageLoader from "../components/PageLoader";
 import SavingOverlay from "../components/SavingOverlay";
-import { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
+import useMinimumDuration, { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 // import { Calculator } from "lucide-react";
 import {
   toEditablePhotos,
@@ -24,6 +24,7 @@ const emptyFeatures = {
 
 const MyListings = ({ onListingUpdated }) => {
   const { showAlert, showConfirm } = useDialog();
+  const hasMinimumLoadingElapsed = useMinimumDuration(PAGE_LOADING_MS);
   const [listings, setListings] = useState([]);
   const [editingListing, setEditingListing] = useState(null);
   const [isOpeningEditor, setIsOpeningEditor] = useState(false);
@@ -296,8 +297,8 @@ const MyListings = ({ onListingUpdated }) => {
     }
   };
 
-  if (loading) {
-    return <PageLoader label="Loading your listings…" fullPage />;
+  if (loading || !hasMinimumLoadingElapsed) {
+    return <PageLoader label="Loading your listings…" fullPage variant="bar" />;
   }
 
   if (editingListing) {
@@ -440,12 +441,12 @@ const MyListings = ({ onListingUpdated }) => {
                             w-full
                             items-center justify-center gap-2
                             rounded-lg
-                            bg-[#08243f]
+                            bg-pine-700
                             px-4 py-3
                             text-sm font-medium
                             text-white
                             transition
-                            hover:bg-[#17634f]
+                            hover:bg-[#08243f]
                           "
                         >
                           {/* <Calculator size={18} /> */}

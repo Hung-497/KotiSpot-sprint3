@@ -128,9 +128,12 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
 
   const toggleFavorite = () => onToggleFavorite(selectedProperty.id);
 
-  const canReport =
-    currentUser?.role !== "administrator" &&
-    currentUser?._id !== selectedProperty.owner;
+  const reportUnavailableReason =
+    currentUser?.role === "administrator"
+      ? "Administrators can review this listing in the Admin panel."
+      : currentUser?._id === selectedProperty.owner
+        ? "You cannot report your own listing."
+        : "";
 
   const toggleReportForm = () => {
     setReportSent(false);
@@ -140,6 +143,11 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
 
   const submitReport = async (event) => {
     event.preventDefault();
+
+    if (reportUnavailableReason) {
+      setReportError(reportUnavailableReason);
+      return;
+    }
 
     const trimmedReason = reportReason.trim();
 
@@ -281,7 +289,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
             <button
               type="button"
               onClick={contactSeller}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-control bg-[#08243f] px-4 py-3 text-sm font-medium text-white transition hover:bg-pine-700 dark:bg-linear-to-b dark:from-[#3279d9] dark:to-[#0751ad] dark:font-semibold dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(0,55,130,0.25)] dark:hover:from-[#4188e5] dark:hover:to-[#0c60c3]"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-control bg-pine-700 px-4 py-3 text-sm font-medium text-white transition hover:bg-[#08243f] dark:bg-linear-to-b dark:from-[#3279d9] dark:to-[#0751ad] dark:font-semibold dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(0,55,130,0.25)] dark:hover:from-[#4188e5] dark:hover:to-[#0c60c3]"
             >
               <Mail size={18} />
               Contact seller or agent
@@ -377,18 +385,16 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
               </div>
             )}
 
-            {canReport && (
-              <button
-                type="button"
-                onClick={toggleReportForm}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-control border border-red-300 bg-red-50 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/50 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
-              >
-                <Flag size={16} aria-hidden="true" />
-                Report this listing
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={toggleReportForm}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-control border border-red-300 bg-red-50 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-100 dark:border-[#f43f4f]/75 dark:bg-[#f43f4f]/10 dark:text-[#ff4d5e] dark:shadow-[0_0_12px_rgba(244,63,79,0.1)] dark:hover:border-[#ff5a69] dark:hover:bg-[#f43f4f]/20 dark:hover:text-[#ff7582]"
+            >
+              <Flag size={16} aria-hidden="true" />
+              Report this listing
+            </button>
 
-            {canReport && isReportFormOpen && (
+            {isReportFormOpen && (
               <div className="mt-3 rounded-control border border-red-200 p-4">
                 {!currentUser ? (
                   <p className="text-sm text-ink-muted">
@@ -400,6 +406,10 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
                       log in
                     </Link>{" "}
                     to report this listing.
+                  </p>
+                ) : reportUnavailableReason ? (
+                  <p role="status" className="text-sm text-ink-muted">
+                    {reportUnavailableReason}
                   </p>
                 ) : reportSent ? (
                   <p className="rounded-control bg-pine-50 px-4 py-3 text-sm text-pine-700">
