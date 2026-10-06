@@ -35,13 +35,13 @@ const PropertyMap = ({ latitude, longitude, address }) => {
       className={
         fullscreen
           ? "fixed inset-0 z-9999 bg-white"
-          : "relative w-full h-100 rounded-xl overflow-hidden"
+          : "relative h-72 w-full sm:h-100 rounded-xl overflow-hidden"
       }
     >
       <MapContainer
         center={position}
         zoom={15}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         zoomControl={false}
         className="w-full h-full"
       >
@@ -77,10 +77,12 @@ const PropertyMap = ({ latitude, longitude, address }) => {
 
       <button
         type="button"
+        aria-label={fullscreen ? "Exit fullscreen map" : "View fullscreen map"}
+        aria-pressed={fullscreen}
         onClick={() => setFullscreen(!fullscreen)}
-        className="absolute right-4 top-4 z-1000 rounded-lg bg-white px-4 py-2 shadow-md hover:bg-gray-100"
+        className="absolute right-4 top-4 z-1000 rounded-lg border border-line-strong bg-surface px-4 py-2 text-ink shadow-md transition-colors hover:bg-surface-muted"
       >
-        {fullscreen ? <Shrink size={20} /> : <Expand size={20} />}
+        {fullscreen ? <Shrink size={20} aria-hidden="true" /> : <Expand size={20} aria-hidden="true" />}
       </button>
     </div>
   );

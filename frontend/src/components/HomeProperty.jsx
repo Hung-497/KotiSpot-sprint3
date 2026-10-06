@@ -1,14 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useRef } from "react";
-import { Heart, MapPin, Ruler, DoorOpen } from "lucide-react";
+import { Heart } from "lucide-react";
 import CardPhotos from "./CardPhotos";
 import useCardPhotoCycle from "../hooks/useCardPhotoCycle";
 import { getCardPhotos } from "../utils/cardPhotos";
-import { formatPrice } from "../utils/formatPrice";
 import { MAX_COMPARISON_PROPERTIES } from "./ComparisonActions";
 import { navigateWithPhotoTransition } from "../utils/photoTransition";
 
-const Property = ({
+const HomeProperty = ({
   property,
   favorites,
   onToggleFavorite,
@@ -17,11 +16,12 @@ const Property = ({
 }) => {
   const isFavorite = favorites.includes(property.id);
   const isSelected = selectedProperties.includes(property.id);
-  const { address, city, price, size, rooms, listingType } = property;
+  const { address, city, price, size, listingType } = property;
   const isRental = listingType === "rent";
+
   const photoCycle = useCardPhotoCycle(getCardPhotos(property).length);
-  const photoRef = useRef(null);
   const navigate = useNavigate();
+  const photoRef = useRef(null);
   const detailPath = `/properties/${property.id}`;
 
   const openDetail = (event) => {
@@ -61,56 +61,40 @@ const Property = ({
   };
 
   return (
-    <article
-      onPointerEnter={photoCycle.start}
-      onPointerLeave={photoCycle.stop}
-      className={`group flex h-full flex-col overflow-hidden rounded-card border bg-surface shadow-card transition-[border-color,box-shadow] hover:shadow-raised ${
-        isSelected ? "border-pine-600 ring-1 ring-pine-600 dark:border-[#55d4aa]/60 dark:ring-[#55d4aa]/50" : "border-line"
-      }`}
-    >
+    <div onPointerEnter={photoCycle.start} onPointerLeave={photoCycle.stop} style={{ width: "100%" }} className={`property-card flex min-w-0 flex-col overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:border-[#2b5262] dark:bg-[#0b2233] dark:shadow-[0_8px_24px_rgba(0,0,0,0.25)] dark:hover:border-[#3d7c71] dark:hover:shadow-[0_12px_30px_rgba(0,0,0,0.35)] ${
+      isSelected ? "ring-2 ring-pine-600 dark:ring-[#55d4aa]/70" : ""
+    }`}>
       <div className="relative">
-        <Link
-          to={detailPath}
-          onClick={openDetail}
-          data-no-route-transition
-          className="block rounded-t-card focus-visible:-outline-offset-2"
-        >
+        <Link to={detailPath} onClick={openDetail} data-no-route-transition>
           <CardPhotos
             property={property}
             index={photoCycle.index}
             hasHovered={photoCycle.hasHovered}
             photoRef={photoRef}
+            mediaClassName="h-28.75 w-full object-cover"
           />
 
-          <div className="px-4 pb-3 pt-3.5">
-            <p className="ks-price">
-              {formatPrice(price)}
-              {isRental && <span className="ks-price-unit"> / month</span>}
-            </p>
-            <p className="mt-1 truncate font-medium text-ink">{address}</p>
-            <p className="mt-0.5 flex items-center gap-1 text-sm text-ink-muted">
-              <MapPin size={14} strokeWidth={1.8} aria-hidden="true" className="shrink-0" />
-              <span className="truncate">{city}</span>
-            </p>
-
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-muted">
-              {size != null && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Ruler size={14} strokeWidth={1.8} aria-hidden="true" />
-                  {size} m²
-                </span>
-              )}
-              {rooms != null && (
-                <span className="inline-flex items-center gap-1.5">
-                  <DoorOpen size={14} strokeWidth={1.8} aria-hidden="true" />
-                  {rooms} {rooms === 1 ? "room" : "rooms"}
-                </span>
-              )}
+          <div className="property-info bg-white text-[#08243f] dark:bg-[#0b2233] dark:text-gray-200">
+            <div className="font-semibold dark:text-white">
+              {address}
             </div>
+
+            <div className="dark:text-gray-300">
+              ⌖ {city}
+            </div>
+
+            <div className="dark:text-gray-100">
+              {price} €{isRental ? " / month" : ""}
+            </div>
+
+            <div className="dark:text-gray-300">
+              {size} m² 
+            </div>
+
           </div>
         </Link>
 
-        <span className="pointer-events-none absolute left-3 top-3 rounded-md bg-surface/95 px-2 py-0.5 text-xs font-semibold text-ink">
+        <span className="pointer-events-none absolute left-2 top-2 rounded-md bg-surface/95 px-2 py-0.5 text-xs font-semibold text-ink">
           {isRental ? "For rent" : "For sale"}
         </span>
 
@@ -122,10 +106,11 @@ const Property = ({
               : "Add property to favorites"
           }
           aria-pressed={isFavorite}
-          className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-card transition-colors ${isFavorite
-              ? "bg-pine-700 text-white hover:bg-pine-800"
-              : "bg-surface/95 text-ink hover:text-pine-700"
-            }`}
+          className={`favorite-button absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full shadow-sm backdrop-blur-sm transition hover:scale-105 ${
+            isFavorite
+              ? "bg-pine-700 text-white hover:bg-pine-800 dark:bg-[#18a77c] dark:hover:bg-[#14906b]"
+              : "bg-white/90 text-pine-700 hover:bg-white dark:border dark:border-[#3a6673] dark:bg-[#0b2233]/90 dark:text-white dark:hover:border-[#55d4aa] dark:hover:text-[#55d4aa]"
+          }`}
           onClick={() => {
             onToggleFavorite(property.id);
           }}
@@ -133,13 +118,12 @@ const Property = ({
           <Heart
             size={18}
             strokeWidth={2}
-            aria-hidden="true"
             fill={isFavorite ? "currentColor" : "none"}
           />
         </button>
       </div>
       {setSelectedProperties && (
-        <label className="ks-compare-row mt-auto flex min-h-11 w-full cursor-pointer items-center gap-2 border-t border-line px-4 py-2.5 text-sm text-ink-muted transition-colors hover:bg-surface-muted">
+        <label className="ks-compare-row mt-auto flex min-h-11 cursor-pointer items-center gap-2 border-t border-gray-200 px-3 py-2.5 text-sm text-[#08243f] transition-colors hover:bg-pine-50">
           <input
             type="checkbox"
             checked={isSelected}
@@ -151,8 +135,8 @@ const Property = ({
           </span>
         </label>
       )}
-    </article>
+    </div>
   );
 };
 
-export default Property;
+export default HomeProperty;

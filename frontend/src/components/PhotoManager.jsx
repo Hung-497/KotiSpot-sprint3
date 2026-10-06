@@ -111,9 +111,9 @@ const PhotoManager = ({ photos, onChange, listingTitle }) => {
   return (
     <div>
       <label
-        className={`mt-4 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 py-6 text-sm text-[#08243f] focus-within:ring-2 focus-within:ring-[#17634f] ${
-          isFull || isAdding ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-gray-50"
-        }`}
+        className={` mt-4 flex items-center justify-center rounded-control border-2 border-dashed border-line py-6 text-sm text-ink focus-within:ring-2 focus-within:ring-pine-700 ${
+          isFull || isAdding ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-surface-muted"
+        }  `}
       >
         {isAdding
           ? "Adding photos..."
@@ -126,11 +126,11 @@ const PhotoManager = ({ photos, onChange, listingTitle }) => {
           multiple
           disabled={isFull || isAdding}
           onChange={handlePhotoChange}
-          className="sr-only"
+          className="ks-file sr-only"
         />
       </label>
 
-      <p className="mt-2 text-xs text-gray-500">
+      <p className="mt-2 text-xs text-ink-muted">
         Up to {MAX_PHOTOS} JPEG, PNG, or WebP photos, max {MAX_PHOTO_FILE_SIZE_MB} MB
         each. Choose which photo is the main photo, and describe each photo for
         people using screen readers.
@@ -139,7 +139,7 @@ const PhotoManager = ({ photos, onChange, listingTitle }) => {
       {error && (
         <p
           role="alert"
-          className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="mt-3 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger"
         >
           {error}
         </p>
@@ -153,20 +153,20 @@ const PhotoManager = ({ photos, onChange, listingTitle }) => {
                 <img
                   src={photo.url}
                   alt={photo.description || `Property photo ${index + 1}`}
-                  className={`aspect-4/3 w-full rounded-lg object-cover ${
-                    photo.isMain ? "ring-2 ring-[#17634f]" : ""
-                  }`}
+                  className={` aspect-4/3 w-full rounded-control object-cover ${
+                    photo.isMain ? "ring-2 ring-pine-700" : ""
+                  }  `}
                 />
 
                 {photo.isMain ? (
-                  <span className="absolute left-2 top-2 rounded-full bg-[#17634f] px-2 py-0.5 text-xs font-medium text-white">
+                  <span className="absolute left-2 top-2 rounded-full bg-pine-700 px-2 py-0.5 text-xs font-medium text-white">
                     Main photo
                   </span>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setMainPhoto(photo.key)}
-                    className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium text-[#17634f] shadow hover:bg-white"
+                    className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium text-pine-700 shadow hover:bg-surface"
                   >
                     Set as main
                   </button>
@@ -176,13 +176,13 @@ const PhotoManager = ({ photos, onChange, listingTitle }) => {
                   type="button"
                   aria-label={`Remove photo ${index + 1}`}
                   onClick={() => removePhoto(photo.key)}
-                  className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-sm text-gray-700 shadow hover:bg-red-50 hover:text-red-600"
+                  className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-sm text-ink-muted shadow hover:bg-red-50 hover:text-red-600"
                 >
                   ×
                 </button>
               </div>
 
-              <label className="mt-2 block text-xs font-medium text-gray-600">
+              <label className="mt-2 block text-xs font-medium text-ink-muted">
                 Photo {index + 1} description
                 <input
                   type="text"
@@ -192,7 +192,7 @@ const PhotoManager = ({ photos, onChange, listingTitle }) => {
                     changeDescription(photo.key, event.target.value)
                   }
                   placeholder={`${listingTitle?.trim() || "Property"} - photo ${index + 1}`}
-                  className="mt-1 w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm font-normal outline-none focus:border-[#17634f]"
+                  className="ks-input mt-1 w-full border text-sm font-normal"
                 />
               </label>
             </div>
@@ -202,7 +202,7 @@ const PhotoManager = ({ photos, onChange, listingTitle }) => {
             {[1, 2, 3, 4].map((placeholder) => (
               <div
                 key={placeholder}
-                className="flex h-24 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400"
+                className="flex h-24 items-center justify-center rounded-control bg-surface-muted text-xs text-ink-subtle"
               >
                 Image placeholder
               </div>

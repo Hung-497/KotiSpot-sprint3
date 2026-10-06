@@ -3,17 +3,17 @@ export const getNearbyPlaces = async (lat, long) => {
     [out:json];
 
     (
-      node["amenity"="cafe"](around:1000,${lat},${long});
-      node["amenity"="restaurant"](around:1000,${lat},${long});
-      node["amenity"="school"](around:1000,${lat},${long});
-      node["amenity"="hospital"](around:1000,${lat},${long});
-      node["amenity"="pharmacy"](around:1000,${lat},${long});
+      node["amenity"="cafe"](around:700,${lat},${long});
+      node["amenity"="restaurant"](around:700,${lat},${long});
+      node["amenity"="school"](around:700,${lat},${long});
+      node["amenity"="hospital"](around:700,${lat},${long});
+      node["amenity"="pharmacy"](around:700,${lat},${long});
 
-      node["shop"="supermarket"](around:1000,${lat},${long});
+      node["shop"="supermarket"](around:700,${lat},${long});
 
-      node["leisure"="park"](around:1000,${lat},${long});
+      node["leisure"="park"](around:700,${lat},${long});
 
-      node["highway"="bus_stop"](around:1000,${lat},${long});
+      node["highway"="bus_stop"](around:400,${lat},${long});
     );
 
     out;

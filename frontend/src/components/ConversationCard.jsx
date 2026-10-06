@@ -79,29 +79,31 @@ const ConversationCard = ({
 
   return (
     <div
-      className={`flex items-start justify-between gap-4 rounded-2xl border bg-white p-5 shadow-sm ${
-        read ? "border-gray-200" : "border-[#17634f] ring-1 ring-[#17634f]"
-      }`}
+      className={` flex items-start justify-between gap-2 rounded-card border bg-surface p-4 sm:gap-4 sm:p-5 shadow-card ${
+        read
+          ? "border-line"
+          : "border-pine-700 ring-1 ring-pine-700 dark:ring-[#55d4aa]/60"
+      }  `}
     >
-      <div className="flex flex-1 gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#eef6f2] text-[#17634f]">
+      <div className="flex min-w-0 flex-1 gap-2 sm:gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-pine-50 text-pine-700">
           <Mail size={22} />
         </div>
 
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-semibold text-[#08243f]">{title}</h2>
+            <h2 className="font-semibold text-ink">{title}</h2>
 
             {!read && (
               <>
-                <span className="rounded-full bg-[#17634f] px-2 py-0.5 text-xs font-medium text-white">
+                <span className="rounded-full bg-pine-700 px-2 py-0.5 text-xs font-medium text-white">
                   New
                 </span>
 
                 <button
                   type="button"
                   onClick={markAsRead}
-                  className="text-sm font-medium text-[#17634f] hover:underline"
+                  className="text-sm font-medium text-pine-700 hover:underline"
                 >
                   Mark as read
                 </button>
@@ -109,7 +111,7 @@ const ConversationCard = ({
             )}
           </div>
 
-          {from && <p className="mt-1 text-sm text-gray-500">From {from}</p>}
+          {from && <p className="mt-1 text-sm text-ink-muted">From {from}</p>}
 
           {/* The conversation */}
           <div className="mt-3 space-y-2">
@@ -118,15 +120,15 @@ const ConversationCard = ({
                 key={message._id}
                 className={
                   message.from === me
-                    ? "rounded-lg bg-[#eef6f2] px-4 py-2 text-sm text-[#17634f]"
-                    : "rounded-lg bg-gray-50 px-4 py-2 text-sm text-gray-700"
+                    ? "rounded-control bg-pine-50 px-4 py-2 text-sm text-pine-700 dark:border dark:border-[#2c806c]/50"
+                    : "rounded-control bg-surface-muted px-4 py-2 text-sm text-ink-muted dark:border dark:border-white/10"
                 }
               >
                 <p className="text-xs font-semibold">
                   {message.from === me ? "You" : otherName}
                 </p>
                 <p>{message.text}</p>
-                <p className="mt-1 text-[11px] text-gray-400">
+                <p className="mt-1 text-[11px] text-ink-subtle">
                   {new Date(message.sentAt).toLocaleString()}
                 </p>
               </div>
@@ -134,7 +136,7 @@ const ConversationCard = ({
           </div>
 
           {error && (
-            <p className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p className="mt-3 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger">
               {error}
             </p>
           )}
@@ -147,19 +149,19 @@ const ConversationCard = ({
                 placeholder="Write a reply..."
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="mt-3 w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                className="ks-input mt-3 w-full resize-none border text-sm"
               />
 
               <button
                 type="button"
                 onClick={sendReply}
-                className="mt-2 rounded-lg bg-[#17634f] px-4 py-2 text-sm font-medium text-white hover:bg-[#124d3d]"
+                className="ks-btn ks-btn-primary mt-2 text-sm font-medium"
               >
                 Send reply
               </button>
             </>
           ) : (
-            <p className="mt-3 text-xs text-amber-700">
+            <p className="mt-3 text-xs text-amber-700 dark:text-amber-300">
               Sent by a guest (not logged in), so they can't see replies here.
               Answer them by email instead.
             </p>
@@ -169,7 +171,7 @@ const ConversationCard = ({
 
       <button
         onClick={onDelete}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-subtle transition hover:bg-red-50 hover:text-red-500"
       >
         <Trash2 size={19} />
       </button>
