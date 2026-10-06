@@ -3,6 +3,8 @@ import { apiRequest } from "../services/api";
 import useDialog from "../hooks/useDialog";
 import houseImage from "../assets/house1.jpg";
 import PhotoManager from "../components/PhotoManager";
+import PageLoader from "../components/PageLoader";
+import SavingOverlay from "../components/SavingOverlay";
 // import { Calculator } from "lucide-react";
 import {
   toEditablePhotos,
@@ -27,10 +29,16 @@ const MyListings = ({ onListingUpdated }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
-    //Estimation variables
+  //Estimation variables
   const [estimate, setEstimate] = useState(0);
   const [growth, setGrowth] = useState(0);
-  const modifiers = ["postalCode", "propertySubType", "size", "rooms", "buildingYear"];
+  const modifiers = [
+    "postalCode",
+    "propertySubType",
+    "size",
+    "rooms",
+    "buildingYear",
+  ];
 
   useEffect(() => {
     const loadListings = async () => {
@@ -72,7 +80,7 @@ const MyListings = ({ onListingUpdated }) => {
       ...current,
       [name]: value,
     }));
-    if(modifiers.includes(name)){
+    if (modifiers.includes(name)) {
       setEstimate(0);
       setGrowth(0);
     }
@@ -102,16 +110,16 @@ const MyListings = ({ onListingUpdated }) => {
     }));
   };
 
-   //Estimate functions
+  //Estimate functions
   const calculateEstimate = async () => {
     try {
       const proposedEstimate = await apiRequest(`/estimate`, {
         method: "POST",
         body: JSON.stringify({
-          postalCode: editingListing.postalCode, 
-          size: Number(editingListing.size), 
-          rooms: Number(editingListing.rooms), 
-          buildingYear: Number(editingListing.buildingYear), 
+          postalCode: editingListing.postalCode,
+          size: Number(editingListing.size),
+          rooms: Number(editingListing.rooms),
+          buildingYear: Number(editingListing.buildingYear),
           buildingType: editingListing.propertySubType,
         }),
       });
@@ -122,7 +130,7 @@ const MyListings = ({ onListingUpdated }) => {
         }),
       });
       setEstimate(proposedEstimate.estimate);
-      setGrowth(proposedGrowth.annualGrowthPct)
+      setGrowth(proposedGrowth.annualGrowthPct);
     } catch (error) {
       console.error("Error getting estimate:", error);
       showAlert(
@@ -131,12 +139,12 @@ const MyListings = ({ onListingUpdated }) => {
       );
     }
   };
-    const applyEstimate = () => {
+  const applyEstimate = () => {
     setEditingListing((current) => ({
       ...current,
       ["price"]: estimate,
     }));
-  }
+  };
   const saveEdit = async () => {
     setError("");
 
@@ -192,10 +200,7 @@ const MyListings = ({ onListingUpdated }) => {
       size: Number(editingListing.size),
       features: editingListing.features,
       // The whole photo list is saved, so removed photos are gone after saving
-      images: toPropertyImages(
-        editingListing.photos,
-        editingListing.title,
-      ),
+      images: toPropertyImages(editingListing.photos, editingListing.title),
     };
 
     if (editingListing.listingType === "rent") {
@@ -250,7 +255,8 @@ const MyListings = ({ onListingUpdated }) => {
   const deleteListing = async (propertyId) => {
     const confirmed = await showConfirm({
       title: "Delete listing",
-      message: "Are you sure you want to delete this listing?\nThis cannot be undone.",
+      message:
+        "Are you sure you want to delete this listing?\nThis cannot be undone.",
       confirmLabel: "Delete",
       danger: true,
     });
@@ -273,24 +279,26 @@ const MyListings = ({ onListingUpdated }) => {
   };
 
   if (loading) {
-    return (
-      <p className="p-10 text-center text-gray-500">Loading listings...</p>
-    );
+    return <PageLoader label="Loading your listings…" fullPage />;
   }
 
   if (editingListing) {
     return (
-      <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+      <div
+        className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10"
+        aria-busy={isSaving}
+      >
+        {isSaving && <SavingOverlay label="Saving changes…" />}
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold text-[#08243f]">Edit listing</h1>
+          <h1 className="ks-page-title">Edit listing</h1>
 
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-ink-muted">
             Update your property information.
           </p>
 
-          <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-8">
+          <div className="mt-8 rounded-card border border-line bg-surface p-4 sm:p-8">
             {error && (
-              <p className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p className="mb-5 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger">
                 {error}
               </p>
             )}
@@ -306,7 +314,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="status"
                   value={editingListing.status}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -323,7 +331,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="propertySubType"
                   value={editingListing.propertySubType}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 >
                   <option value="apartment">Apartment</option>
 
@@ -344,7 +352,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="title"
                   value={editingListing.title}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
               <div>
@@ -358,50 +366,51 @@ const MyListings = ({ onListingUpdated }) => {
                   min="1"
                   value={editingListing.price}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
               <div>
-                { editingListing.listingType !== "rent" &&
-                  editingListing.postalCode && 
-                  editingListing.propertyType && 
-                  editingListing.size && 
-                  editingListing.rooms && 
-                  editingListing.buildingYear && 
-                  (estimate ?
+                {editingListing.listingType !== "rent" &&
+                  editingListing.postalCode &&
+                  editingListing.propertyType &&
+                  editingListing.size &&
+                  editingListing.rooms &&
+                  editingListing.buildingYear &&
+                  (estimate ? (
                     <>
-                    <div>
-                      <label className="mb-2 block text-sm">Price estimate (click to apply) (€) *</label>
-                      <button
-                        title="Estimation of current price and predicted annual growth per next 5 years"
-                        type="button"
-                        onClick={applyEstimate}
-                        className="
+                      <div>
+                        <label className="mb-2 block text-sm">
+                          Price estimate (click to apply) (€) *
+                        </label>
+                        <button
+                          title="Estimation of current price and predicted annual growth per next 5 years"
+                          type="button"
+                          onClick={applyEstimate}
+                          className="
                           w-full
                           items-center justify-center gap-2
                           rounded-lg
                           border border-gray-300
                           px-4 py-3
                           text-sm
-                          text-[#08243f]
+                          text-ink
                           transition
                           hover:bg-gray-50
                         "
-                      >
-                        {Math.trunc((estimate * 0.925) / 1000) * 1000}&nbsp;-&nbsp;{Math.trunc((estimate * 1.075) / 1000) * 1000} €
-                        {growth && (
-                          <>
-                            &nbsp;({growth} %)
-                          </>
-                        )}
-
-                      </button>
-                    </div>
+                        >
+                          {Math.trunc((estimate * 0.925) / 1000) * 1000}
+                          &nbsp;-&nbsp;
+                          {Math.trunc((estimate * 1.075) / 1000) * 1000} €
+                          {growth && <>&nbsp;({growth} %)</>}
+                        </button>
+                      </div>
                     </>
-                    : (
-                      <>
+                  ) : (
+                    <>
                       <div>
-                        <label className="mb-2 block text-sm">Price estimate(€) *</label>
+                        <label className="mb-2 block text-sm">
+                          Price estimate(€) *
+                        </label>
                         <button
                           type="button"
                           onClick={calculateEstimate}
@@ -418,13 +427,14 @@ const MyListings = ({ onListingUpdated }) => {
                           "
                         >
                           {/* <Calculator size={18} /> */}
-                          <p>Calculate price estimate <sup >AI-powered </sup></p>
+                          <p>
+                            Calculate price estimate <sup>AI-powered </sup>
+                          </p>
                         </button>
-                        </div>
-                      </>
-                    )
-                )}
-            </div>
+                      </div>
+                    </>
+                  ))}
+              </div>
 
               <div>
                 <label className="mb-2 block text-sm font-medium">City</label>
@@ -433,7 +443,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="city"
                   value={editingListing.city}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -446,7 +456,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="address"
                   value={editingListing.address}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -459,7 +469,7 @@ const MyListings = ({ onListingUpdated }) => {
                   name="postalCode"
                   value={editingListing.postalCode}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -474,7 +484,7 @@ const MyListings = ({ onListingUpdated }) => {
                   min="1"
                   value={editingListing.size}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -488,7 +498,7 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.rooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -504,7 +514,7 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.buildingYear}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -520,7 +530,7 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.bedrooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -536,7 +546,7 @@ const MyListings = ({ onListingUpdated }) => {
                   step="1"
                   value={editingListing.bathrooms}
                   onChange={handleChange}
-                  className="w-full rounded-lg border px-4 py-3"
+                  className="ks-input w-full border"
                 />
               </div>
 
@@ -550,15 +560,13 @@ const MyListings = ({ onListingUpdated }) => {
                   rows="5"
                   value={editingListing.description}
                   onChange={handleChange}
-                  className="w-full resize-none rounded-lg border px-4 py-3"
+                  className="ks-input w-full resize-none border"
                 />
               </div>
             </div>
 
-            <div className="mt-8 border-t pt-6">
-              <h2 className="mb-4 text-lg font-semibold text-[#08243f]">
-                Features
-              </h2>
+            <div className="mt-8 border-t pt-6 dark:border-white/10">
+              <h2 className="mb-4 text-lg font-semibold text-ink">Features</h2>
 
               <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                 {[
@@ -575,6 +583,7 @@ const MyListings = ({ onListingUpdated }) => {
                       name={name}
                       checked={editingListing.features?.[name] ?? false}
                       onChange={handleFeatureChange}
+                      className="accent-pine-700 dark:accent-[#55d4aa]"
                     />
 
                     {label}
@@ -584,8 +593,8 @@ const MyListings = ({ onListingUpdated }) => {
             </div>
 
             {editingListing.listingType === "rent" && (
-              <div className="mt-8 border-t pt-6">
-                <h2 className="mb-5 text-lg font-semibold text-[#08243f]">
+              <div className="mt-8 border-t pt-6 dark:border-white/10">
+                <h2 className="mb-5 text-lg font-semibold text-ink">
                   Rental details
                 </h2>
 
@@ -600,7 +609,7 @@ const MyListings = ({ onListingUpdated }) => {
                       type="date"
                       value={editingListing.rentalDetails?.availableFrom || ""}
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3"
+                      className="ks-input w-full border"
                     />
                   </div>
 
@@ -618,7 +627,7 @@ const MyListings = ({ onListingUpdated }) => {
                         editingListing.rentalDetails?.minimumRentalPeriod ?? ""
                       }
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3"
+                      className="ks-input w-full border"
                     />
                   </div>
 
@@ -633,7 +642,7 @@ const MyListings = ({ onListingUpdated }) => {
                       min="0"
                       value={editingListing.rentalDetails?.deposit ?? ""}
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3"
+                      className="ks-input w-full border"
                     />
                   </div>
 
@@ -648,17 +657,15 @@ const MyListings = ({ onListingUpdated }) => {
                         editingListing.rentalDetails?.additionalCosts || ""
                       }
                       onChange={handleRentalChange}
-                      className="w-full rounded-lg border px-4 py-3"
+                      className="ks-input w-full border"
                     />
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="mt-8 border-t pt-6">
-              <h2 className="font-semibold text-[#08243f]">
-                Property photos
-              </h2>
+            <div className="mt-8 border-t pt-6 dark:border-white/10">
+              <h2 className="font-semibold text-ink">Property photos</h2>
 
               <PhotoManager
                 photos={editingListing.photos}
@@ -672,7 +679,7 @@ const MyListings = ({ onListingUpdated }) => {
               />
             </div>
 
-            <div className="mt-8 flex justify-end gap-3 border-t pt-6">
+            <div className="mt-8 flex flex-wrap justify-end gap-3 border-t pt-6 dark:border-white/10">
               <button
                 type="button"
                 disabled={isSaving}
@@ -680,7 +687,7 @@ const MyListings = ({ onListingUpdated }) => {
                   setEditingListing(null);
                   setError("");
                 }}
-                className="rounded-lg border px-6 py-2.5"
+                className="rounded-control border px-6 py-2.5 dark:border-[#315064] dark:text-white"
               >
                 Cancel
               </button>
@@ -689,7 +696,7 @@ const MyListings = ({ onListingUpdated }) => {
                 type="button"
                 disabled={isSaving}
                 onClick={saveEdit}
-                className="rounded-lg bg-[#17634f] px-6 py-2.5 font-medium text-white disabled:opacity-60"
+                className="ks-btn ks-btn-primary font-medium disabled:opacity-60"
               >
                 {isSaving ? "Saving..." : "Save changes"}
               </button>
@@ -701,18 +708,24 @@ const MyListings = ({ onListingUpdated }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+    <div
+      className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10"
+      aria-busy={isSaving}
+    >
+      {isSaving && <SavingOverlay label="Saving changes…" />}
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-bold text-[#08243f]">My listings</h1>
+        <h1 className="ks-page-title">My listings</h1>
 
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-ink-muted">
           Manage your property listings.
         </p>
 
-        {error && <p className="mt-5 text-red-600">{error}</p>}
+        {error && <p className="mt-5 text-danger dark:text-red-400">{error}</p>}
 
         {listings.length === 0 ? (
-          <p className="mt-8">No listings yet.</p>
+          <p className="mt-8 rounded-card border border-dashed border-line bg-surface px-6 py-12 text-center text-ink-muted">
+            No listings yet.
+          </p>
         ) : (
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {listings.map((listing) => {
@@ -721,7 +734,7 @@ const MyListings = ({ onListingUpdated }) => {
               return (
                 <div
                   key={listing.id}
-                  className="overflow-hidden rounded-2xl border border-gray-200 bg-white"
+                  className="overflow-hidden rounded-card border border-line bg-surface transition duration-200 hover:-translate-y-1 hover:shadow-raised"
                 >
                   <img
                     src={mainImage?.url || houseImage}
@@ -733,11 +746,11 @@ const MyListings = ({ onListingUpdated }) => {
                   />
 
                   <div className="p-5">
-                    <h2 className="text-lg font-semibold text-[#08243f]">
+                    <h2 className="text-lg font-semibold text-ink">
                       {listing.title}
                     </h2>
 
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-ink-muted">
                       {listing.address}, {listing.city}
                     </p>
 
@@ -746,11 +759,11 @@ const MyListings = ({ onListingUpdated }) => {
                       {listing.listingType === "rent" ? " / month" : ""}
                     </p>
 
-                    <p className="mt-1 text-sm capitalize text-gray-500">
+                    <p className="mt-1 text-sm capitalize text-ink-muted">
                       Status: {listing.status}
                     </p>
 
-                    <p className="mt-1 text-sm capitalize text-gray-500">
+                    <p className="mt-1 text-sm capitalize text-ink-muted">
                       Moderation: {listing.moderation?.status}
                     </p>
 
@@ -758,7 +771,7 @@ const MyListings = ({ onListingUpdated }) => {
                       <button
                         type="button"
                         onClick={() => startEdit(listing)}
-                        className="rounded-lg border border-[#17634f] px-4 py-2 text-[#17634f]"
+                        className="rounded-control border border-pine-700 px-4 py-2 text-pine-700 transition hover:bg-pine-50"
                       >
                         Edit
                       </button>
@@ -766,7 +779,7 @@ const MyListings = ({ onListingUpdated }) => {
                       <button
                         type="button"
                         onClick={() => deleteListing(listing.id)}
-                        className="rounded-lg border border-red-300 px-4 py-2 text-red-600"
+                        className="rounded-control border border-red-300 px-4 py-2 text-danger transition hover:bg-red-50 dark:border-red-500/70 dark:text-red-400"
                       >
                         Delete
                       </button>

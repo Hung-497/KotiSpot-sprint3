@@ -8,6 +8,7 @@ import {
 } from "../utils/listingForm";
 import { toPropertyImages } from "../utils/imageUtils";
 import PhotoManager from "../components/PhotoManager";
+import SavingOverlay from "../components/SavingOverlay";
 // import { Calculator } from "lucide-react";
 
 const Listings = () => {
@@ -21,7 +22,13 @@ const Listings = () => {
   //Estimation variables
   const [estimate, setEstimate] = useState(0);
   const [growth, setGrowth] = useState(0);
-  const modifiers = ["postalCode", "propertyType", "size", "rooms", "buildingYear"];
+  const modifiers = [
+    "postalCode",
+    "propertyType",
+    "size",
+    "rooms",
+    "buildingYear",
+  ];
 
   const [newListing, setNewListing] = useState(createEmptyListing());
 
@@ -34,7 +41,7 @@ const Listings = () => {
       ...prevListing,
       [name]: value,
     }));
-    if(modifiers.includes(name)){
+    if (modifiers.includes(name)) {
       setEstimate(0);
       setGrowth(0);
     }
@@ -57,10 +64,10 @@ const Listings = () => {
       const proposedEstimate = await apiRequest(`/estimate`, {
         method: "POST",
         body: JSON.stringify({
-          postalCode: newListing.postalCode, 
-          size: Number(newListing.size), 
-          rooms: Number(newListing.rooms), 
-          buildingYear: Number(newListing.buildingYear), 
+          postalCode: newListing.postalCode,
+          size: Number(newListing.size),
+          rooms: Number(newListing.rooms),
+          buildingYear: Number(newListing.buildingYear),
           buildingType: newListing.propertyType,
         }),
       });
@@ -71,7 +78,7 @@ const Listings = () => {
         }),
       });
       setEstimate(proposedEstimate.estimate);
-      setGrowth(proposedGrowth.annualGrowthPct)
+      setGrowth(proposedGrowth.annualGrowthPct);
     } catch (error) {
       console.error("Error getting estimate:", error);
       showAlert(
@@ -89,7 +96,7 @@ const Listings = () => {
       ...prevListing,
       ["price"]: estimate,
     }));
-  }
+  };
 
   const addListing = async () => {
     setFormError("");
@@ -136,20 +143,22 @@ const Listings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+    <div
+      className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10"
+      aria-busy={isSubmitting}
+    >
+      {isSubmitting && <SavingOverlay label="Publishing listing…" />}
       <div className="mx-auto max-w-6xl">
-        <h1 className="mt-4 text-3xl font-bold text-[#08243f]">
-          Create property listing
-        </h1>
+        <h1 className="ks-page-title mt-4">Create property listing</h1>
 
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-ink-muted">
           Fill in the details below to list your property.
         </p>
 
         {formError && (
           <p
             role="alert"
-            className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="mt-4 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger"
           >
             {formError}
           </p>
@@ -158,15 +167,15 @@ const Listings = () => {
         {formMessage && (
           <p
             role="status"
-            className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700"
+            className="mt-4 rounded-control bg-pine-50 px-4 py-3 text-sm text-pine-700"
           >
             {formMessage}
           </p>
         )}
 
         {/* LISTING PURPOSE */}
-        <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="font-semibold text-[#08243f]">Listing purpose</h2>
+        <div className="mt-6 rounded-card border border-line bg-surface p-4 sm:p-6">
+          <h2 className="font-semibold text-ink">Listing purpose</h2>
 
           <div className="mt-4 flex gap-10">
             <label className="flex items-center gap-2 text-sm">
@@ -192,8 +201,8 @@ const Listings = () => {
         </div>
 
         {/* PROPERTY INFORMATION */}
-        <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="mb-5 font-semibold text-[#08243f]">
+        <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
+          <h2 className="mb-5 font-semibold text-ink">
             Property information
           </h2>
 
@@ -208,7 +217,7 @@ const Listings = () => {
                 value={newListing.title}
                 onChange={handleInputChange}
                 placeholder="e.g. Modern 2-bedroom apartment"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
+                className="ks-input w-full border text-sm"
               />
             </div>
 
@@ -221,7 +230,7 @@ const Listings = () => {
                 value={newListing.location}
                 onChange={handleInputChange}
                 placeholder="e.g. Helsinki, Finland"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
+                className="ks-input w-full border text-sm"
               />
             </div>
           </div>
@@ -237,7 +246,7 @@ const Listings = () => {
                 value={newListing.address}
                 onChange={handleInputChange}
                 placeholder="Street address"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
+                className="ks-input w-full border text-sm"
               />
             </div>
 
@@ -250,7 +259,7 @@ const Listings = () => {
                 value={newListing.postalCode}
                 onChange={handleInputChange}
                 placeholder="e.g. 00100"
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
+                className="ks-input w-full border text-sm"
               />
             </div>
           </div>
@@ -264,7 +273,7 @@ const Listings = () => {
                 name="propertyType"
                 value={newListing.propertyType}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-sm"
+                className="ks-input w-full border text-sm"
               >
                 <option value="">Select type</option>
                 <option value="apartment">Apartment</option>
@@ -282,7 +291,7 @@ const Listings = () => {
                 name="bedrooms"
                 value={newListing.bedrooms}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
+                className="ks-input w-full border text-sm"
               />
             </div>
 
@@ -294,7 +303,7 @@ const Listings = () => {
                 name="bathrooms"
                 value={newListing.bathrooms}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
+                className="ks-input w-full border text-sm"
               />
             </div>
 
@@ -307,23 +316,24 @@ const Listings = () => {
                 value={newListing.size}
                 onChange={handleInputChange}
                 placeholder="55"
-                className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
+                className="ks-input w-full border text-sm"
               />
             </div>
-
           </div>
 
           {/* Rooms */}
           <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm">Year of construction *</label>
+              <label className="mb-2 block text-sm">
+                Year of construction *
+              </label>
               <input
                 type="number"
                 name="buildingYear"
                 value={newListing.buildingYear}
                 onChange={handleInputChange}
                 placeholder="1970"
-                className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
+                className="ks-input w-full border text-sm"
               />
             </div>
             <div>
@@ -334,7 +344,7 @@ const Listings = () => {
                 name="rooms"
                 value={newListing.rooms}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
+                className="ks-input w-full border text-sm"
               />
             </div>
           </div>
@@ -416,15 +426,15 @@ const Listings = () => {
               onChange={handleInputChange}
               placeholder="Describe your property..."
               rows="4"
-              className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#17634f]"
+              className="ks-input w-full resize-none border text-sm"
             />
           </div>
         </div>
 
         {/* RENTAL DETAILS */}
         {listingType === "rent" && (
-          <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
-            <h2 className="mb-5 font-semibold text-[#08243f]">
+          <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
+            <h2 className="mb-5 font-semibold text-ink">
               Rental details
             </h2>
 
@@ -438,7 +448,7 @@ const Listings = () => {
                   name="monthlyRent"
                   onChange={handleInputChange}
                   placeholder="e.g. 1200"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
+                  className="ks-input w-full border text-sm"
                 />
               </div>
 
@@ -450,7 +460,7 @@ const Listings = () => {
                   value={newListing.availableFrom}
                   name="availableFrom"
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
+                  className="ks-input w-full border text-sm"
                 />
               </div>
 
@@ -465,7 +475,7 @@ const Listings = () => {
                   name="securityDeposit"
                   onChange={handleInputChange}
                   placeholder="e.g. 2400"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
+                  className="ks-input w-full border text-sm"
                 />
               </div>
 
@@ -478,7 +488,7 @@ const Listings = () => {
                   value={newListing.minimumRentalPeriod}
                   name="minimumRentalPeriod"
                   onChange={handleInputChange}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm"
+                  className="ks-input w-full border text-sm"
                 >
                   <option value="">Select rental period *</option>
                   <option value="1">1 month</option>
@@ -500,7 +510,7 @@ const Listings = () => {
                   name="additionalCosts"
                   onChange={handleInputChange}
                   placeholder="e.g. 40 €/month"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
+                  className="ks-input w-full border text-sm"
                 />
               </div>
             </div>
@@ -509,8 +519,8 @@ const Listings = () => {
 
         {/* SALE DETAILS */}
         {listingType === "sale" && (
-          <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
-            <h2 className="mb-5 font-semibold text-[#08243f]">Sale details</h2>
+          <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
+            <h2 className="mb-5 font-semibold text-ink">Sale details</h2>
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div>
@@ -523,18 +533,20 @@ const Listings = () => {
                   value={newListing.price}
                   onChange={handleInputChange}
                   placeholder="e.g. 350000"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm"
+                  className="ks-input w-full border text-sm"
                 />
               </div>
-                { newListing.postalCode && 
-                  newListing.propertyType && 
-                  newListing.size && 
-                  newListing.rooms && 
-                  newListing.buildingYear && 
-                  (estimate ?
-                    <>
+              {newListing.postalCode &&
+                newListing.propertyType &&
+                newListing.size &&
+                newListing.rooms &&
+                newListing.buildingYear &&
+                (estimate ? (
+                  <>
                     <div>
-                      <label className="mb-2 block text-sm">Price estimate (click to apply) (€) *</label>
+                      <label className="mb-2 block text-sm">
+                        Price estimate (click to apply) (€) *
+                      </label>
                       <button
                         title="Estimation of current price and predicted annual growth per next 5 years"
                         type="button"
@@ -551,24 +563,23 @@ const Listings = () => {
                           hover:bg-gray-50
                         "
                       >
-                        {Math.trunc((estimate * 0.925) / 1000) * 1000}&nbsp;-&nbsp;{Math.trunc((estimate * 1.075) / 1000) * 1000} €
-                        {growth && (
-                          <>
-                            &nbsp;({growth} %)
-                          </>
-                        )}
-
+                        {Math.trunc((estimate * 0.925) / 1000) * 1000}
+                        &nbsp;-&nbsp;
+                        {Math.trunc((estimate * 1.075) / 1000) * 1000} €
+                        {growth && <>&nbsp;({growth} %)</>}
                       </button>
                     </div>
-                    </>
-                    : (
-                      <>
-                      <div>
-                        <label className="mb-2 block text-sm">Price estimate(€) *</label>
-                        <button
-                          type="button"
-                          onClick={calculateEstimate}
-                          className="
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="mb-2 block text-sm">
+                        Price estimate(€) *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={calculateEstimate}
+                        className="
                             w-full
                             items-center justify-center gap-2
                             rounded-lg
@@ -579,21 +590,22 @@ const Listings = () => {
                             transition
                             hover:bg-[#17634f]
                           "
-                        >
-                          {/* <Calculator size={18} /> */}
-                          <p>Calculate price estimate <sup >AI-powered </sup></p>
-                        </button>
-                        </div>
-                      </>
-                    )
-                )}
+                      >
+                        {/* <Calculator size={18} /> */}
+                        <p>
+                          Calculate price estimate <sup>AI-powered </sup>
+                        </p>
+                      </button>
+                    </div>
+                  </>
+                ))}
             </div>
           </div>
         )}
 
         {/* PHOTOS */}
-        <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="font-semibold text-[#08243f]">Property photos</h2>
+        <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
+          <h2 className="font-semibold text-ink">Property photos</h2>
 
           <PhotoManager
             photos={photos}
@@ -608,16 +620,7 @@ const Listings = () => {
             type="button"
             onClick={addListing}
             disabled={isSubmitting}
-            className="
-                            rounded-lg
-                            bg-[#17634f]
-                            px-8 py-3
-                            text-sm
-                            font-medium
-                            text-white
-                            hover:bg-[#12503f]
-                            disabled:opacity-60
-                        "
+            className="ks-btn ks-btn-primary text-sm font-medium disabled:opacity-60"
           >
             {isSubmitting ? "Publishing..." : "Publish listing"}
           </button>

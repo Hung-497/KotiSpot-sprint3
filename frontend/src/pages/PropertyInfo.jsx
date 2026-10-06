@@ -1,6 +1,9 @@
-import PropertyMap from "../components/PropertyMap";
-import { Link, useParams } from "react-router-dom";
+import PageLoader from "../components/PageLoader";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import PropertyMap from "../components/PropertyMap";
+import PropertyReviews from "../components/PropertyReviews";
+import PropertyGallery from "../components/PropertyGallery";
 import {
   MapPin,
   Heart,
@@ -8,22 +11,29 @@ import {
   BedDouble,
   Bath,
   Maximize,
-  ChevronLeft,
-  ChevronRight,
+  DoorOpen,
+  Check,
   Calendar,
   Flag,
 } from "lucide-react";
-import houseImage from "../assets/house1.jpg";
 import { apiRequest } from "../services/api";
 
 const maxReportReasonLength = 500;
+
+const featureLabels = [
+  ["balcony", "Balcony"],
+  ["elevator", "Elevator"],
+  ["parking", "Parking"],
+  ["furnished", "Furnished"],
+  ["petsAllowed", "Pets allowed"],
+  ["sauna", "Sauna"],
+];
 
 const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
   const { id } = useParams();
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [currentImage, setCurrentImage] = useState(0);
   const [longitude, setLongitude] = useState(null);
   const [latitude, setLatitude] = useState(null);
   const [mapError, setMapError] = useState(false);
@@ -46,7 +56,6 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
     const fetchProperty = async () => {
       setLoading(true);
       setError("");
-      setCurrentImage(0);
       setIsReportFormOpen(false);
       setReportReason("");
       setReportSent(false);
@@ -72,61 +81,53 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
         setLongitude(Number(encoder.longitude));
         setLatitude(Number(encoder.latitude));
       } catch (error) {
-        console.error("Error geocoding location:", error);
         setMapError(true);
+        console.error("Error geocoding location:", error);
       }
     };
-
     fetchProperty();
     getLonLat();
   }, [id]);
 
   if (loading) {
-    return (
-      <p className="px-6 py-10 text-center text-sm text-gray-500">
-        Loading property...
-      </p>
-    );
+    return <PageLoader label="Loading property…" fullPage />;
   }
 
   if (error || !selectedProperty) {
     return (
       <p
         role="alert"
-        className="mx-auto my-10 max-w-xl rounded-lg bg-red-50 px-4 py-3 text-center text-sm text-red-700"
+        className="mx-auto my-10 max-w-xl rounded-control bg-danger-soft px-4 py-3 text-center text-sm text-danger"
       >
         {error || "Property information is unavailable."}
       </p>
     );
   }
 
-  // Main image first, then the rest in the order they were added
-  const images =
-    selectedProperty.images?.length > 0
-      ? [
-          ...selectedProperty.images.filter((image) => image.isMain),
-          ...selectedProperty.images.filter((image) => !image.isMain),
-        ]
-      : [{ url: houseImage, description: selectedProperty.title }];
-
-  const shownImage = images[currentImage] || images[0];
-
-  const showPreviousImage = () => {
-    setCurrentImage(currentImage === 0 ? images.length - 1 : currentImage - 1);
-  };
-
-  const showNextImage = () => {
-    setCurrentImage(currentImage === images.length - 1 ? 0 : currentImage + 1);
-  };
-
   const isFavorite = favorites.includes(selectedProperty.id);
   const isRental = selectedProperty.listingType === "rent";
   const rentalDetails = selectedProperty.rentalDetails;
+  const stats = [
+    { Icon: BedDouble, value: selectedProperty.bedrooms, label: "Bedrooms" },
+    { Icon: Bath, value: selectedProperty.bathrooms, label: "Bathrooms" },
+    {
+      Icon: Maximize,
+      value: `${selectedProperty.size} m²`,
+      label: "Living area",
+    },
+    {
+      Icon: Calendar,
+      value: selectedProperty.buildingYear ?? "—",
+      label: "Built",
+    },
+    { Icon: DoorOpen, value: selectedProperty.rooms, label: "Rooms" },
+  ];
+  const listedFeatures = featureLabels.filter(
+    ([key]) => selectedProperty.features?.[key],
+  );
 
   const toggleFavorite = () => onToggleFavorite(selectedProperty.id);
 
-  // Administrators moderate from the admin panel and owners cannot report
-  // their own listing, so the report button is hidden for them
   const canReport =
     currentUser?.role !== "administrator" &&
     currentUser?._id !== selectedProperty.owner;
@@ -134,7 +135,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
   const toggleReportForm = () => {
     setReportSent(false);
     setReportError("");
-    setIsReportFormOpen(!isReportFormOpen);
+    setIsReportFormOpen((current) => !current);
   };
 
   const submitReport = async (event) => {
@@ -208,98 +209,39 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
       setIsSubmitting(false);
     }
   };
+
   return (
-    <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-6xl">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:grid-rows-[auto_1fr]">
-          <div className="lg:col-span-2">
-            <div className="relative">
-              <img
-                src={shownImage.url}
-                onError={(event) => {
-                  event.target.src = houseImage;
-                }}
-                alt={shownImage.description || selectedProperty.title}
-                className="h-105 w-full rounded-xl object-cover"
-              />
-
-              {images.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Previous image"
-                    onClick={showPreviousImage}
-                    className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#08243f] shadow hover:bg-white"
-                  >
-                    <ChevronLeft size={22} />
-                  </button>
-
-                  <button
-                    type="button"
-                    aria-label="Next image"
-                    onClick={showNextImage}
-                    className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#08243f] shadow hover:bg-white"
-                  >
-                    <ChevronRight size={22} />
-                  </button>
-
-                  <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs text-white">
-                    {currentImage + 1} / {images.length}
-                  </span>
-                </>
-              )}
-            </div>
-
-            {images.length > 1 && (
-              <div className="mt-4 grid grid-cols-4 gap-3">
-                {images.map((image, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setCurrentImage(index)}
-                    aria-label={`Show image ${index + 1}`}
-                  >
-                    <img
-                      src={image.url}
-                      onError={(event) => {
-                        event.target.src = houseImage;
-                      }}
-                      alt={image.description || selectedProperty.title}
-                      className={`h-20 w-full rounded-lg object-cover ${
-                        index === currentImage
-                          ? "ring-2 ring-[#17634f]"
-                          : "opacity-70 hover:opacity-100"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="min-w-0 lg:col-span-2">
+            <PropertyGallery
+              key={selectedProperty.id}
+              property={selectedProperty}
+            />
           </div>
 
-          <div className="self-start rounded-xl border border-gray-300 bg-white p-6 lg:row-span-2">
-            <h1 className="text-2xl font-bold text-[#08243f]">
-              {selectedProperty.address}
-            </h1>
+          <div className="rounded-card border border-line bg-surface p-4 sm:p-6">
+            <h1 className="ks-page-title">{selectedProperty.address}</h1>
 
-            <div className="mt-3 flex items-center gap-2 text-gray-600">
+            <div className="mt-3 flex items-center gap-2 text-ink-muted">
               <MapPin size={18} />
               <span>
                 {selectedProperty.city}, {selectedProperty.postalCode}
               </span>
             </div>
 
-            <h2 className="mt-4 text-3xl font-medium text-[#08243f]">
+            <h2 className="mt-4 text-2xl font-medium sm:text-3xl text-ink">
               {selectedProperty.price} €{isRental && " / month"}
             </h2>
 
-            <hr className="my-5 border-gray-300" />
+            <hr className="my-5 border-line" />
 
-            <h2 className="text-lg font-semibold text-[#08243f]">
+            <h2 className="text-[22px] font-bold leading-tight text-ink">
               Property information
             </h2>
 
-            <div className="mt-3 space-y-2 text-sm text-gray-700">
+            <div className="mt-3 space-y-2 text-sm text-ink-muted">
               <p>Property type: {selectedProperty.propertySubType}</p>
 
               <p>Area: {selectedProperty.size} m²</p>
@@ -329,18 +271,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
             <button
               type="button"
               onClick={toggleFavorite}
-              className="
-                mt-5
-                flex w-full
-                items-center justify-center gap-2
-                rounded-lg
-                border border-gray-400
-                px-4 py-3
-                text-sm
-                text-[#08243f]
-                transition
-                hover:bg-gray-50
-              "
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-control border border-line-strong px-4 py-3 text-sm text-ink transition hover:bg-surface-muted"
             >
               <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
 
@@ -350,36 +281,32 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
             <button
               type="button"
               onClick={contactSeller}
-              className="
-                mt-3
-                flex w-full
-                items-center justify-center gap-2
-                rounded-lg
-                bg-[#08243f]
-                px-4 py-3
-                text-sm font-medium
-                text-white
-                transition
-                hover:bg-[#17634f]
-              "
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-control bg-[#08243f] px-4 py-3 text-sm font-medium text-white transition hover:bg-pine-700"
             >
               <Mail size={18} />
               Contact seller or agent
             </button>
 
             {isInquiryFormOpen && (
-              <div className="mt-4 rounded-lg border border-gray-200 p-4">
+              <div className="mt-4 rounded-control border border-line p-4">
                 {inquirySent ? (
-                  <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
-                    Your message has been sent. The seller or agent will get back
-                    to you soon.
+                  <p className="rounded-control bg-pine-50 px-4 py-3 text-sm text-pine-700">
+                    Your message has been sent. The seller or agent will get
+                    back to you soon.
                   </p>
                 ) : (
-                  <form onSubmit={submitInquiry} className="space-y-3">
+                  <form
+                    onSubmit={submitInquiry}
+                    className="space-y-3"
+                    aria-busy={isSubmitting}
+                  >
+                    {isSubmitting && (
+                      <PageLoader label="Sending inquiry…" variant="spinner" />
+                    )}
                     {formError && (
                       <p
                         role="alert"
-                        className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+                        className="rounded-control bg-danger-soft px-4 py-3 text-sm text-danger"
                       >
                         {formError}
                       </p>
@@ -388,7 +315,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
                     <div>
                       <label
                         htmlFor="inquiry-name"
-                        className="mb-1 block text-xs font-medium text-[#08243f]"
+                        className="mb-1 block text-xs font-medium text-ink"
                       >
                         Your name
                       </label>
@@ -397,14 +324,14 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
                         type="text"
                         value={inquiryName}
                         onChange={(event) => setInquiryName(event.target.value)}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                        className="ks-input w-full border text-sm"
                       />
                     </div>
 
                     <div>
                       <label
                         htmlFor="inquiry-email"
-                        className="mb-1 block text-xs font-medium text-[#08243f]"
+                        className="mb-1 block text-xs font-medium text-ink"
                       >
                         Your email
                       </label>
@@ -412,15 +339,17 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
                         id="inquiry-email"
                         type="email"
                         value={inquiryEmail}
-                        onChange={(event) => setInquiryEmail(event.target.value)}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                        onChange={(event) =>
+                          setInquiryEmail(event.target.value)
+                        }
+                        className="ks-input w-full border text-sm"
                       />
                     </div>
 
                     <div>
                       <label
                         htmlFor="inquiry-message"
-                        className="mb-1 block text-xs font-medium text-[#08243f]"
+                        className="mb-1 block text-xs font-medium text-ink"
                       >
                         Message
                       </label>
@@ -432,14 +361,14 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
                         }
                         rows="3"
                         placeholder={`Hi, I'm interested in ${selectedProperty.title || "this property"}...`}
-                        className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                        className="ks-input w-full resize-none border text-sm"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full rounded-lg bg-[#17634f] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#12503f] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="ks-btn ks-btn-primary w-full text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isSubmitting ? "Sending..." : "Send message"}
                     </button>
@@ -452,28 +381,28 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
               <button
                 type="button"
                 onClick={toggleReportForm}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 transition hover:bg-red-50"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-control px-4 py-2.5 text-sm text-danger transition hover:bg-danger-soft"
               >
-                <Flag size={16} />
+                <Flag size={16} aria-hidden="true" />
                 Report this listing
               </button>
             )}
 
             {canReport && isReportFormOpen && (
-              <div className="mt-3 rounded-lg border border-red-200 p-4">
+              <div className="mt-3 rounded-control border border-red-200 p-4">
                 {!currentUser ? (
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-ink-muted">
                     Please{" "}
                     <Link
                       to="/login"
-                      className="font-medium text-[#17634f] underline"
+                      className="font-medium text-pine-700 underline"
                     >
                       log in
                     </Link>{" "}
                     to report this listing.
                   </p>
                 ) : reportSent ? (
-                  <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
+                  <p className="rounded-control bg-pine-50 px-4 py-3 text-sm text-pine-700">
                     Thank you. An administrator will review this listing.
                   </p>
                 ) : (
@@ -481,7 +410,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
                     {reportError && (
                       <p
                         role="alert"
-                        className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+                        className="rounded-control bg-danger-soft px-4 py-3 text-sm text-danger"
                       >
                         {reportError}
                       </p>
@@ -490,20 +419,24 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
                     <div>
                       <label
                         htmlFor="report-reason"
-                        className="mb-1 block text-xs font-medium text-[#08243f]"
+                        className="mb-1 block text-xs font-medium text-ink"
                       >
                         Why are you reporting this listing? *
                       </label>
+
                       <textarea
                         id="report-reason"
                         value={reportReason}
-                        onChange={(event) => setReportReason(event.target.value)}
+                        onChange={(event) =>
+                          setReportReason(event.target.value)
+                        }
                         maxLength={maxReportReasonLength}
                         rows="3"
                         placeholder="For example: the photos are copied from another listing"
-                        className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                        className="ks-input w-full resize-none border text-sm"
                       />
-                      <p className="mt-1 text-right text-xs text-gray-500">
+
+                      <p className="mt-1 text-right text-xs text-ink-muted">
                         {reportReason.length} / {maxReportReasonLength}
                       </p>
                     </div>
@@ -511,7 +444,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
                     <button
                       type="submit"
                       disabled={isReporting || !reportReason.trim()}
-                      className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="ks-btn w-full bg-red-600 text-sm font-medium text-white disabled:opacity-60"
                     >
                       {isReporting ? "Sending..." : "Send report"}
                     </button>
@@ -520,82 +453,79 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
               </div>
             )}
           </div>
-
-          <div className="lg:col-span-2">
-            <h2 className="text-2xl font-semibold text-[#08243f]">
-              Property details:
-            </h2>
-
-            <div className="mt-4 flex overflow-hidden rounded-full border border-gray-300 bg-white">
-              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
-                <BedDouble size={18} />
-
-                <span className="text-sm">
-                  {selectedProperty.bedrooms} bedrooms
-                </span>
-              </div>
-
-              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
-                <Bath size={18} />
-
-                <span className="text-sm">
-                  {selectedProperty.bathrooms} bathroom
-                </span>
-              </div>
-
-              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
-                <Maximize size={18} />
-
-                <span className="text-sm">{selectedProperty.size} m²</span>
-              </div>
-
-              <div className="flex flex-1 items-center justify-center gap-2 border-r border-gray-300 px-4 py-3">
-                <Calendar size={18} />
-
-                <span className="text-sm">{selectedProperty.buildingYear}</span>
-              </div>
-
-              <div className="flex flex-1 items-center justify-center gap-2 px-4 py-3">
-                <span>🏠</span>
-
-                <span className="text-sm">{selectedProperty.rooms} rooms</span>
-              </div>
-            </div>
-
-            {selectedProperty.description && (
-              <div className="mt-6">
-                <h3 className="font-semibold text-[#08243f]">Description</h3>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  {selectedProperty.description}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-8">
-              <h2 className="text-2xl font-semibold text-[#08243f]">Features:</h2>
-
-              <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
-                {selectedProperty.features?.balcony && <div>✓ Balcony</div>}
-
-                {selectedProperty.features?.elevator && <div>✓ Elevator</div>}
-
-                {selectedProperty.features?.parking && <div>✓ Parking</div>}
-
-                {selectedProperty.features?.furnished && <div>✓ Furnished</div>}
-
-                {selectedProperty.features?.petsAllowed && (
-                  <div>✓ Pets allowed</div>
-                )}
-
-                {selectedProperty.features?.sauna && <div>✓ Sauna</div>}
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="mt-10">
-          <h2 className="mb-5 text-2xl font-semibold text-[#08243f]">Location</h2>
+        <div className="mt-10 space-y-12">
+          {selectedProperty.description && (
+            <section>
+              <h2 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+                Description
+              </h2>
+
+              <p className="mt-3 w-full whitespace-normal text-lg leading-7 text-ink-muted">
+                {selectedProperty.description}
+              </p>
+            </section>
+          )}
+
+          <section
+            className={
+              selectedProperty.description
+                ? "border-t border-line-strong pt-12"
+                : undefined
+            }
+          >
+            <h2 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+              Property details
+            </h2>
+
+            <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {stats.map(({ Icon, value, label }) => (
+                <div key={label} className="ks-card p-4">
+                  <Icon
+                    size={18}
+                    aria-hidden="true"
+                    className="text-pine-700"
+                  />
+                  <dd className="mt-2 text-lg font-semibold text-ink tabular-nums">
+                    {value ?? "—"}
+                  </dd>
+                  <dt className="text-lg leading-7 text-ink-muted">{label}</dt>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <section className="border-t border-line-strong pt-12">
+            <h2 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+              Features
+            </h2>
+
+            {listedFeatures.length > 0 ? (
+              <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 text-base sm:text-lg leading-7 text-ink sm:grid-cols-3">
+                {listedFeatures.map(([key, label]) => (
+                  <li key={key} className="flex items-center gap-2">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pine-50 text-pine-700">
+                      <Check size={13} strokeWidth={2.5} aria-hidden="true" />
+                    </span>
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-lg leading-7 text-ink-muted">
+                No features listed.
+              </p>
+            )}
+          </section>
+
+          <PropertyReviews propertyId={selectedProperty.id} />
+        </div>
+
+        <div className="mt-12 border-t border-line-strong pt-12">
+          <h2 className="mb-5 text-[28px] font-bold leading-tight text-ink sm:text-[32px]">
+            Location
+          </h2>
           {latitude !== null && longitude !== null ? (
             <PropertyMap
               latitude={latitude}
@@ -603,8 +533,10 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
               address={selectedProperty.address}
             />
           ) : (
-            <p className="text-sm text-gray-500">
-              {mapError ? "Map is unavailable for this property." : "Loading map..."}
+            <p className="text-sm text-ink-muted">
+              {mapError
+                ? "Map is unavailable for this property."
+                : "Loading map..."}
             </p>
           )}
         </div>

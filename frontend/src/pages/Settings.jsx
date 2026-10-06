@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bell,
   Mail,
@@ -8,9 +8,21 @@ import {
   Smartphone,
   Trash2,
   User,
+  Sun,
+  CircleCheck,
+  X,
 } from "lucide-react";
 import { apiRequest } from "../services/api";
 import useDialog from "../hooks/useDialog";
+import PageLoader from "../components/PageLoader";
+import SavingOverlay from "../components/SavingOverlay";
+import SegmentedControl from "../components/SegmentedControl";
+
+const themeOptions = [
+  { value: "light", label: "Light", Icon: Sun },
+  { value: "dark", label: "Dark", Icon: Moon },
+  { value: "system", label: "System", Icon: Monitor },
+];
 
 const Settings = ({
   preferences,
@@ -25,27 +37,72 @@ const Settings = ({
   const { showConfirm } = useDialog();
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const saveQueue = useRef(Promise.resolve());
+  const latestSave = useRef(0);
+  const confirmedPreferences = useRef(preferences);
+
+  useEffect(() => {
+    if (!isSaving) {
+      confirmedPreferences.current = preferences;
+    }
+  }, [preferences, isSaving]);
+
+  useEffect(() => {
+    if (!message) return;
+
+    const timer = setTimeout(() => setMessage(""), 3500);
+
+    return () => clearTimeout(timer);
+  }, [message, setMessage]);
+
+  useEffect(() => () => setMessage(""), [setMessage]);
 
   const updatePreference = async (name, value) => {
+    if (
+      preferences[name] === value ||
+      isDeleting ||
+      (isSaving && name !== "theme")
+    ) {
+      return;
+    }
+
+    const version = ++latestSave.current;
+
     setError("");
     setMessage("");
     setIsSaving(true);
 
-    try {
-      const data = await apiRequest("/users/me/preferences", {
-        method: "PATCH",
-        body: JSON.stringify({
-          [name]: value,
-        }),
-      });
+    setPreferences((current) => ({
+      ...current,
+      [name]: value,
+    }));
 
-      setPreferences(data.preferences);
-      setMessage("Settings saved.");
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsSaving(false);
-    }
+    saveQueue.current = saveQueue.current.then(async () => {
+      try {
+        const data = await apiRequest("/users/me/preferences", {
+          method: "PATCH",
+          body: JSON.stringify({ [name]: value }),
+        });
+
+        confirmedPreferences.current = data.preferences;
+
+        if (version === latestSave.current) {
+          setPreferences(data.preferences);
+          setMessage("Settings saved.");
+        }
+      } catch (error) {
+        if (version === latestSave.current) {
+          setPreferences(confirmedPreferences.current);
+          setError(error.message);
+        }
+      } finally {
+        if (version === latestSave.current) {
+          setIsSaving(false);
+        }
+      }
+    });
+
+    await saveQueue.current;
   };
 
   const deleteAccount = async () => {
@@ -79,19 +136,15 @@ const Settings = ({
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 px-6 py-10 dark:bg-gray-950">
-        <div className="mx-auto max-w-5xl">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Loading settings...
-          </p>
-        </div>
-      </div>
-    );
+    return <PageLoader label="Loading settings…" fullPage />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10 dark:bg-gray-950">
+    <div
+      className="min-h-screen bg-surface-muted px-4 py-6 sm:px-6 sm:py-10"
+      aria-busy={isDeleting}
+    >
+      {isDeleting && <SavingOverlay label="Deleting account…" />}
       <div className="mx-auto max-w-5xl">
         <h1 className="text-3xl font-bold text-[#08243f] dark:text-gray-100">
           Settings
@@ -110,14 +163,33 @@ const Settings = ({
           </p>
         )}
 
-        {message && (
-          <p
-            role="status"
-            className="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700"
-          >
-            {message}
-          </p>
-        )}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="pointer-events-none fixed inset-x-4 bottom-5 z-110 sm:inset-x-auto sm:bottom-auto sm:right-6 sm:top-24 sm:w-80"
+        >
+          {message && (
+            <div className="pointer-events-auto flex items-center gap-3 rounded-card border border-pine-200 bg-surface px-4 py-3 text-ink shadow-raised">
+              <CircleCheck
+                size={22}
+                className="shrink-0 text-pine-700"
+                aria-hidden="true"
+              />
+
+              <p className="flex-1 text-sm font-medium">{message}</p>
+
+              <button
+                type="button"
+                aria-label="Dismiss saved notification"
+                onClick={() => setMessage("")}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+              >
+                <X size={16} aria-hidden="true" />
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* APPEARANCE */}
         <div className="mb-5 rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
@@ -141,10 +213,7 @@ const Settings = ({
 
           <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <Moon
-                size={21}
-                className="text-gray-700 dark:text-gray-300"
-              />
+              <Moon size={21} className="text-gray-700 dark:text-gray-300" />
 
               <div>
                 <p className="font-medium text-[#08243f] dark:text-gray-100">
@@ -157,55 +226,14 @@ const Settings = ({
               </div>
             </div>
 
-            <div className="flex rounded-lg border border-gray-300 dark:border-gray-700">
-              <button
-                type="button"
-                disabled={isSaving}
-                aria-pressed={preferences.theme === "light"}
-                onClick={() =>
-                  updatePreference("theme", "light")
-                }
-                className={
-                  preferences.theme === "light"
-                    ? "bg-green-50 px-6 py-2 text-green-700"
-                    : "px-6 py-2 text-gray-500 dark:text-gray-400"
-                }
-              >
-                Light
-              </button>
-
-              <button
-                type="button"
-                disabled={isSaving}
-                aria-pressed={preferences.theme === "dark"}
-                onClick={() =>
-                  updatePreference("theme", "dark")
-                }
-                className={
-                  preferences.theme === "dark"
-                    ? "bg-green-50 px-6 py-2 text-green-700"
-                    : "px-6 py-2 text-gray-500 dark:text-gray-400"
-                }
-              >
-                Dark
-              </button>
-
-              <button
-                type="button"
-                disabled={isSaving}
-                aria-pressed={preferences.theme === "system"}
-                onClick={() =>
-                  updatePreference("theme", "system")
-                }
-                className={
-                  preferences.theme === "system"
-                    ? "bg-green-50 px-6 py-2 text-green-700"
-                    : "px-6 py-2 text-gray-500 dark:text-gray-400"
-                }
-              >
-                System
-              </button>
-            </div>
+            <SegmentedControl
+              options={themeOptions}
+              value={preferences.theme}
+              onChange={(theme) => updatePreference("theme", theme)}
+              disabled={isDeleting}
+              transitionName="theme-indicator"
+              className="ks-theme-picker self-start sm:self-auto"
+            />
           </div>
         </div>
 
@@ -230,10 +258,7 @@ const Settings = ({
           {/* EMAIL */}
           <div className="mx-6 flex items-center justify-between border-b border-gray-200 py-5 dark:border-gray-700">
             <div className="flex items-center gap-4">
-              <Mail
-                size={21}
-                className="text-gray-700 dark:text-gray-300"
-              />
+              <Mail size={21} className="text-gray-700 dark:text-gray-300" />
 
               <div>
                 <p className="font-medium text-[#08243f] dark:text-gray-100">
@@ -250,9 +275,7 @@ const Settings = ({
               type="button"
               role="switch"
               disabled={isSaving}
-              aria-checked={
-                preferences.emailNotifications
-              }
+              aria-checked={preferences.emailNotifications}
               aria-label="Email notifications"
               onClick={() =>
                 updatePreference(
@@ -393,10 +416,7 @@ const Settings = ({
 
           <div className="flex items-center justify-between p-6">
             <div className="flex items-center gap-4">
-              <Trash2
-                size={21}
-                className="text-gray-700 dark:text-gray-300"
-              />
+              <Trash2 size={21} className="text-gray-700 dark:text-gray-300" />
 
               <div>
                 <p className="font-medium text-[#08243f] dark:text-gray-100">

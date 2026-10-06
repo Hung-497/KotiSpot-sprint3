@@ -38,6 +38,7 @@ const Buy = ({ properties, favorites, onToggleFavorite, isLoading = false }) => 
         <PropertySearch
           onResults={setFilteredProperties}
           properties={propertiesForSale}
+          listingType="sale"
           placeholder="Search city, neighborhood or postal code"
         />
       </section>
