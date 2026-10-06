@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import { Heart, MapPin, Ruler, DoorOpen } from "lucide-react";
 import CardPhotos from "./CardPhotos";
@@ -6,6 +6,7 @@ import useCardPhotoCycle from "../hooks/useCardPhotoCycle";
 import { getCardPhotos } from "../utils/cardPhotos";
 import { formatPrice } from "../utils/formatPrice";
 import { MAX_COMPARISON_PROPERTIES } from "./ComparisonActions";
+import { navigateWithPhotoTransition } from "../utils/photoTransition";
 
 const Property = ({
   property,
@@ -20,7 +21,25 @@ const Property = ({
   const isRental = listingType === "rent";
   const photoCycle = useCardPhotoCycle(getCardPhotos(property).length);
   const photoRef = useRef(null);
+  const navigate = useNavigate();
   const detailPath = `/properties/${property.id}`;
+
+  const openDetail = (event) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    const photo = Array.from(photoRef.current?.parentElement.querySelectorAll("img") || [])
+      .find((image) => image.getClientRects().length > 0);
+    navigateWithPhotoTransition(navigate, detailPath, photo);
+  };
 
   const handleCompare = () => {
     if (!isSelected && selectedProperties.length >= MAX_COMPARISON_PROPERTIES) {
@@ -52,6 +71,8 @@ const Property = ({
       <div className="relative">
         <Link
           to={detailPath}
+          onClick={openDetail}
+          data-no-route-transition
           className="block rounded-t-card focus-visible:-outline-offset-2"
         >
           <CardPhotos

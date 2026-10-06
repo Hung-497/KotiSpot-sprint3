@@ -1,5 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
 import { ArrowLeft, Check, X } from "lucide-react";
 import houseImage from "../assets/house1.jpg";
 import darkHouseImage from "../assets/house1_dark.png";
@@ -7,6 +7,7 @@ import { getMainImage } from "../utils/imageUtils";
 import { formatPrice } from "../utils/formatPrice";
 import PageLoader from "../components/PageLoader";
 import { MAX_COMPARISON_PROPERTIES } from "../components/ComparisonActions";
+import { navigateWithPhotoTransition } from "../utils/photoTransition";
 
 const ComparisonPhoto = ({ property }) => {
   const image = getMainImage(property);
@@ -15,7 +16,7 @@ const ComparisonPhoto = ({ property }) => {
   const imageClass = "aspect-[6/5] w-full object-cover";
 
   return (
-    <div className="overflow-hidden rounded-control bg-surface-muted">
+    <div className="relative overflow-hidden rounded-control bg-surface-muted">
       {image?.url && !failed ? (
         <img src={image.url} alt={alt} onError={() => setFailed(true)} className={imageClass} />
       ) : (
@@ -24,6 +25,9 @@ const ComparisonPhoto = ({ property }) => {
           <img src={darkHouseImage} alt={alt} className={`${imageClass} hidden dark:block`} />
         </>
       )}
+      <span className="pointer-events-none absolute left-2 top-2 rounded-md bg-surface/95 px-2 py-0.5 text-xs font-semibold text-ink">
+        {isRentalListing(property) ? "For rent" : "For sale"}
+      </span>
     </div>
   );
 };
@@ -34,18 +38,37 @@ const isRentalListing = (property) =>
 const formatSubtype = (value) =>
   value ? value.replaceAll("-", " ").replace(/^\w/, (letter) => letter.toUpperCase()) : "-";
 
-const PropertySummary = ({ property }) => (
-  <div className="min-w-0 font-normal">
-    <Link to={`/properties/${property.id}`} className="block rounded-control">
+const PropertySummary = ({ property }) => {
+  const navigate = useNavigate();
+  const photoRef = useRef(null);
+  const detailPath = `/properties/${property.id}`;
+  const openDetail = (event) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    const photo = Array.from(photoRef.current?.querySelectorAll("img") || [])
+      .find((image) => image.getClientRects().length > 0);
+    navigateWithPhotoTransition(navigate, detailPath, photo);
+  };
+
+  return (
+  <div ref={photoRef} className="min-w-0 font-normal">
+    <Link to={detailPath} onClick={openDetail} data-no-route-transition className="block rounded-control">
       <ComparisonPhoto property={property} />
     </Link>
 
-    <span className="mt-3 inline-block rounded px-2 py-1 text-[10px] font-semibold leading-4 bg-pine-50 text-pine-700">
-      {isRentalListing(property) ? "For rent" : "For sale"}
-    </span>
-
     <Link
-      to={`/properties/${property.id}`}
+      to={detailPath}
+      onClick={openDetail}
+      data-no-route-transition
       className="mt-2 block text-sm font-semibold leading-5 text-ink hover:text-pine-700"
     >
       {property.address || property.title}
@@ -63,7 +86,8 @@ const PropertySummary = ({ property }) => (
       {property.size != null && <> · {property.size} m²</>}
     </p>
   </div>
-);
+  );
+};
 
 const FeatureValue = ({ value }) =>
   value ? (
@@ -91,7 +115,7 @@ const sections = [
   {
     title: "Property details",
     rows: [
-      { label: "Property subtype", render: (p) => formatSubtype(p.propertySubType) },
+      { label: "Property Type", render: (p) => formatSubtype(p.propertySubType) },
       { label: "Listing type", render: (p) => (isRentalListing(p) ? "For rent" : "For sale") },
       { label: "Billing period", render: (p) => (isRentalListing(p) ? "Monthly" : "-") },
     ],

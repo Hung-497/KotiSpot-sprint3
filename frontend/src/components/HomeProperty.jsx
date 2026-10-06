@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import { Heart } from "lucide-react";
 import CardPhotos from "./CardPhotos";
 import useCardPhotoCycle from "../hooks/useCardPhotoCycle";
 import { getCardPhotos } from "../utils/cardPhotos";
 import { MAX_COMPARISON_PROPERTIES } from "./ComparisonActions";
+import { navigateWithPhotoTransition } from "../utils/photoTransition";
 
 const HomeProperty = ({
   property,
@@ -18,6 +20,26 @@ const HomeProperty = ({
   const isRental = listingType === "rent";
 
   const photoCycle = useCardPhotoCycle(getCardPhotos(property).length);
+  const navigate = useNavigate();
+  const photoRef = useRef(null);
+  const detailPath = `/properties/${property.id}`;
+
+  const openDetail = (event) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    const photo = Array.from(photoRef.current?.parentElement.querySelectorAll("img") || [])
+      .find((image) => image.getClientRects().length > 0);
+    navigateWithPhotoTransition(navigate, detailPath, photo);
+  };
 
   const handleCompare = () => {
     if (!isSelected && selectedProperties.length >= MAX_COMPARISON_PROPERTIES) {
@@ -43,11 +65,12 @@ const HomeProperty = ({
       isSelected ? "ring-2 ring-pine-600 dark:ring-[#55d4aa]/70" : ""
     }`}>
       <div className="relative">
-        <Link to={`/properties/${property.id}`}>
+        <Link to={detailPath} onClick={openDetail} data-no-route-transition>
           <CardPhotos
             property={property}
             index={photoCycle.index}
             hasHovered={photoCycle.hasHovered}
+            photoRef={photoRef}
             mediaClassName="h-28.75 w-full object-cover"
           />
 
@@ -70,6 +93,10 @@ const HomeProperty = ({
 
           </div>
         </Link>
+
+        <span className="pointer-events-none absolute left-2 top-2 rounded-md bg-surface/95 px-2 py-0.5 text-xs font-semibold text-ink">
+          {isRental ? "For rent" : "For sale"}
+        </span>
 
         <button
           type="button"

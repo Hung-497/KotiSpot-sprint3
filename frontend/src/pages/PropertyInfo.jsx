@@ -309,7 +309,17 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
         </div>
 
         <div className="mt-10 space-y-12">
-          <section>
+          {selectedProperty.description && (
+            <section>
+              <h2 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">Description</h2>
+
+              <p className="mt-3 w-full whitespace-normal text-lg leading-7 text-ink-muted">
+                {selectedProperty.description}
+              </p>
+            </section>
+          )}
+
+          <section className={selectedProperty.description ? "border-t border-line-strong pt-12" : undefined}>
             <h2 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">Property details</h2>
 
             <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -345,16 +355,6 @@ const PropertyInfo = ({ favorites, onToggleFavorite }) => {
               </p>
             )}
           </section>
-
-          {selectedProperty.description && (
-            <section className="border-t border-line-strong pt-12">
-              <h2 className="text-[28px] font-bold leading-tight text-ink sm:text-[32px]">Description</h2>
-
-              <p className="mt-3 w-full whitespace-normal text-lg leading-7 text-ink-muted">
-                {selectedProperty.description}
-              </p>
-            </section>
-          )}
 
           <PropertyReviews propertyId={selectedProperty.id} />
         </div>

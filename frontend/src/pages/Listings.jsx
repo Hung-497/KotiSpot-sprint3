@@ -1,4 +1,6 @@
 import SavingOverlay from "../components/SavingOverlay";
+import PageLoader from "../components/PageLoader";
+import useMinimumDuration, { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 import { useState } from "react";
 import { apiRequest } from "../services/api";
 import {
@@ -10,6 +12,7 @@ import { toPropertyImages } from "../utils/imageUtils";
 import PhotoManager from "../components/PhotoManager";
 
 const Listings = () => {
+  const hasMinimumLoadingElapsed = useMinimumDuration(PAGE_LOADING_MS);
   const [listingType, setListingType] = useState("");
   const [formMessage, setFormMessage] = useState("");
   const [formError, setFormError] = useState("");
@@ -83,6 +86,10 @@ const Listings = () => {
   const handleListingType = (event) => {
     setListingType(event.target.value);
   };
+
+  if (!hasMinimumLoadingElapsed) {
+    return <PageLoader label="Loading listing form…" fullPage variant="spinner" />;
+  }
 
   return (
     <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10" aria-busy={isSubmitting}>

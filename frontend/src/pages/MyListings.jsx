@@ -26,7 +26,15 @@ const MyListings = ({ onListingUpdated }) => {
   const hasMinimumLoadingElapsed = useMinimumDuration(PAGE_LOADING_MS);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isOpeningEditor, setIsOpeningEditor] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!isOpeningEditor) return;
+
+    const timer = setTimeout(() => setIsOpeningEditor(false), PAGE_LOADING_MS);
+    return () => clearTimeout(timer);
+  }, [isOpeningEditor]);
 
   useEffect(() => {
     const loadListings = async () => {
@@ -44,6 +52,7 @@ const MyListings = ({ onListingUpdated }) => {
   }, []);
 
   const startEdit = (listing) => {
+    setIsOpeningEditor(true);
     setEditingListing({
       ...listing,
       features: {
@@ -218,6 +227,10 @@ const MyListings = ({ onListingUpdated }) => {
   };
   if (loading || !hasMinimumLoadingElapsed) {
     return <PageLoader label="Loading your listings…" fullPage />;
+  }
+
+  if (isOpeningEditor) {
+    return <PageLoader label="Loading listing editor…" fullPage variant="spinner" />;
   }
 
   if (editingListing) {

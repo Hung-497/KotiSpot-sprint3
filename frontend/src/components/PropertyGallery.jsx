@@ -3,13 +3,19 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import houseImage from "../assets/house1.jpg";
 import darkHouseImage from "../assets/house1_dark.png";
 import { getPropertyPhotos } from "../utils/cardPhotos";
+import { PHOTO_TRANSITION_NAME } from "../utils/photoTransition";
 
-const GalleryPhoto = ({ photo, alt, className, loading }) => (
+const GalleryPhoto = ({ photo, alt, className, loading, isMain = false }) => (
   <div className={`overflow-hidden bg-surface-muted ${className}`}>
     <img
       src={photo.url || houseImage}
       alt={alt}
       loading={loading}
+      data-photo-transition-target={isMain || undefined}
+      style={{
+        viewTransitionName: isMain ? PHOTO_TRANSITION_NAME : undefined,
+        objectPosition: photo.position,
+      }}
       onError={(event) => {
         event.currentTarget.onerror = null;
         event.currentTarget.src = houseImage;
@@ -21,6 +27,11 @@ const GalleryPhoto = ({ photo, alt, className, loading }) => (
         src={photo.darkUrl}
         alt={alt}
         loading={loading}
+        data-photo-transition-target={isMain || undefined}
+        style={{
+          viewTransitionName: isMain ? PHOTO_TRANSITION_NAME : undefined,
+          objectPosition: photo.position,
+        }}
         onError={(event) => {
           event.currentTarget.onerror = null;
           event.currentTarget.src = darkHouseImage;
@@ -52,6 +63,7 @@ const PropertyGallery = ({ property }) => {
           photo={shownImage}
           alt={shownImage.description || fallbackAlt}
           className="h-64 w-full rounded-card sm:h-105"
+          isMain
         />
 
         {photos.length > 1 && (

@@ -2,6 +2,7 @@ import SavingOverlay from "../components/SavingOverlay";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { apiRequest } from "../services/api";
+import { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 
 const Contact = () => {
   const [fullName, setFullName] = useState("");
@@ -30,6 +31,8 @@ const Contact = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isSubmitting) return;
+
     const fields = [
       [fullName, "full name"],
       [email, "email"],
@@ -50,6 +53,7 @@ const Contact = () => {
 
     setFormError("");
     setIsSubmitting(true);
+    const minimumLoading = new Promise((resolve) => setTimeout(resolve, PAGE_LOADING_MS));
 
     try {
       await apiRequest("/contact-messages", {
@@ -62,8 +66,10 @@ const Contact = () => {
         }),
       });
 
+      await minimumLoading;
       navigate("/contactthankmessage");
     } catch (error) {
+      await minimumLoading;
       console.error("Error sending contact message:", error);
       setFormError(error.message);
     } finally {
