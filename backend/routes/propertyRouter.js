@@ -12,8 +12,9 @@ const {
   getMyProperties,
 } = require("../controllers/propertyControllers");
 const {
-  getLongLatById   
-} =  require("../utils/locationHelper");
+  getLongLatById,
+  getNearbyPlacesByLocation,
+} = require("../utils/locationHelper");
 const { reportProperty } = require("../controllers/moderationControllers");
 const {
   requireAuth,
@@ -39,6 +40,9 @@ router.get("/filter", filterProperties);
 
 //GET /properties/search
 router.get("/search", getPropertyByKeyword);
+
+// GET /properties/nearby?lat=..&lon=..
+router.get("/nearby", getNearbyPlacesByLocation);
 
 //GET /properties/geocode/:propertyId
 router.get("/geocode/:propertyId", getLongLatById)

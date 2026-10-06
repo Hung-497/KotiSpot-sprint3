@@ -16,18 +16,28 @@ const PropertyMap = ({ latitude, longitude, address }) => {
   const position = [latitude, longitude];
   const [fullscreen, setFullscreen] = useState(false);
   const [places, setPlaces] = useState([]);
+  const [placesUnavailable, setPlacesUnavailable] = useState(false);
 
   useEffect(() => {
-    const fetchNearbyPlaces = async () => {
-      try {
-        const data = await getNearbyPlaces(latitude, longitude);
-        setPlaces(data);
-      } catch (error) {
-        console.error("Error loading nearby places:", error);
-      }
-    };
+    let ignore = false;
 
-    fetchNearbyPlaces();
+    getNearbyPlaces(latitude, longitude)
+      .then((data) => {
+        if (ignore) return;
+        setPlaces(data);
+        setPlacesUnavailable(false);
+      })
+      .catch((error) => {
+        if (ignore) return;
+        console.warn("Nearby places unavailable:", error);
+        setPlaces([]);
+        setPlacesUnavailable(true);
+      });
+
+    // Ignore results that arrive after the property changed or the map unmounted
+    return () => {
+      ignore = true;
+    };
   }, [latitude, longitude]);
 
   return (
@@ -74,6 +84,15 @@ const PropertyMap = ({ latitude, longitude, address }) => {
         <ZoomControl position="bottomright" />
         <MapUpdate fullscreen={fullscreen} />
       </MapContainer>
+
+      {placesUnavailable && (
+        <p
+          role="status"
+          className="absolute left-4 top-4 z-1000 rounded-lg border border-line bg-surface px-3 py-2 text-xs text-ink-muted shadow-md"
+        >
+          Nearby places couldn't be loaded right now.
+        </p>
+      )}
 
       <button
         type="button"

@@ -8,6 +8,7 @@ const options = {
   provider: 'openstreetmap',
 }
 const geocoder = NodeGeocoder(options);
+const { getNearbyPlaces } = require("../services/nearbyPlacesService");
 const getLongLatById = async (req, res) => {
   const { propertyId } = req.params
 
@@ -30,6 +31,34 @@ const getLongLatById = async (req, res) => {
   }
 }
 
+// GET /properties/nearby?lat=..&lon=..
+// Nearby places are optional extras on the map, so when Overpass is down
+// this still answers 200 with an empty list and unavailable: true.
+const getNearbyPlacesByLocation = async (req, res) => {
+  const lat = Number(req.query.lat);
+  const lon = Number(req.query.lon);
+
+  if (
+    req.query.lat === undefined ||
+    req.query.lon === undefined ||
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lon) ||
+    Math.abs(lat) > 90 ||
+    Math.abs(lon) > 180
+  ) {
+    return res.status(400).json({ message: "Valid lat and lon are required" });
+  }
+
+  try {
+    const places = await getNearbyPlaces(lat, lon);
+    res.status(200).json({ places, unavailable: false });
+  } catch (error) {
+    console.warn("Nearby places unavailable:", error.failures || error.message);
+    res.status(200).json({ places: [], unavailable: true });
+  }
+};
+
 module.exports = {
     getLongLatById,
+    getNearbyPlacesByLocation,
 }
