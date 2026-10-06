@@ -1,120 +1,128 @@
 import logo from "../assets/KotiSpot_logo.png";
+import darkLogo from "../assets/KotiSpot_darklogo.png";
 import { navLinks } from "../../data";
 import { Link } from "react-router-dom";
 import { FaGithub, FaInstagram, FaLinkedin, FaFacebook, FaXTwitter } from "react-icons/fa6";
+import { Globe, MapPin } from "lucide-react";
+import Contours from "./Contours";
+
+const socialLinks = [
+  { label: "GitHub", Icon: FaGithub },
+  { label: "Instagram", Icon: FaInstagram },
+  { label: "LinkedIn", Icon: FaLinkedin },
+  { label: "X", Icon: FaXTwitter },
+  { label: "Facebook", Icon: FaFacebook },
+];
+
+const footerLinkClass =
+  "rounded-sm text-sm text-ink-muted transition-colors hover:text-pine-700";
 
 const Footer = ({ isAdmin }) => {
   return (
-    <footer className="bg-[#f1f7f4] px-6 py-10 md:px-12 lg:px-16">
+    <footer className="relative overflow-hidden border-t border-line bg-surface-muted text-ink">
+      <Contours variant="right" className="text-pine-700 opacity-[0.06] dark:opacity-10" />
 
-  <div className="mx-auto flex max-w-350 flex-col gap-10 md:flex-row md:items-start md:justify-between">
+      <div className="ks-container relative grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1.4fr]">
+        <div>
+          <Link to="/" className="inline-flex items-center rounded-control">
+            <img src={logo} alt="KotiSpot" className="h-auto w-36 dark:hidden" />
+            <img src={darkLogo} alt="KotiSpot" className="hidden h-auto w-36 dark:block" />
+          </Link>
 
-    <div className="flex-1">
-      <img src={logo} alt="KotiSpot" className="h-auto w-57.5"/>
+          <div className="mt-5 flex gap-1 text-lg text-ink-muted">
+            {socialLinks.map(({ label, Icon }) => (
+              <a
+                key={label}
+                href="#"
+                aria-label={label}
+                className="flex h-11 w-11 items-center justify-center rounded-control transition-colors hover:bg-pine-50 hover:text-pine-700 sm:h-9 sm:w-9"
+              >
+                <Icon aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        </div>
 
-      <div className="mt-5 flex gap-4 text-xl text-[#08243f]">
+        <div>
+          <h3 className="mb-4 text-sm font-semibold text-ink">Explore</h3>
 
-        <a href="#" className="transition hover:text-[#1f7356]">
-          <FaGithub />
-        </a>
+          <ul className="space-y-2.5">
+            {navLinks
+              .filter((link) => !(isAdmin && link.href === "/sell"))
+              .map((link) => (
+                <li key={link.id}>
+                  <Link to={link.href} className={footerLinkClass}>
+                    {link.footerText}
+                  </Link>
+                </li>
+              ))}
+          </ul>
+        </div>
 
-        <a href="#" className="transition hover:text-[#1f7356]">
-          <FaInstagram />
-        </a>
+        <div>
+          <h3 className="mb-4 text-sm font-semibold text-ink">Helpful Links</h3>
 
-        <a href="#" className="transition hover:text-[#1f7356]">
-          <FaLinkedin />
-        </a>
+          <ul className="space-y-2.5">
+            <li>
+              <a href="#" className={footerLinkClass}>
+                FAQ
+              </a>
+            </li>
 
-        <a href="#" className="transition hover:text-[#1f7356]">
-          <FaXTwitter />
-        </a>
+            <li>
+              <a href="#" className={footerLinkClass}>
+                Privacy Policy
+              </a>
+            </li>
 
-        <a href="#" className="transition hover:text-[#1f7356]">
-          <FaFacebook />
-        </a>
+            <li>
+              <a href="#" className={footerLinkClass}>
+                Terms of Service
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="mb-2 text-sm font-semibold text-ink">
+            Create your account
+          </h3>
+
+          <p className="mb-4 text-sm text-ink-muted">Get your property now!</p>
+
+          <form className="flex gap-2">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              aria-label="Email address"
+              className="ks-input min-h-11 min-w-0 flex-1 text-base sm:text-sm"
+            />
+
+            <button type="submit" className="ks-btn ks-btn-primary min-h-11 shrink-0">
+              Sign Up
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
 
+      <div className="relative border-t border-line">
+        <div className="ks-container flex flex-col gap-3 py-5 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin size={15} strokeWidth={1.8} aria-hidden="true" />
+              Finland
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Globe size={15} strokeWidth={1.8} aria-hidden="true" />
+              English | Suomi
+            </span>
+          </div>
 
-    <div className="flex-1">
-      <h3 className="mb-4 text-lg font-bold">Explore</h3>
-
-      <ul className="space-y-2 text-black-600">
-        {navLinks
-          .filter((link) => !(isAdmin && link.href === "/sell"))
-          .map((link) => (
-          <li key={link.id}>
-            <Link to={link.href} className="transition-colors hover:text-[#1f7356]">
-              {link.footerText}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-
-    <div className="flex-1">
-      <h3 className="mb-4 text-lg font-bold">Helpful Links</h3>
-
-      <ul className="space-y-2 text-black-600">
-
-        <li>
-          <a href="#" className="transition-colors hover:text-[#1f7356]">
-            FAQ
-          </a>
-        </li>
-
-        <li>
-          <a href="#" className="transition-colors hover:text-[#1f7356]">
-            Privacy Policy
-          </a>
-        </li>
-
-        <li>
-          <a href="#" className="transition-colors hover:text-[#1f7356]">
-            Terms of Service
-          </a>
-        </li>
-      </ul>
-    </div>
-
-
-    <div className="flex-1">
-      <h3 className="mb-4 text-lg font-bold">
-        Create your account
-      </h3>
-
-      <p className="mb-4">
-        Get your property now!
-      </p>
-
-      <form className="flex max-w-350">
-        <input type="email" placeholder="Enter your email" className="min-w-0 flex-1 border border-gray-300 bg-white px-4 py-3 outline-none"/>
-
-        <button type="submit" className="bg-[#1f7356] px-5 py-3 font-medium text-white transition hover:bg-[#1a5e45]">
-          Sign Up
-        </button>
-      </form>
-    </div>
-
-  </div> 
-
-  <div className="mx-auto mt-12 flex max-w-350 flex-col gap-5 border-t border-gray-300 pt-6 text-sm md:flex-row md:items-center md:justify-between">
-
-    <div className="flex gap-4">
-      <span>🇫🇮 Finland</span>
-      <span>🌐 English | Suomi</span>
-    </div>
-
-    <p>
-      © 2026 KotiSpot. All rights reserved.
-    </p>
-
-  </div>
-
-</footer>
-
+          <p>© 2026 KotiSpot. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
   );
 };
 
-export default Footer
+export default Footer;

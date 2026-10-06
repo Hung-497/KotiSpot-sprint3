@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { apiRequest } from "../services/api";
+import { applyThemeClass } from "../utils/applyTheme";
 
 const DEFAULT_PREFERENCES = {
   theme: "system",
@@ -8,11 +9,25 @@ const DEFAULT_PREFERENCES = {
   smsNotifications: false,
 };
 
+const THEME_STORAGE_KEY = "kotispotTheme";
+
+const getStoredTheme = () => {
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+};
+
 const usePreferences = (isLoggedIn) => {
-  const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
+  const [preferences, setPreferences] = useState(() => ({
+    ...DEFAULT_PREFERENCES,
+    theme: getStoredTheme() || DEFAULT_PREFERENCES.theme,
+  }));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const hasAppliedTheme = useRef(false);
 
   const resetPreferences = () => {
     setPreferences(DEFAULT_PREFERENCES);
@@ -43,9 +58,7 @@ const usePreferences = (isLoggedIn) => {
     loadPreferences();
   }, [isLoggedIn]);
 
-  useEffect(() => {
-    const root = document.documentElement;
-
+  useLayoutEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     const applyTheme = () => {
@@ -53,10 +66,18 @@ const usePreferences = (isLoggedIn) => {
         preferences.theme === "dark" ||
         (preferences.theme === "system" && mediaQuery.matches);
 
-      root.classList.toggle("dark", useDark);
+      // No cross-fade for the very first theme on page load
+      applyThemeClass(useDark, { animate: hasAppliedTheme.current });
+      hasAppliedTheme.current = true;
     };
 
     applyTheme();
+
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, preferences.theme);
+    } catch {
+      // Storage blocked: the theme still applies for this visit
+    }
 
     if (preferences.theme === "system") {
       mediaQuery.addEventListener("change", applyTheme);

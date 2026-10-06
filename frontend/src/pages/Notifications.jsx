@@ -4,6 +4,8 @@ import ApplicationCard from "../components/ApplicationCard";
 import ConversationCard from "../components/ConversationCard";
 import { apiRequest } from "../services/api";
 import useDialog from "../hooks/useDialog";
+import PageLoader from "../components/PageLoader";
+import useMinimumDuration, { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 
 const getInquiryPropertyLabel = (property) => {
   if (!property) {
@@ -19,6 +21,9 @@ const getInquiryPropertyLabel = (property) => {
 
 function Notifications({ isAdmin }) {
   const { showAlert } = useDialog();
+  const hasMinimumLoadingElapsed = useMinimumDuration(PAGE_LOADING_MS);
+  const [adminLoading, setAdminLoading] = useState(isAdmin);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
   // Only for admins
   const [applications, setApplications] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
@@ -35,11 +40,15 @@ function Notifications({ isAdmin }) {
     }
 
     const fetchAdminData = async () => {
+      setAdminLoading(true);
+
       try {
         setApplications(await apiRequest("/verifications"));
         setContactMessages(await apiRequest("/contact-messages"));
       } catch (error) {
         console.error("Failed to load admin notifications:", error);
+      } finally {
+        setAdminLoading(false);
       }
     };
 
@@ -55,6 +64,8 @@ function Notifications({ isAdmin }) {
         setMyMessages(await apiRequest("/contact-messages/mine"));
       } catch (error) {
         console.error("Failed to load notifications:", error);
+      } finally {
+        setConversationsLoading(false);
       }
     };
 
@@ -120,24 +131,27 @@ function Notifications({ isAdmin }) {
     myMessages.length === 0 &&
     (!isAdmin || (applications.length === 0 && contactMessages.length === 0));
 
+  if (!hasMinimumLoadingElapsed || conversationsLoading || (isAdmin && adminLoading)) {
+    return <PageLoader label="Loading notifications…" fullPage variant="bar" />;
+  }
   return (
-    <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#08243f]">Notifications</h1>
+          <h1 className="ks-page-title">Notifications</h1>
 
-          <p className="mt-2 text-gray-500">Stay updated with your</p>
+          <p className="mt-2 text-ink-muted">Stay updated with your</p>
         </div>
 
         {/* ---------- Admin only ---------- */}
         {isAdmin && (
           <div className="mb-10">
-            <h2 className="mb-4 text-xl font-semibold text-[#08243f]">
+            <h2 className="mb-4 text-xl font-semibold text-ink">
               Seller / agent applications
             </h2>
 
             {applications.length === 0 && (
-              <p className="text-sm text-gray-500">No applications.</p>
+              <p className="text-sm text-ink-muted">No applications.</p>
             )}
 
             <div className="space-y-4">
@@ -154,12 +168,12 @@ function Notifications({ isAdmin }) {
 
         {isAdmin && (
           <div className="mb-10">
-            <h2 className="mb-4 text-xl font-semibold text-[#08243f]">
+            <h2 className="mb-4 text-xl font-semibold text-ink">
               Contact messages
             </h2>
 
             {contactMessages.length === 0 && (
-              <p className="text-sm text-gray-500">No messages.</p>
+              <p className="text-sm text-ink-muted">No messages.</p>
             )}
 
             <div className="space-y-4">
@@ -254,16 +268,18 @@ function Notifications({ isAdmin }) {
           ))}
 
           {hasNoNotifications && (
-            <div className="rounded-2xl border border-gray-200 bg-white px-6 py-16 text-center shadow-sm">
-              <div className=" mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#eef6f2] text-[#17634f]">
+            <div className="rounded-card border border-line bg-surface px-6 py-16 text-center shadow-card">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-pine-50 text-pine-700">
                 <Bell size={26} />
               </div>
 
-              <h2 className="mt-4 text-lg font-semibold text-[#08243f]">
+              <h2 className="mt-4 text-lg font-semibold text-ink">
                 No notifications left
               </h2>
 
-              <p className="mt-1 text-sm text-gray-500">You're now caught up</p>
+              <p className="mt-1 text-sm text-ink-muted">
+                You're now caught up
+              </p>
             </div>
           )}
         </div>

@@ -1,8 +1,9 @@
+import PropertySkeletons from "./PropertySkeletons";
 import { useState } from "react"
-import Properties from "./Properties"
-import { Star, Heart } from "lucide-react";
+import Properties from "./HomeProperties"
+import PropertyTabs from "./PropertyTabs";
 
-const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFavorite }) => {
+const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFavorite, isLoading = false }) => {
 
     const [activeTab, setActiveTab] = useState("recommendations")
     const favoriteProperties = visibleProperties.filter((property) =>
@@ -10,31 +11,12 @@ const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFa
     );
     return (
         <div>
-            <h3>Discover properties</h3>
             <div className="discover-property">
-                <div className="propertyTabs flex gap-3 mb-4 mt-2">
-                    <button onClick={() => setActiveTab("recommendations")}
-                    className={
-                        activeTab === "recommendations"
-                            ? "flex items-center gap-2 rounded-full bg-[#17634f] px-5 py-2 text-xs font-medium text-white"
-                            : "flex items-center gap-2 rounded-full bg-[#eef6f2] px-5 py-2 text-xs font-medium text-[#08243f]"
-                    }
-                    >
-                    <Star size={16} fill={ activeTab === "recommendations" ? "currentColor" : "none"}/>
-                        Recommended</button>
-
-                    <button onClick={() => setActiveTab("favorites")}
-                    className={
-                        activeTab === "favorites"
-                            ? "flex items-center gap-2 rounded-full bg-[#17634f] px-5 py-2 text-xs font-medium text-white"
-                            : "flex items-center gap-2 rounded-full bg-[#eef6f2] px-5 py-2 text-xs font-medium text-[#08243f]"
-                    }
-                    >
-                    <Heart size={16} fill={activeTab === "favorites" ? "currentColor" : "none"}/>    
-                        Favourites</button>
+                <div className="propertyTabs mt-2 mb-4">
+                    <PropertyTabs activeTab={activeTab} onChange={setActiveTab} />
                 </div>
-                
-                {activeTab === "recommendations" ? (
+
+                {isLoading ? <PropertySkeletons home /> : activeTab === "recommendations" ? (
                     <Properties
                         properties={visibleProperties}
                         favorites={favorites}
@@ -42,7 +24,7 @@ const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFa
                     />
                 ) : (
                     favoriteProperties.length === 0 ? (
-                        <p>No favourite properties yet.</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">No favourite properties yet.</p>
                     ) : (
                         <Properties
                             properties={favoriteProperties}

@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import { Check, Flag, MapPin, ShieldCheck, Trash2, X } from "lucide-react";
 import { apiRequest } from "../services/api";
 import houseImage from "../assets/house1.jpg";
+import PageLoader from "../components/PageLoader";
+import SavingOverlay from "../components/SavingOverlay";
 
 const statusStyles = {
-  active: "bg-green-50 text-green-700",
-  approved: "bg-green-50 text-green-700",
+  active: "bg-green-50 text-green-700 dark:bg-[#123b38] dark:text-[#55d4aa]",
+  approved: "bg-green-50 text-green-700 dark:bg-[#123b38] dark:text-[#55d4aa]",
   unreviewed: "bg-blue-50 text-blue-700",
-  flagged: "bg-amber-50 text-amber-700",
-  removed: "bg-red-50 text-red-700",
+  flagged:
+    "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+  removed: "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-300",
 };
 
 const AdminPanel = ({ onModerationUpdated }) => {
@@ -24,7 +27,9 @@ const AdminPanel = ({ onModerationUpdated }) => {
   useEffect(() => {
     const loadProperties = async () => {
       try {
-        const data = await apiRequest(`/moderation/properties?moderationStatus=${selectedStatus}`);
+        const data = await apiRequest(
+          `/moderation/properties?moderationStatus=${selectedStatus}`,
+        );
         setProperties(data);
       } catch (error) {
         setError(error.message);
@@ -93,247 +98,273 @@ const AdminPanel = ({ onModerationUpdated }) => {
   };
 
   return (
-    <main className="min-h-screen bg-[#f8faf9] px-6 py-10">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[2px] text-[#17634f]">
-              Moderation
-            </p>
-            <h1 className="mt-2 text-3xl font-bold text-[#08243f]">
-              Admin panel
-            </h1>
-            <p className="mt-2 text-gray-500">
-              Review every property listing and record its moderation status.
-            </p>
+    <>
+      {isSubmitting && <SavingOverlay label="Saving moderation…" />}
+
+      <main className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[2px] text-pine-700">
+                Moderation
+              </p>
+              <h1 className="ks-page-title mt-2">Admin panel</h1>
+              <p className="mt-2 text-ink-muted">
+                Review every property listing and record its moderation status.
+              </p>
+            </div>
+            <button
+              onClick={() => setSelectedStatus("unreviewed")}
+              className="mt-5 w-1/4 rounded-lg bg-[#1f3C73] py-3 font-medium text-white transition hover:bg-[#162d59] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Unreviewed
+            </button>
+            <button
+              onClick={() => setSelectedStatus("flagged")}
+              className="mt-5 w-1/4 rounded-lg bg-[#73561f] py-3 font-medium text-white transition hover:bg-[#594216] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Flagged
+            </button>
+            <button
+              onClick={() => setSelectedStatus("removed")}
+              className="mt-5 w-1/4 rounded-lg bg-[#731f3c] py-3 font-medium text-white transition hover:bg-[#59162d] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Removed
+            </button>
+            <button
+              onClick={() => setSelectedStatus("approved")}
+              className="mt-5 w-1/4 rounded-lg bg-[#1f7356] py-3 font-medium text-white transition hover:bg-[#165942] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Approved
+            </button>
+            <div className="flex items-center gap-2 text-sm text-ink-muted">
+              <ShieldCheck size={18} className="text-pine-700" />
+              {properties.length} listings to review
+            </div>
           </div>
-          <button onClick={() => setSelectedStatus("unreviewed")} className="mt-5 w-1/4 rounded-lg bg-[#1f3C73] py-3 font-medium text-white transition hover:bg-[#162d59] disabled:cursor-not-allowed disabled:opacity-60">Unreviewed</button>
-          <button onClick={() => setSelectedStatus("flagged")} className="mt-5 w-1/4 rounded-lg bg-[#73561f] py-3 font-medium text-white transition hover:bg-[#594216] disabled:cursor-not-allowed disabled:opacity-60">Flagged</button>
-          <button onClick={() => setSelectedStatus("removed")} className="mt-5 w-1/4 rounded-lg bg-[#731f3c] py-3 font-medium text-white transition hover:bg-[#59162d] disabled:cursor-not-allowed disabled:opacity-60">Removed</button>
-          <button onClick={() => setSelectedStatus("approved")} className="mt-5 w-1/4 rounded-lg bg-[#1f7356] py-3 font-medium text-white transition hover:bg-[#165942] disabled:cursor-not-allowed disabled:opacity-60">Approved</button>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <ShieldCheck size={18} className="text-[#17634f]" />
-            {properties.length} listings to review
+
+          {error && (
+            <p className="mt-5 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger">
+              {error}
+            </p>
+          )}
+
+          {loading && (
+            <PageLoader
+              label="Loading moderation listings…"
+              className="py-16"
+            />
+          )}
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {properties.map((property) => {
+              const moderation = property.moderation;
+              const status = moderation?.status || "unreviewed";
+              const isRental = property.listingType === "rent";
+
+              const image =
+                property.images?.find((image) => image.isMain)?.url ||
+                property.images?.[0]?.url ||
+                houseImage;
+
+              return (
+                <button
+                  key={property.id}
+                  type="button"
+                  onClick={() => setSelectedProperty(property)}
+                  className="overflow-hidden rounded-card border border-line bg-surface text-left shadow-card transition hover:-translate-y-0.5 hover:border-pine-700 hover:shadow-raised"
+                >
+                  <img
+                    src={image}
+                    alt={property.title}
+                    className="h-48 w-full object-cover"
+                  />
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <h2 className="font-semibold text-ink">
+                        {property.title}
+                      </h2>
+                      <span
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusStyles[status] || statusStyles.active}`}
+                      >
+                        {status}
+                      </span>
+                    </div>
+                    <p className="mt-3 flex items-center gap-1 text-sm text-ink-muted">
+                      <MapPin size={15} />
+                      {property.city}
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-ink">
+                      {property.price} €{isRental ? " / month" : ""}
+                    </p>
+                    {moderation?.reason && (
+                      <p className="mt-2 line-clamp-2 text-xs text-ink-muted">
+                        Reason: {moderation.reason}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {error && (
-          <p className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+        {selectedProperty && (
+          <div
+            className="fixed inset-0 z-80 flex items-center justify-center bg-[#08243f]/40 px-4 py-4 sm:px-6 sm:py-8"
+            role="presentation"
+            onClick={closeDetails}
+          >
+            <div
+              className="max-h-full w-full max-w-2xl overflow-y-auto rounded-card bg-surface shadow-xl dark:border dark:border-[#315064]"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="property-details-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-line p-4 sm:p-6">
+                <div>
+                  <p className="text-sm text-ink-muted">Property details</p>
+                  <h2
+                    id="property-details-title"
+                    className="mt-1 text-2xl font-bold text-ink"
+                  >
+                    {selectedProperty.title}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Close property details"
+                  onClick={closeDetails}
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-ink-muted hover:bg-surface-muted hover:text-ink"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-        {loading && (
-          <p className="mt-8 text-gray-500">Loading moderation listings...</p>
-        )}
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {properties.map((property) => {
-            const moderation = property.moderation;
-            const status = moderation?.status || "unreviewed";
-            const isRental = property.listingType === "rent";
-
-            const image =
-              property.images?.find((image) => image.isMain)?.url ||
-              property.images?.[0]?.url ||
-              houseImage;
-
-            return (
-              <button
-                key={property.id}
-                type="button"
-                onClick={() => setSelectedProperty(property)}
-                className="overflow-hidden rounded-xl border border-gray-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#17634f] hover:shadow-md"
-              >
+              <div className="grid gap-4 p-4 sm:gap-6 sm:p-6 md:grid-cols-[220px_1fr]">
                 <img
-                  src={image}
-                  alt={property.title}
-                  className="h-48 w-full object-cover"
+                  src={
+                    selectedProperty.images?.find((image) => image.isMain)
+                      ?.url ||
+                    selectedProperty.images?.[0]?.url ||
+                    houseImage
+                  }
+                  alt={selectedProperty.title}
+                  className="h-48 w-full rounded-control object-cover"
                 />
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <h2 className="font-semibold text-[#08243f]">
-                      {property.title}
-                    </h2>
-                    <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusStyles[status] || statusStyles.active}`}
-                    >
-                      {status}
-                    </span>
-                  </div>
-                  <p className="mt-3 flex items-center gap-1 text-sm text-gray-500">
-                    <MapPin size={15} />
-                    {property.city}
+                <div className="space-y-3 text-sm text-ink-muted">
+                  <p className="text-xl font-semibold text-ink">
+                    {selectedProperty.price} €
+                    {selectedProperty.listingType === "rent" ? " / month" : ""}
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-[#08243f]">
-                    {property.price} €{isRental ? " / month" : ""}
+                  <p>
+                    <strong className="text-ink">Address:</strong>{" "}
+                    {selectedProperty.address}, {selectedProperty.city}
                   </p>
-                  {moderation?.reason && (
-                    <p className="mt-2 line-clamp-2 text-xs text-gray-500">
-                      Reason: {moderation.reason}
+                  <p>
+                    <strong className="text-ink">Listing type:</strong>{" "}
+                    {selectedProperty.listingType}
+                  </p>
+                  <p>
+                    <strong className="text-ink">Size:</strong>{" "}
+                    {selectedProperty.size} m²
+                  </p>
+                  <p>{selectedProperty.description}</p>
+                </div>
+              </div>
+
+              {selectedProperty.moderation?.reason && (
+                <div className="mx-6 mb-6 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
+                  <p className="font-semibold capitalize">
+                    {selectedProperty.moderation.status} reason
+                  </p>
+                  <p className="mt-1 whitespace-pre-line">
+                    {selectedProperty.moderation.reason}
+                  </p>
+                  {selectedProperty.moderation.moderatedAt && (
+                    <p className="mt-2 text-xs text-amber-700">
+                      Updated{" "}
+                      {new Date(
+                        selectedProperty.moderation.moderatedAt,
+                      ).toLocaleString()}
                     </p>
                   )}
                 </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+              )}
 
-      {selectedProperty && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#08243f]/40 px-6 py-8"
-          role="presentation"
-          onClick={closeDetails}
-        >
-          <div
-            className="max-h-full w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="property-details-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-gray-200 p-6">
-              <div>
-                <p className="text-sm text-gray-500">Property details</p>
-                <h2
-                  id="property-details-title"
-                  className="mt-1 text-2xl font-bold text-[#08243f]"
-                >
-                  {selectedProperty.title}
-                </h2>
-              </div>
-              <button
-                type="button"
-                aria-label="Close property details"
-                onClick={closeDetails}
-                className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-[#08243f]"
-              >
-                <X size={20} />
-              </button>
-            </div>
+              <div className="border-t border-line p-4 sm:p-6">
+                <p className="text-sm font-semibold text-ink">
+                  Choose a moderation action
+                </p>
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => chooseAction("approved")}
+                    className="flex items-center justify-center gap-2 rounded-control bg-green-600 px-4 py-3 text-sm font-medium text-white hover:bg-green-700"
+                  >
+                    <Check size={17} /> Approve
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => chooseAction("flagged")}
+                    className="flex items-center justify-center gap-2 rounded-control bg-amber-500 px-4 py-3 text-sm font-medium text-white hover:bg-amber-600"
+                  >
+                    <Flag size={17} /> Flag
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => chooseAction("removed")}
+                    className="flex items-center justify-center gap-2 rounded-control bg-red-600 px-4 py-3 text-sm font-medium text-white hover:bg-red-700"
+                  >
+                    <Trash2 size={17} /> Remove
+                  </button>
+                </div>
 
-            <div className="grid gap-6 p-6 md:grid-cols-[220px_1fr]">
-              <img
-                src={
-                  selectedProperty.images?.find((image) => image.isMain)?.url ||
-                  selectedProperty.images?.[0]?.url ||
-                  houseImage
-                }
-                alt={selectedProperty.title}
-                className="h-48 w-full rounded-lg object-cover"
-              />
-              <div className="space-y-3 text-sm text-gray-600">
-                <p className="text-xl font-semibold text-[#08243f]">
-                  {selectedProperty.price} €
-                  {selectedProperty.listingType === "rent" ? " / month" : ""}
-                </p>
-                <p>
-                  <strong className="text-[#08243f]">Address:</strong>{" "}
-                  {selectedProperty.address}, {selectedProperty.city}
-                </p>
-                <p>
-                  <strong className="text-[#08243f]">Listing type:</strong>{" "}
-                  {selectedProperty.listingType}
-                </p>
-                <p>
-                  <strong className="text-[#08243f]">Size:</strong>{" "}
-                  {selectedProperty.size} m²
-                </p>
-                <p>{selectedProperty.description}</p>
-              </div>
-            </div>
-
-            {selectedProperty.moderation?.reason && (
-              <div className="mx-6 mb-6 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
-                <p className="font-semibold capitalize">
-                  {selectedProperty.moderation.status} reason
-                </p>
-                <p className="mt-1 whitespace-pre-line">
-                  {selectedProperty.moderation.reason}
-                </p>
-                {selectedProperty.moderation.moderatedAt && (
-                  <p className="mt-2 text-xs text-amber-700">
-                    Updated{" "}
-                    {new Date(
-                      selectedProperty.moderation.moderatedAt,
-                    ).toLocaleString()}
-                  </p>
+                {pendingAction && (
+                  <div className="mt-5 rounded-control bg-surface-muted p-4 dark:border dark:border-[#315064]">
+                    <p className="text-sm text-ink">
+                      Confirm marking this property as{" "}
+                      <strong className="capitalize">{pendingAction}</strong>.
+                    </p>
+                    <label
+                      htmlFor="moderation-reason"
+                      className="mt-3 block text-sm font-medium text-ink"
+                    >
+                      Reason *
+                    </label>
+                    <textarea
+                      id="moderation-reason"
+                      value={reason}
+                      onChange={(event) => setReason(event.target.value)}
+                      rows="3"
+                      className="ks-input mt-2 w-full border text-sm"
+                      placeholder="Add a note for the moderation decision"
+                    />
+                    <div className="mt-3 flex flex-wrap justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setPendingAction(null)}
+                        className="rounded-control border border-line px-4 py-2 text-sm text-ink"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isSubmitting || !reason.trim()}
+                        onClick={confirmAction}
+                        className="ks-btn ks-btn-primary text-sm font-medium disabled:opacity-60"
+                      >
+                        {isSubmitting ? "Saving..." : "Confirm action"}
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
-            )}
-
-            <div className="border-t border-gray-200 p-6">
-              <p className="text-sm font-semibold text-[#08243f]">
-                Choose a moderation action
-              </p>
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <button
-                  type="button"
-                  onClick={() => chooseAction("approved")}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white hover:bg-green-700"
-                >
-                  <Check size={17} /> Approve
-                </button>
-                <button
-                  type="button"
-                  onClick={() => chooseAction("flagged")}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-3 text-sm font-medium text-white hover:bg-amber-600"
-                >
-                  <Flag size={17} /> Flag
-                </button>
-                <button
-                  type="button"
-                  onClick={() => chooseAction("removed")}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-3 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  <Trash2 size={17} /> Remove
-                </button>
-              </div>
-
-              {pendingAction && (
-                <div className="mt-5 rounded-lg bg-gray-50 p-4">
-                  <p className="text-sm text-[#08243f]">
-                    Confirm marking this property as{" "}
-                    <strong className="capitalize">{pendingAction}</strong>.
-                  </p>
-                  <label
-                    htmlFor="moderation-reason"
-                    className="mt-3 block text-sm font-medium text-[#08243f]"
-                  >
-                    Reason *
-                  </label>
-                  <textarea
-                    id="moderation-reason"
-                    value={reason}
-                    onChange={(event) => setReason(event.target.value)}
-                    rows="3"
-                    className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
-                    placeholder="Add a note for the moderation decision"
-                  />
-                  <div className="mt-3 flex justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setPendingAction(null)}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-[#08243f]"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isSubmitting || !reason.trim()}
-                      onClick={confirmAction}
-                      className="rounded-lg bg-[#17634f] px-4 py-2 text-sm font-medium text-white hover:bg-[#12503f] disabled:opacity-60"
-                    >
-                      {isSubmitting ? "Saving..." : "Confirm action"}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      )}
-    </main>
+        )}
+      </main>
+    </>
   );
 };
 

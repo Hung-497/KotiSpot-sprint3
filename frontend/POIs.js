@@ -1,33 +1,34 @@
-export const getNearbyPlaces = async (lat, long) => {
-  const query = `
-    [out:json];
+import { apiRequest } from "./src/services/api";
 
-    (
-      node["amenity"="cafe"](around:1000,${lat},${long});
-      node["amenity"="restaurant"](around:1000,${lat},${long});
-      node["amenity"="school"](around:1000,${lat},${long});
-      node["amenity"="hospital"](around:1000,${lat},${long});
-      node["amenity"="pharmacy"](around:1000,${lat},${long});
+// The backend fetches nearby places from Overpass and caches them, so the
+// browser never talks to Overpass directly.
+// This cache only stops duplicate calls in this tab (React StrictMode,
+// revisiting a property).
+const placesCache = new Map();
 
-      node["shop"="supermarket"](around:1000,${lat},${long});
+export const getNearbyPlaces = (lat, long) => {
+  const latitude = Number(lat);
+  const longitude = Number(long);
+  const key = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
 
-      node["leisure"="park"](around:1000,${lat},${long});
+  if (!placesCache.has(key)) {
+    const params = new URLSearchParams({ lat: latitude, lon: longitude });
 
-      node["highway"="bus_stop"](around:1000,${lat},${long});
-    );
+    const request = apiRequest(`/properties/nearby?${params}`)
+      .then((data) => {
+        if (data?.unavailable) {
+          throw new Error("Nearby places are unavailable right now");
+        }
+        return data?.places ?? [];
+      })
+      .catch((error) => {
+        // Don't cache failures, so the next visit can try again
+        placesCache.delete(key);
+        throw error;
+      });
 
-    out;
-  `;
-
-  const url ="https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch nearby places");
+    placesCache.set(key, request);
   }
 
-  const data = await response.json();
-
-  return data.elements;
+  return placesCache.get(key);
 };

@@ -1,6 +1,8 @@
+import SavingOverlay from "../components/SavingOverlay";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { apiRequest } from "../services/api";
+import { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 
 const Contact = () => {
   const [fullName, setFullName] = useState("");
@@ -29,6 +31,8 @@ const Contact = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isSubmitting) return;
+
     const fields = [
       [fullName, "full name"],
       [email, "email"],
@@ -49,6 +53,7 @@ const Contact = () => {
 
     setFormError("");
     setIsSubmitting(true);
+    const minimumLoading = new Promise((resolve) => setTimeout(resolve, PAGE_LOADING_MS));
 
     try {
       await apiRequest("/contact-messages", {
@@ -61,8 +66,10 @@ const Contact = () => {
         }),
       });
 
+      await minimumLoading;
       navigate("/contactthankmessage");
     } catch (error) {
+      await minimumLoading;
       console.error("Error sending contact message:", error);
       setFormError(error.message);
     } finally {
@@ -71,33 +78,34 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] px-6 py-10">
+    <div className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10" aria-busy={isSubmitting}>
+      {isSubmitting && <SavingOverlay label="Sending message…" />}
       <div className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-bold text-[#08243f]">Contact Us</h1>
+        <h1 className="ks-page-title">Contact Us</h1>
 
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-ink-muted">
           We're here to help. Send us a message and we'll get back to you.
         </p>
 
         <form
           onSubmit={handleSubmit}
-          className="mt-8 rounded-xl border border-gray-200 bg-white p-6"
+          className="mt-8 rounded-card border border-line bg-surface p-4 sm:p-6"
         >
-          <h2 className="mb-6 text-lg font-semibold text-[#08243f]">
+          <h2 className="mb-6 text-lg font-semibold text-ink">
             Send us a message
           </h2>
 
           {formError && (
             <p
               role="alert"
-              className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mb-5 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger"
             >
               {formError}
             </p>
           )}
 
           <div className="mb-5">
-            <label className="mb-2 block text-sm font-medium text-[#08243f]">
+            <label className="mb-2 block text-sm font-medium text-ink">
               Full name *
             </label>
 
@@ -106,20 +114,12 @@ const Contact = () => {
               value={fullName}
               onChange={handleFullName}
               placeholder="e.g. John Doe"
-              className="
-                w-full
-                rounded-lg
-                border border-gray-300
-                px-4 py-3
-                text-sm
-                outline-none
-                focus:border-[#17634f]
-              "
+              className="ks-input w-full border text-sm"
             />
           </div>
 
           <div className="mb-5">
-            <label className="mb-2 block text-sm font-medium text-[#08243f]">
+            <label className="mb-2 block text-sm font-medium text-ink">
               Email *
             </label>
 
@@ -128,37 +128,19 @@ const Contact = () => {
               value={email}
               onChange={handleEmail}
               placeholder="e.g. john.doe@example.com"
-              className="
-                w-full
-                rounded-lg
-                border border-gray-300
-                px-4 py-3
-                text-sm
-                outline-none
-                focus:border-[#17634f]
-              "
+              className="ks-input w-full border text-sm"
             />
           </div>
 
           <div className="mb-5">
-            <label className="mb-2 block text-sm font-medium text-[#08243f]">
+            <label className="mb-2 block text-sm font-medium text-ink">
               Subject *
             </label>
 
             <select
               value={subject}
               onChange={handleSubject}
-              className="
-                w-full
-                rounded-lg
-                border border-gray-300
-                bg-white
-                px-4 py-3
-                text-sm
-                text-gray-600
-                outline-none
-                focus:border-[#17634f]
-              "
+              className="ks-input w-full border text-sm"
             >
               <option value="">Select a subject</option>
               <option>Buy a property</option>
@@ -174,7 +156,7 @@ const Contact = () => {
           </div>
 
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-[#08243f]">
+            <label className="mb-2 block text-sm font-medium text-ink">
               Message *
             </label>
 
@@ -183,81 +165,53 @@ const Contact = () => {
               onChange={handleMessage}
               placeholder="Type your message here..."
               rows="5"
-              className="
-                w-full
-                resize-none
-                rounded-lg
-                border border-gray-300
-                px-4 py-3
-                text-sm
-                outline-none
-                focus:border-[#17634f]
-              "
+              className="ks-input w-full resize-none border text-sm"
             />
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="
-              inline-block
-              rounded-lg
-              bg-[#17634f]
-              px-6 py-3
-              text-sm font-medium
-              text-white
-              transition
-              hover:bg-[#124f40]
-              disabled:cursor-not-allowed
-              disabled:opacity-60
-            "
+            className="ks-btn ks-btn-primary inline-block text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? "Sending..." : "Send message"}
           </button>
         </form>
 
-        <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="mb-5 text-lg font-semibold text-[#08243f]">
+        <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
+          <h2 className="mb-5 text-lg font-semibold text-ink">
             Other ways to reach us
           </h2>
 
-          <div className="flex items-center justify-between border-b border-gray-100 py-4">
-            <span className="text-sm text-gray-600">Email</span>
+          <div className="flex items-center justify-between border-b border-line py-4">
+            <span className="text-sm text-ink-muted">Email</span>
 
-            <span className="text-sm text-[#17634f]">support@example.com</span>
+            <span className="text-sm text-pine-700">support@example.com</span>
           </div>
 
-          <div className="flex items-center justify-between border-b border-gray-100 py-4">
-            <span className="text-sm text-gray-600">Phone</span>
+          <div className="flex items-center justify-between border-b border-line py-4">
+            <span className="text-sm text-ink-muted">Phone</span>
 
-            <span className="text-sm text-[#17634f]">+358 10 123 4567</span>
+            <span className="text-sm text-pine-700">+358 10 123 4567</span>
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            <span className="text-sm text-gray-600">Support hours</span>
+            <span className="text-sm text-ink-muted">Support hours</span>
 
-            <span className="text-sm text-[#08243f]">Mon-Fri, 09:00-17:00</span>
+            <span className="text-sm text-ink">Mon-Fri, 09:00-17:00</span>
           </div>
         </div>
 
-        <div className="mt-5 rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-[#08243f]">FAQ</h2>
+        <div className="mt-5 rounded-card border border-line bg-surface p-4 sm:p-6">
+          <h2 className="text-lg font-semibold text-ink">FAQ</h2>
 
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-ink-muted">
               Visit our Help Center for answers to common questions.
             </p>
 
             <button
-              className="
-                rounded-lg
-                border border-gray-300
-                px-5 py-2.5
-                text-sm
-                text-[#08243f]
-                transition
-                hover:bg-gray-50
-              "
+              className="rounded-control border border-line px-5 py-2.5 text-sm text-ink transition hover:bg-surface-muted"
             >
               Go to Help Center
             </button>

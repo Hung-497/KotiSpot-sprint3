@@ -56,32 +56,34 @@ const ApplicationCard = ({ application, onDelete }) => {
 
   return (
     <div
-      className={`flex items-start justify-between gap-4 rounded-2xl border bg-white p-5 shadow-sm ${
-        read ? "border-gray-200" : "border-[#17634f] ring-1 ring-[#17634f]"
-      }`}
+      className={` flex items-start justify-between gap-3 rounded-card border bg-surface p-4 shadow-card sm:gap-4 sm:p-5 ${
+        read
+          ? "border-line"
+          : "border-pine-700 ring-1 ring-pine-700 dark:ring-[#55d4aa]/50"
+      }  `}
     >
-      <div className="flex flex-1 gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#eef6f2] text-[#17634f]">
+      <div className="flex min-w-0 flex-1 gap-2 sm:gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-pine-50 text-pine-700">
           <UserCheck size={22} />
         </div>
 
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-[#08243f]">
+            <h3 className="font-semibold text-ink">
               {application.fullName} wants to become{" "}
               {isAgent ? "a real estate agent" : "a seller"}
             </h3>
 
             {!read && (
               <>
-                <span className="rounded-full bg-[#17634f] px-2 py-0.5 text-xs font-medium text-white">
+                <span className="rounded-full bg-pine-700 px-2 py-0.5 text-xs font-medium text-white">
                   New
                 </span>
 
                 <button
                   type="button"
                   onClick={markAsRead}
-                  className="text-sm font-medium text-[#17634f] hover:underline"
+                  className="text-sm font-medium text-pine-700 hover:underline"
                 >
                   Mark as read
                 </button>
@@ -89,76 +91,78 @@ const ApplicationCard = ({ application, onDelete }) => {
             )}
           </div>
 
-          <p className="mt-1 text-sm text-gray-600">{application.email}</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            {application.email}
+          </p>
 
-          <p className="mt-2 text-xs text-gray-400">
+          <p className="mt-2 text-xs text-ink-subtle">
             {new Date(application.createdAt).toLocaleString()}
           </p>
 
           <button
             type="button"
             onClick={() => setShowDetails(!showDetails)}
-            className="mt-3 text-sm font-medium text-[#17634f] hover:underline"
+            className="mt-3 text-sm font-medium text-pine-700 hover:underline"
           >
             {showDetails ? "Hide application" : "View application"}
           </button>
 
           {/* The full application: the same fields as the form they filled in */}
           {showDetails && (
-            <div className="mt-4 space-y-2 rounded-xl bg-[#f8faf9] p-4 text-sm text-gray-700">
+            <div className="mt-4 space-y-2 rounded-card bg-canvas p-4 text-sm text-ink-muted dark:border dark:border-[#315064]">
               <p>
-                <strong>Applying for:</strong>{" "}
+                <strong className="dark:text-white">Applying for:</strong>{" "}
                 {isAgent ? "Real estate agent" : "Seller"}
               </p>
               <p>
-                <strong>Full name:</strong> {application.fullName}
+                <strong className="dark:text-white">Full name:</strong> {application.fullName}
               </p>
               <p>
-                <strong>Email:</strong> {application.email}
+                <strong className="dark:text-white">Email:</strong> {application.email}
               </p>
               <p>
-                <strong>Phone number:</strong> {application.phone}
+                <strong className="dark:text-white">Phone number:</strong> {application.phone}
               </p>
 
               {isAgent && (
                 <>
                   <p>
-                    <strong>Company name:</strong>{" "}
+                    <strong className="dark:text-white">Company name:</strong>{" "}
                     {application.companyName || "-"}
                   </p>
                   <p>
-                    <strong>Where they operate:</strong> {application.areas}
+                    <strong className="dark:text-white">Where they operate:</strong> {application.areas}
                   </p>
                   <p>
-                    <strong>Real estate licence number:</strong>{" "}
+                    <strong className="dark:text-white">Real estate licence number:</strong>{" "}
                     {application.licenseNumber}
                   </p>
                 </>
               )}
 
-              <div className="flex flex-wrap gap-4 pt-2">
+              <div className="grid grid-cols-1 gap-4 pt-2 xl:grid-cols-2">
                 <div>
-                  <p className="mb-1 font-medium text-[#08243f]">
+                  <p className="mb-1 font-medium text-ink">
                     Government ID
                   </p>
                   <img
                     src={application.idDocument}
                     alt="Government ID"
                     onClick={() => setBigPicture(application.idDocument)}
-                    className="h-40 w-60 cursor-zoom-in rounded-lg border border-gray-200 bg-white object-cover"
+                    className="h-40 w-full max-w-60 cursor-zoom-in rounded-control border border-line bg-surface object-cover"
                   />
                 </div>
 
                 {isAgent && (
                   <div>
-                    <p className="mb-1 font-medium text-[#08243f]">
+                    <p className="mb-1 font-medium text-ink">
                       Real estate licence
                     </p>
                     <img
                       src={application.licenseDocument}
                       alt="Real estate licence"
                       onClick={() => setBigPicture(application.licenseDocument)}
-                      className="h-40 w-60 cursor-zoom-in rounded-lg border border-gray-200 bg-white object-cover"
+                      className="h-40 w-full max-w-60 cursor-zoom-in rounded-control border border-line bg-surface object-cover"
                     />
                   </div>
                 )}
@@ -175,11 +179,11 @@ const ApplicationCard = ({ application, onDelete }) => {
               <img
                 src={bigPicture}
                 alt="Application document"
-                className="max-h-full max-w-full rounded-lg bg-white object-contain"
+                className="max-h-full max-w-full rounded-control bg-surface object-contain dark:border dark:border-[#315064]"
               />
               <button
                 type="button"
-                className="absolute right-6 top-6 rounded-full bg-white px-3 py-1 text-sm font-medium text-[#08243f]"
+                className="absolute right-6 top-6 rounded-full bg-surface px-3 py-1 text-sm font-medium text-ink"
               >
                 Close
               </button>
@@ -187,21 +191,21 @@ const ApplicationCard = ({ application, onDelete }) => {
           )}
 
           {error && (
-            <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p className="mt-4 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger">
               {error}
             </p>
           )}
 
           {/* Already reviewed: show the result */}
           {status === "approved" && (
-            <div className="mt-4 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700">
+            <div className="mt-4 rounded-control bg-pine-50 px-4 py-2 text-sm text-pine-700 dark:border dark:border-[#2c806c]/50 dark:text-[#7cf0ca]">
               <p className="font-medium">Approved</p>
               {reviewReason && <p>Reason: {reviewReason}</p>}
             </div>
           )}
 
           {status === "rejected" && (
-            <div className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+            <div className="mt-4 rounded-control bg-danger-soft px-4 py-2 text-sm text-danger dark:border dark:border-red-500/30">
               <p className="font-medium">Rejected</p>
               {reviewReason && <p>Reason: {reviewReason}</p>}
             </div>
@@ -216,14 +220,14 @@ const ApplicationCard = ({ application, onDelete }) => {
                 maxLength={500}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="mt-4 w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-[#17634f]"
+                className="ks-input mt-4 w-full border text-sm"
               />
 
-              <div className="mt-3 flex gap-3">
+              <div className="mt-3 flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => reviewApplication("approved")}
-                  className="rounded-lg bg-[#17634f] px-4 py-2 text-sm font-medium text-white hover:bg-[#124d3d]"
+                  className="ks-btn ks-btn-primary text-sm font-medium"
                 >
                   Approve
                 </button>
@@ -231,7 +235,7 @@ const ApplicationCard = ({ application, onDelete }) => {
                 <button
                   type="button"
                   onClick={() => reviewApplication("rejected")}
-                  className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                  className="rounded-control border border-red-300 px-4 py-2 text-sm font-medium text-danger hover:bg-red-50 dark:border-red-500/70 dark:text-red-400"
                 >
                   Reject
                 </button>
@@ -246,7 +250,7 @@ const ApplicationCard = ({ application, onDelete }) => {
       {status !== "pending" && (
         <button
           onClick={onDelete}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-subtle transition hover:bg-red-50 hover:text-red-500"
         >
           <Trash2 size={19} />
         </button>

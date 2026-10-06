@@ -1,5 +1,6 @@
+import PageLoader from "../components/PageLoader";
+import AuthLayout from "../components/AuthLayout";
 import { useNavigate, Link } from "react-router-dom";
-import logo from "../assets/KotiSpot_logo.png";
 import useOtpAuth from "../hooks/useOtpAuth";
 import { useState } from "react";
 import { apiRequest } from "../services/api";
@@ -24,188 +25,189 @@ const Register = ({ onRegister }) => {
   const [lastName, setLastName] = useState("");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f7f9f8] px-4">
-      <div className="w-full max-w-107.5 rounded-xl bg-white px-10 py-12 shadow-sm">
-        <div className="mb-8 flex justify-center">
-          <img src={logo} alt="KotiSpot" className="w-45 h-auto" />
-        </div>
-
-        <div className="mb-7 text-center">
-          <h1 className="text-2xl font-semibold text-[#08243f]">
-            Sign up to get started
-          </h1>
-
-          <p className="mt-1 text-sm text-gray-600">
-            {codeRequested
-              ? `Enter the code sent to ${email}`
-              : "Create your KotiSpot account"}
-          </p>
-        </div>
-
-        {!codeRequested ? (
-          <form
-            onSubmit={(e) =>
-              requestCode(e, () => {
-                if (!firstName.trim()) {
-                  return "Please enter your first name.";
-                }
-                if (!lastName.trim()) {
-                  return "Please enter your last name.";
-                }
-
-                return null; // No validation errors
-              })
-            }
-            className="space-y-5"
+    <AuthLayout
+      panelHeading="Find your spot. Make it home."
+      panelText="Homes for sale and rent across Finland, with sellers and agents you can message directly."
+      title="Create your account"
+      subtitle={
+        codeRequested
+          ? `Enter the code sent to ${email}`
+          : "Create your KotiSpot account."
+      }
+      stepKey={codeRequested ? "code" : "email"}
+      footer={
+        <p>
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="font-medium text-pine-700 hover:underline"
           >
-            {formError && (
-              <p
-                role="alert"
-                className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
-              >
-                {formError}
-              </p>
-            )}
+            Log in
+          </Link>
+        </p>
+      }
+    >
+      {isSubmitting && (
+        <PageLoader
+          label={codeRequested ? "Verifying code…" : "Sending code…"}
+          variant="spinner"
+          className="mb-4"
+        />
+      )}
 
-            <div>
-              <label
-                htmlFor="firstName"
-                className="mb-2 block text-sm font-medium text-[#08243f]"
-              >
-                First name
-              </label>
+      {!codeRequested ? (
+        <form
+          onSubmit={(event) =>
+            requestCode(event, () => {
+              if (!firstName.trim()) {
+                return "Please enter your first name.";
+              }
 
-              <input
-                id="firstName"
-                type="text"
-                value={firstName}
-                onChange={(event) => setFirstName(event.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#1f7356] focus:ring-1 focus:ring-[#1f7356]"
-              />
-            </div>
+              if (!lastName.trim()) {
+                return "Please enter your last name.";
+              }
 
-            <div>
-              <label
-                htmlFor="lastName"
-                className="mb-2 block text-sm font-medium text-[#08243f]"
-              >
-                Last name
-              </label>
-
-              <input
-                id="lastName"
-                type="text"
-                value={lastName}
-                onChange={(event) => setLastName(event.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#1f7356] focus:ring-1 focus:ring-[#1f7356]"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-2 block text-sm font-medium text-[#08243f]"
-              >
-                Email
-              </label>
-
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#1f7356] focus:ring-1 focus:ring-[#1f7356]"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full rounded-lg bg-[#1f7356] py-3 font-medium text-white transition hover:bg-[#165942] disabled:cursor-not-allowed disabled:opacity-60"
+              return null;
+            })
+          }
+          className="space-y-5"
+        >
+          {formError && (
+            <p
+              role="alert"
+              className="rounded-control bg-danger-soft px-4 py-3 text-sm text-danger"
             >
-              {isSubmitting ? "Sending..." : "Continue"}
-            </button>
-          </form>
-        ) : (
-          <form
-            onSubmit={(e) =>
-              verifyCode(e, async (authData) => {
-                const profileData = await apiRequest("/users/me", {
-                  method: "PATCH",
-                  headers: {
-                    Authorization: `Bearer ${authData.token}`,
-                  },
-                  body: JSON.stringify({
-                    firstName: firstName.trim(),
-                    lastName: lastName.trim(),
-                  }),
-                });
-                onRegister(profileData.user, authData.token);
-                navigate("/");
-              })
-            }
-          >
-            {formError && (
-              <p
-                role="alert"
-                className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
-              >
-                {formError}
-              </p>
-            )}
+              {formError}
+            </p>
+          )}
 
+          <div>
             <label
-              htmlFor="register-code"
-              className="mb-2 block text-sm font-medium text-[#08243f]"
+              htmlFor="firstName"
+              className="mb-2 block text-sm font-medium text-ink"
             >
-              Verification code
+              First name
             </label>
 
             <input
-              id="register-code"
+              id="firstName"
               type="text"
-              inputMode="numeric"
-              maxLength="6"
-              value={code}
-              onChange={(event) =>
-                setCode(event.target.value.replace(/\D/g, ""))
-              }
-              placeholder="Enter 6-digit code"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#1f7356] focus:ring-1 focus:ring-[#1f7356]"
+              value={firstName}
+              onChange={(event) => setFirstName(event.target.value)}
+              className="ks-input"
             />
+          </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="mt-5 w-full rounded-lg bg-[#1f7356] py-3 font-medium text-white transition hover:bg-[#165942] disabled:cursor-not-allowed disabled:opacity-60"
+          <div>
+            <label
+              htmlFor="lastName"
+              className="mb-2 block text-sm font-medium text-ink"
             >
-              {isSubmitting ? "Creating account..." : "Create account"}
-            </button>
+              Last name
+            </label>
 
-            <button
-              type="button"
-              disabled={isSubmitting}
-              onClick={resetCode}
-              className="mt-3 w-full text-sm font-medium text-[#1f7356] hover:underline"
-            >
-              Change information
-            </button>
-          </form>
-        )}
+            <input
+              id="lastName"
+              type="text"
+              value={lastName}
+              onChange={(event) => setLastName(event.target.value)}
+              className="ks-input"
+            />
+          </div>
 
-        <div className="mt-7 text-center text-sm text-gray-600">
-          <p>
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-[#1f7356] hover:underline"
+          <div>
+            <label
+              htmlFor="email"
+              className="mb-2 block text-sm font-medium text-ink"
             >
-              Log in
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+              Email
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="ks-input"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="ks-btn ks-btn-primary w-full"
+          >
+            {isSubmitting ? "Sending..." : "Continue"}
+          </button>
+        </form>
+      ) : (
+        <form
+          onSubmit={(event) =>
+            verifyCode(event, async (authData) => {
+              const profileData = await apiRequest("/users/me", {
+                method: "PATCH",
+                headers: {
+                  Authorization: `Bearer ${authData.token}`,
+                },
+                body: JSON.stringify({
+                  firstName: firstName.trim(),
+                  lastName: lastName.trim(),
+                }),
+              });
+
+              onRegister(profileData.user, authData.token);
+              navigate("/");
+            })
+          }
+        >
+          {formError && (
+            <p
+              role="alert"
+              className="mb-4 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger"
+            >
+              {formError}
+            </p>
+          )}
+
+          <label
+            htmlFor="register-code"
+            className="mb-2 block text-sm font-medium text-ink"
+          >
+            Verification code
+          </label>
+
+          <input
+            id="register-code"
+            type="text"
+            inputMode="numeric"
+            maxLength="6"
+            value={code}
+            onChange={(event) =>
+              setCode(event.target.value.replace(/\D/g, ""))
+            }
+            placeholder="Enter 6-digit code"
+            className="ks-input"
+          />
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="ks-btn ks-btn-primary mt-5 w-full"
+          >
+            {isSubmitting ? "Creating account..." : "Create account"}
+          </button>
+
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={resetCode}
+            className="mt-3 w-full text-sm font-medium text-pine-700 hover:underline"
+          >
+            Change information
+          </button>
+        </form>
+      )}
+    </AuthLayout>
   );
 };
 
