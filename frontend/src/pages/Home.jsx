@@ -33,23 +33,29 @@ const Home = ({ properties, favorites, onToggleFavorite, isLoading = false }) =>
         <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-white/85 via-white/30 to-transparent sm:hidden dark:from-[#081520]/85 dark:via-[#081520]/30" />
 
         <div className="relative mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-24 lg:px-10">
-          <p className="text-xs font-semibold tracking-[3px] text-[#173451] dark:text-[#55d4aa]">
-            FIND YOUR SPOT
-          </p>
+          <div className="ks-hero-copy relative w-fit">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-x-5 -inset-y-8 z-0 bg-white/70 backdrop-blur-xl mask-[radial-gradient(ellipse_closest-side_at_center,black_40%,transparent_100%)] sm:-inset-x-12 sm:-inset-y-10 dark:bg-[#081520]/50 dark:backdrop-blur-sm dark:mask-[radial-gradient(ellipse_at_center,black_45%,transparent_75%)]"
+            />
+            <p className="relative z-10 text-xs font-semibold tracking-[3px] text-[#173451] dark:text-[#55d4aa]">
+              FIND YOUR SPOT
+            </p>
 
-          <h1 className="mt-3 text-3xl font-bold sm:text-4xl leading-[1.05] text-[#08243f] dark:text-white">
-            Search for a house
-            <br />
-            to <span className=" text-[#12a77d] dark:text-[#55d4aa]"> buy or rent </span>
-          </h1>
+            <h1 className="relative z-10 mt-3 text-3xl font-bold sm:text-4xl leading-[1.05] text-[#08243f] dark:text-white">
+              Search for a house
+              <br />
+              to <span className=" text-[#12a77d] dark:text-[#55d4aa]"> buy or rent </span>
+            </h1>
 
-          <p className="mt-3 text-sm text-[#294158] dark:text-white/85">
-            Discover your next home in Finland.
-          </p>
+            <p className="relative z-10 mt-3 text-sm text-[#294158] dark:text-white/85">
+              Discover your next home in Finland.
+            </p>
 
-          <p className="text-sm text-[#294158] dark:text-white/75">
-            Simple. Trusted. For a better tomorrow.
-          </p>
+            <p className="relative z-10 text-sm text-[#294158] dark:text-white/75">
+              Simple. Trusted. For a better tomorrow.
+            </p>
+          </div>
         </div>
 
         <div className="absolute bottom-8 left-1/2 z-20 w-190 max-w-[90%] -translate-x-1/2">

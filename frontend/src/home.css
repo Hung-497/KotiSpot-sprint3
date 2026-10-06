@@ -2,3 +2,29 @@
 .property-card { width: 220px; border: 1px solid #ddd; border-radius: 12px; overflow: hidden; background: white; }
 .dark .property-card { border-color: #2b5262; background: #0b2233; }
 .property-info { padding: 0.75rem; }
+
+.ks-hero-copy ::selection {
+    background-color: transparent;
+    color: #294158;
+}
+
+.ks-hero-copy h1::selection {
+    color: #08243f;
+}
+
+.ks-hero-copy > p:first-of-type::selection {
+    color: #173451;
+}
+
+.ks-hero-copy h1 span::selection {
+    color: #12a77d;
+}
+
+.dark .ks-hero-copy ::selection {
+    color: #ffffff;
+}
+
+.dark .ks-hero-copy h1 span::selection,
+.dark .ks-hero-copy > p:first-of-type::selection {
+    color: #55d4aa;
+}
