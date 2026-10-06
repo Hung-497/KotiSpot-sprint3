@@ -7,6 +7,7 @@ import { getCardPhotos } from "../utils/cardPhotos";
 import { formatPrice } from "../utils/formatPrice";
 import { MAX_COMPARISON_PROPERTIES } from "./ComparisonActions";
 import { navigateWithPhotoTransition } from "../utils/photoTransition";
+import useDialog from "../hooks/useDialog";
 
 const Property = ({
   property,
@@ -23,6 +24,7 @@ const Property = ({
   const photoRef = useRef(null);
   const navigate = useNavigate();
   const detailPath = `/properties/${property.id}`;
+  const { showAlert } = useDialog();
 
   const openDetail = (event) => {
     if (
@@ -36,14 +38,18 @@ const Property = ({
     }
 
     event.preventDefault();
-    const photo = Array.from(photoRef.current?.parentElement.querySelectorAll("img") || [])
-      .find((image) => image.getClientRects().length > 0);
+    const photo = Array.from(
+      photoRef.current?.parentElement.querySelectorAll("img") || [],
+    ).find((image) => image.getClientRects().length > 0);
     navigateWithPhotoTransition(navigate, detailPath, photo);
   };
 
   const handleCompare = () => {
     if (!isSelected && selectedProperties.length >= MAX_COMPARISON_PROPERTIES) {
-      window.alert(`You can compare up to ${MAX_COMPARISON_PROPERTIES} properties. Deselect one before adding another.`);
+      showAlert(
+        `You can compare up to ${MAX_COMPARISON_PROPERTIES} properties. Deselect one before adding another.`,
+        "Comparison limit",
+      );
       return;
     }
 
@@ -65,7 +71,9 @@ const Property = ({
       onPointerEnter={photoCycle.start}
       onPointerLeave={photoCycle.stop}
       className={`group flex h-full flex-col overflow-hidden rounded-card border bg-surface shadow-card transition-[border-color,box-shadow] hover:shadow-raised ${
-        isSelected ? "border-pine-600 ring-1 ring-pine-600 dark:border-[#55d4aa]/60 dark:ring-[#55d4aa]/50" : "border-line"
+        isSelected
+          ? "border-pine-600 ring-1 ring-pine-600 dark:border-[#55d4aa]/60 dark:ring-[#55d4aa]/50"
+          : "border-line"
       }`}
     >
       <div className="relative">
@@ -89,7 +97,12 @@ const Property = ({
             </p>
             <p className="mt-1 truncate font-medium text-ink">{address}</p>
             <p className="mt-0.5 flex items-center gap-1 text-sm text-ink-muted">
-              <MapPin size={14} strokeWidth={1.8} aria-hidden="true" className="shrink-0" />
+              <MapPin
+                size={14}
+                strokeWidth={1.8}
+                aria-hidden="true"
+                className="shrink-0"
+              />
               <span className="truncate">{city}</span>
             </p>
 
@@ -122,10 +135,11 @@ const Property = ({
               : "Add property to favorites"
           }
           aria-pressed={isFavorite}
-          className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-card transition-colors ${isFavorite
+          className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-card transition-colors ${
+            isFavorite
               ? "bg-pine-700 text-white hover:bg-pine-800"
               : "bg-surface/95 text-ink hover:text-pine-700"
-            }`}
+          }`}
           onClick={() => {
             onToggleFavorite(property.id);
           }}
@@ -146,8 +160,14 @@ const Property = ({
             onChange={handleCompare}
             className="ks-compare-checkbox"
           />
-          <span className={`ks-compare-text ${isSelected ? "font-medium text-pine-700" : ""}`}>
-            Compare<span className="sr-only"> {address}, {city}</span>
+          <span
+            className={`ks-compare-text ${isSelected ? "font-medium text-pine-700" : ""}`}
+          >
+            Compare
+            <span className="sr-only">
+              {" "}
+              {address}, {city}
+            </span>
           </span>
         </label>
       )}

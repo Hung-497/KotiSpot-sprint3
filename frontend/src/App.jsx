@@ -1,3 +1,4 @@
+import PageTransition from "./components/PageTransition";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Footer from "../src/components/Footer";
@@ -50,7 +51,7 @@ function App() {
     resetPreferences,
   } = usePreferences(isLoggedIn);
 
-  const { properties, syncModeratedProperty } =
+  const { properties, isLoading: propertiesLoading, syncModeratedProperty } =
     useProperties(auth?.user?._id);
 
   const { favorites, toggleFavourite, resetFavorites } = useFavorites(
@@ -68,11 +69,13 @@ function App() {
     <>
       <BrowserRouter>
         <Navbar isLoggedIn={isLoggedIn} user={auth?.user} onLogout={logOut} />
+        <PageTransition>
         <Routes>
           <Route
             path="/"
             element={
               <Home
+                isLoading={propertiesLoading}
                 properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
@@ -84,6 +87,7 @@ function App() {
             element={
               isLoggedIn ? (
                 <Favorites
+                  isLoading={propertiesLoading}
                   properties={properties}
                   favorites={favorites}
                   onToggleFavorite={toggleFavourite}
@@ -97,6 +101,7 @@ function App() {
             path="/buy"
             element={
               <Buy
+                isLoading={propertiesLoading}
                 properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
@@ -207,6 +212,7 @@ function App() {
             path="/rent"
             element={
               <Rent
+                isLoading={propertiesLoading}
                 properties={properties}
                 favorites={favorites}
                 onToggleFavorite={toggleFavourite}
@@ -228,13 +234,15 @@ function App() {
           <Route
             path="/comparison"
             element={
-              <Comparison 
-              properties={properties}
+              <Comparison
+                properties={properties}
+                isLoading={propertiesLoading}
               />
             }
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </PageTransition>
         <Footer isAdmin={isAdmin} />
       </BrowserRouter>
     </>

@@ -1,5 +1,5 @@
 import DiscoverProperty from "../components/DiscoverProperty";
-import PropertySearch from "../components/HomePropertySearch";
+import PropertySearch from "../components/PropertySearch";
 import realestate from "../assets/realestate.png";
 import realestateDark from "../assets/realestate_dark.png";
 import { useState } from "react";
@@ -60,7 +60,6 @@ const Home = ({ properties, favorites, onToggleFavorite, isLoading = false }) =>
 
         <div className="absolute bottom-8 left-1/2 z-20 w-190 max-w-[90%] -translate-x-1/2">
           <PropertySearch
-            properties={properties}
             onResults={setFilteredProperties}
             placeholder="Search by city, area, or property type..."
             compact

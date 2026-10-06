@@ -3,6 +3,7 @@ import { apiRequest } from "../services/api";
 
 const useProperties = (currentUserId) => {
   const [properties, setProperties] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadProperties = async () => {
@@ -11,6 +12,8 @@ const useProperties = (currentUserId) => {
         setProperties(data);
       } catch (error) {
         console.error("Failed to load properties:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -45,7 +48,7 @@ const useProperties = (currentUserId) => {
     });
   };
 
-  return { properties, syncModeratedProperty };
+  return { properties, isLoading, syncModeratedProperty };
 };
 
 export default useProperties;

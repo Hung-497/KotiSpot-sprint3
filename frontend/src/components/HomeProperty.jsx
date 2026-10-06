@@ -6,6 +6,7 @@ import useCardPhotoCycle from "../hooks/useCardPhotoCycle";
 import { getCardPhotos } from "../utils/cardPhotos";
 import { MAX_COMPARISON_PROPERTIES } from "./ComparisonActions";
 import { navigateWithPhotoTransition } from "../utils/photoTransition";
+import useDialog from "../hooks/useDialog";
 
 const HomeProperty = ({
   property,
@@ -23,6 +24,7 @@ const HomeProperty = ({
   const navigate = useNavigate();
   const photoRef = useRef(null);
   const detailPath = `/properties/${property.id}`;
+  const { showAlert } = useDialog();
 
   const openDetail = (event) => {
     if (
@@ -36,14 +38,18 @@ const HomeProperty = ({
     }
 
     event.preventDefault();
-    const photo = Array.from(photoRef.current?.parentElement.querySelectorAll("img") || [])
-      .find((image) => image.getClientRects().length > 0);
+    const photo = Array.from(
+      photoRef.current?.parentElement.querySelectorAll("img") || [],
+    ).find((image) => image.getClientRects().length > 0);
     navigateWithPhotoTransition(navigate, detailPath, photo);
   };
 
   const handleCompare = () => {
     if (!isSelected && selectedProperties.length >= MAX_COMPARISON_PROPERTIES) {
-      window.alert(`You can compare up to ${MAX_COMPARISON_PROPERTIES} properties. Deselect one before adding another.`);
+      showAlert(
+        `You can compare up to ${MAX_COMPARISON_PROPERTIES} properties. Deselect one before adding another.`,
+        "Comparison limit",
+      );
       return;
     }
 
@@ -61,9 +67,14 @@ const HomeProperty = ({
   };
 
   return (
-    <div onPointerEnter={photoCycle.start} onPointerLeave={photoCycle.stop} style={{ width: "100%" }} className={`property-card flex min-w-0 flex-col overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:border-[#2b5262] dark:bg-[#0b2233] dark:shadow-[0_8px_24px_rgba(0,0,0,0.25)] dark:hover:border-[#3d7c71] dark:hover:shadow-[0_12px_30px_rgba(0,0,0,0.35)] ${
-      isSelected ? "ring-2 ring-pine-600 dark:ring-[#55d4aa]/70" : ""
-    }`}>
+    <div
+      onPointerEnter={photoCycle.start}
+      onPointerLeave={photoCycle.stop}
+      style={{ width: "100%" }}
+      className={`property-card flex min-w-0 flex-col overflow-hidden rounded-xl border border-gray-300 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:border-[#2b5262] dark:bg-[#0b2233] dark:shadow-[0_8px_24px_rgba(0,0,0,0.25)] dark:hover:border-[#3d7c71] dark:hover:shadow-[0_12px_30px_rgba(0,0,0,0.35)] ${
+        isSelected ? "ring-2 ring-pine-600 dark:ring-[#55d4aa]/70" : ""
+      }`}
+    >
       <div className="relative">
         <Link to={detailPath} onClick={openDetail} data-no-route-transition>
           <CardPhotos
@@ -75,22 +86,15 @@ const HomeProperty = ({
           />
 
           <div className="property-info bg-white text-[#08243f] dark:bg-[#0b2233] dark:text-gray-200">
-            <div className="font-semibold dark:text-white">
-              {address}
-            </div>
+            <div className="font-semibold dark:text-white">{address}</div>
 
-            <div className="dark:text-gray-300">
-              ⌖ {city}
-            </div>
+            <div className="dark:text-gray-300">⌖ {city}</div>
 
             <div className="dark:text-gray-100">
               {price} €{isRental ? " / month" : ""}
             </div>
 
-            <div className="dark:text-gray-300">
-              {size} m² 
-            </div>
-
+            <div className="dark:text-gray-300">{size} m²</div>
           </div>
         </Link>
 
@@ -130,8 +134,14 @@ const HomeProperty = ({
             onChange={handleCompare}
             className="ks-compare-checkbox"
           />
-          <span className={`ks-compare-text ${isSelected ? "font-medium text-pine-700" : ""}`}>
-            Compare<span className="sr-only"> {address}, {city}</span>
+          <span
+            className={`ks-compare-text ${isSelected ? "font-medium text-pine-700" : ""}`}
+          >
+            Compare
+            <span className="sr-only">
+              {" "}
+              {address}, {city}
+            </span>
           </span>
         </label>
       )}

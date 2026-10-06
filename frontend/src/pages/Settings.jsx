@@ -140,24 +140,24 @@ const Settings = ({
   }
 
   return (
-    <div
-      className="min-h-screen bg-surface-muted px-4 py-6 sm:px-6 sm:py-10"
-      aria-busy={isDeleting}
-    >
+    <div className="min-h-screen bg-surface-muted px-4 py-6 sm:px-6 sm:py-10" aria-busy={isDeleting}>
       {isDeleting && <SavingOverlay label="Deleting account…" />}
       <div className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-bold text-[#08243f] dark:text-gray-100">
+        <h1 className="ks-page-title">
           Settings
         </h1>
 
-        <p className="mb-8 mt-2 text-sm text-gray-500 dark:text-gray-400">
-          Manage your account
-        </p>
+        <div className="mb-8 mt-2 flex items-center justify-between gap-3">
+          <p className="text-sm text-ink-muted">Manage your account</p>
+          <span role="status" aria-live="polite" className="min-h-5 text-sm text-ink-muted">
+            {isSaving ? "Saving…" : ""}
+          </span>
+        </div>
 
         {error && (
           <p
             role="alert"
-            className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="mb-4 rounded-control bg-danger-soft px-4 py-3 text-sm text-danger"
           >
             {error}
           </p>
@@ -171,14 +171,8 @@ const Settings = ({
         >
           {message && (
             <div className="pointer-events-auto flex items-center gap-3 rounded-card border border-pine-200 bg-surface px-4 py-3 text-ink shadow-raised">
-              <CircleCheck
-                size={22}
-                className="shrink-0 text-pine-700"
-                aria-hidden="true"
-              />
-
+              <CircleCheck size={22} className="shrink-0 text-pine-700" aria-hidden="true" />
               <p className="flex-1 text-sm font-medium">{message}</p>
-
               <button
                 type="button"
                 aria-label="Dismiss saved notification"
@@ -192,35 +186,38 @@ const Settings = ({
         </div>
 
         {/* APPEARANCE */}
-        <div className="mb-5 rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-          <div className="flex items-center gap-4 p-6">
-            <div className="rounded-full bg-green-50 p-3 text-green-700">
+        <div className="mb-5 rounded-card border border-line bg-surface">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4 p-4 sm:p-6">
+            <div className="rounded-full bg-pine-50 p-3 text-pine-700">
               <Monitor size={21} />
             </div>
 
             <div>
-              <h2 className="text-lg font-semibold text-[#08243f] dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-ink">
                 Appearance
               </h2>
 
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-ink-muted">
                 Customize how the website looks
               </p>
             </div>
           </div>
 
-          <hr className="mx-6 border-gray-200 dark:border-gray-700" />
+          <hr className="mx-4 sm:mx-6 border-line" />
 
-          <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <Moon size={21} className="text-gray-700 dark:text-gray-300" />
+          <div className="flex flex-col gap-4 p-4 sm:p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <Moon
+                size={21}
+                className="shrink-0 text-ink-muted"
+              />
 
               <div>
-                <p className="font-medium text-[#08243f] dark:text-gray-100">
+                <p className="font-medium text-ink">
                   Theme
                 </p>
 
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ink-muted">
                   Switch between light and dark mode
                 </p>
               </div>
@@ -238,34 +235,37 @@ const Settings = ({
         </div>
 
         {/* NOTIFICATIONS */}
-        <div className="mb-5 rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-          <div className="flex items-center gap-4 p-6">
-            <div className="rounded-full bg-green-50 p-3 text-green-700">
+        <div className="mb-5 rounded-card border border-line bg-surface">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4 p-4 sm:p-6">
+            <div className="rounded-full bg-pine-50 p-3 text-pine-700">
               <Bell size={21} />
             </div>
 
             <div>
-              <h2 className="text-lg font-semibold text-[#08243f] dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-ink">
                 Notifications
               </h2>
 
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-ink-muted">
                 Choose what updates you want to receive
               </p>
             </div>
           </div>
 
           {/* EMAIL */}
-          <div className="mx-6 flex items-center justify-between border-b border-gray-200 py-5 dark:border-gray-700">
-            <div className="flex items-center gap-4">
-              <Mail size={21} className="text-gray-700 dark:text-gray-300" />
+          <div className="mx-4 sm:mx-6 flex items-center justify-between gap-3 border-b border-line py-5">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <Mail
+                size={21}
+                className="shrink-0 text-ink-muted"
+              />
 
               <div>
-                <p className="font-medium text-[#08243f] dark:text-gray-100">
+                <p className="font-medium text-ink">
                   Email notifications
                 </p>
 
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ink-muted">
                   Receive important updates via email
                 </p>
               </div>
@@ -275,7 +275,9 @@ const Settings = ({
               type="button"
               role="switch"
               disabled={isSaving}
-              aria-checked={preferences.emailNotifications}
+              aria-checked={
+                preferences.emailNotifications
+              }
               aria-label="Email notifications"
               onClick={() =>
                 updatePreference(
@@ -285,34 +287,34 @@ const Settings = ({
               }
               className={
                 preferences.emailNotifications
-                  ? "relative h-7 w-12 rounded-full bg-green-700 disabled:opacity-60"
-                  : "relative h-7 w-12 rounded-full bg-gray-300 disabled:opacity-60"
+                  ? "relative h-7 w-12 shrink-0 rounded-full bg-pine-700 transition-[background-color,transform] duration-200 active:scale-95"
+                  : "relative h-7 w-12 shrink-0 rounded-full bg-line-strong transition-[background-color,transform] duration-200 active:scale-95"
               }
             >
               <span
                 className={
                   preferences.emailNotifications
-                    ? "absolute right-1 top-1 h-5 w-5 rounded-full bg-white"
-                    : "absolute left-1 top-1 h-5 w-5 rounded-full bg-white"
+                    ? "absolute left-1 top-1 h-5 w-5 translate-x-5 rounded-full bg-white shadow-card transition-transform duration-200 ease-standard"
+                    : "absolute left-1 top-1 h-5 w-5 translate-x-0 rounded-full bg-white shadow-card transition-transform duration-200 ease-standard"
                 }
               />
             </button>
           </div>
 
           {/* MARKETING */}
-          <div className="mx-6 flex items-center justify-between border-b border-gray-200 py-5 dark:border-gray-700">
-            <div className="flex items-center gap-4">
+          <div className="mx-4 sm:mx-6 flex items-center justify-between gap-3 border-b border-line py-5">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Megaphone
                 size={21}
-                className="text-gray-700 dark:text-gray-300"
+                className="shrink-0 text-ink-muted"
               />
 
               <div>
-                <p className="font-medium text-[#08243f] dark:text-gray-100">
+                <p className="font-medium text-ink">
                   Marketing emails
                 </p>
 
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ink-muted">
                   Receive offers and tips
                 </p>
               </div>
@@ -332,34 +334,34 @@ const Settings = ({
               }
               className={
                 preferences.marketingEmails
-                  ? "relative h-7 w-12 rounded-full bg-green-700 disabled:opacity-60"
-                  : "relative h-7 w-12 rounded-full bg-gray-300 disabled:opacity-60"
+                  ? "relative h-7 w-12 shrink-0 rounded-full bg-pine-700 transition-[background-color,transform] duration-200 active:scale-95"
+                  : "relative h-7 w-12 shrink-0 rounded-full bg-line-strong transition-[background-color,transform] duration-200 active:scale-95"
               }
             >
               <span
                 className={
                   preferences.marketingEmails
-                    ? "absolute right-1 top-1 h-5 w-5 rounded-full bg-white"
-                    : "absolute left-1 top-1 h-5 w-5 rounded-full bg-white"
+                    ? "absolute left-1 top-1 h-5 w-5 translate-x-5 rounded-full bg-white shadow-card transition-transform duration-200 ease-standard"
+                    : "absolute left-1 top-1 h-5 w-5 translate-x-0 rounded-full bg-white shadow-card transition-transform duration-200 ease-standard"
                 }
               />
             </button>
           </div>
 
           {/* SMS */}
-          <div className="mx-6 flex items-center justify-between py-5">
-            <div className="flex items-center gap-4">
+          <div className="mx-4 sm:mx-6 flex items-center justify-between gap-3 py-5">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Smartphone
                 size={21}
-                className="text-gray-700 dark:text-gray-300"
+                className="shrink-0 text-ink-muted"
               />
 
               <div>
-                <p className="font-medium text-[#08243f] dark:text-gray-100">
+                <p className="font-medium text-ink">
                   SMS notifications
                 </p>
 
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ink-muted">
                   Receive important updates via SMS
                 </p>
               </div>
@@ -379,15 +381,15 @@ const Settings = ({
               }
               className={
                 preferences.smsNotifications
-                  ? "relative h-7 w-12 rounded-full bg-green-700 disabled:opacity-60"
-                  : "relative h-7 w-12 rounded-full bg-gray-300 disabled:opacity-60"
+                  ? "relative h-7 w-12 shrink-0 rounded-full bg-pine-700 transition-[background-color,transform] duration-200 active:scale-95"
+                  : "relative h-7 w-12 shrink-0 rounded-full bg-line-strong transition-[background-color,transform] duration-200 active:scale-95"
               }
             >
               <span
                 className={
                   preferences.smsNotifications
-                    ? "absolute right-1 top-1 h-5 w-5 rounded-full bg-white"
-                    : "absolute left-1 top-1 h-5 w-5 rounded-full bg-white"
+                    ? "absolute left-1 top-1 h-5 w-5 translate-x-5 rounded-full bg-white shadow-card transition-transform duration-200 ease-standard"
+                    : "absolute left-1 top-1 h-5 w-5 translate-x-0 rounded-full bg-white shadow-card transition-transform duration-200 ease-standard"
                 }
               />
             </button>
@@ -395,35 +397,38 @@ const Settings = ({
         </div>
 
         {/* ACCOUNT */}
-        <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-          <div className="flex items-center gap-4 p-6">
-            <div className="rounded-full bg-green-50 p-3 text-green-700">
+        <div className="rounded-card border border-line bg-surface">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4 p-4 sm:p-6">
+            <div className="rounded-full bg-pine-50 p-3 text-pine-700">
               <User size={21} />
             </div>
 
             <div>
-              <h2 className="text-lg font-semibold text-[#08243f] dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-ink">
                 Account
               </h2>
 
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-ink-muted">
                 Manage your account and data
               </p>
             </div>
           </div>
 
-          <hr className="mx-6 border-gray-200 dark:border-gray-700" />
+          <hr className="mx-4 sm:mx-6 border-line" />
 
-          <div className="flex items-center justify-between p-6">
-            <div className="flex items-center gap-4">
-              <Trash2 size={21} className="text-gray-700 dark:text-gray-300" />
+          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <Trash2
+                size={21}
+                className="shrink-0 text-ink-muted"
+              />
 
               <div>
-                <p className="font-medium text-[#08243f] dark:text-gray-100">
+                <p className="font-medium text-ink">
                   Delete account
                 </p>
 
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-ink-muted">
                   Permanently delete your account
                 </p>
               </div>
@@ -433,7 +438,7 @@ const Settings = ({
               type="button"
               onClick={deleteAccount}
               disabled={isDeleting}
-              className="flex items-center gap-2 rounded-lg border border-red-400 px-5 py-2 text-red-500"
+              className="flex items-center gap-2 rounded-control border border-red-400 px-5 py-2 text-red-500"
             >
               <Trash2 size={17} />
               {isDeleting ? "Deleting..." : "Delete account"}
