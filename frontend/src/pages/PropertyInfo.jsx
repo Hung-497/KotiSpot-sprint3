@@ -271,7 +271,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
             <button
               type="button"
               onClick={toggleFavorite}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-control border border-line-strong px-4 py-3 text-sm text-ink transition hover:bg-surface-muted"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-control border border-line-strong px-4 py-3 text-sm text-ink transition hover:bg-surface-muted dark:border-[#416d88] dark:bg-[#173b50] dark:font-semibold dark:text-[#f1f5f9] dark:shadow-[inset_0_0_0_1px_rgba(92,148,179,0.12)] dark:hover:border-[#6396b3] dark:hover:bg-[#204b63]"
             >
               <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
 
@@ -281,7 +281,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
             <button
               type="button"
               onClick={contactSeller}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-control bg-[#08243f] px-4 py-3 text-sm font-medium text-white transition hover:bg-pine-700"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-control bg-[#08243f] px-4 py-3 text-sm font-medium text-white transition hover:bg-pine-700 dark:bg-linear-to-b dark:from-[#3279d9] dark:to-[#0751ad] dark:font-semibold dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(0,55,130,0.25)] dark:hover:from-[#4188e5] dark:hover:to-[#0c60c3]"
             >
               <Mail size={18} />
               Contact seller or agent
@@ -381,7 +381,7 @@ const PropertyInfo = ({ favorites, onToggleFavorite, currentUser }) => {
               <button
                 type="button"
                 onClick={toggleReportForm}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-control px-4 py-2.5 text-sm text-danger transition hover:bg-danger-soft"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-control border border-red-300 bg-red-50 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/50 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
               >
                 <Flag size={16} aria-hidden="true" />
                 Report this listing

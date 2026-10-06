@@ -3,6 +3,8 @@ import logo from "../assets/KotiSpot_logo.png";
 import darkLogo from "../assets/KotiSpot_darklogo.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
+import SavingOverlay from "./SavingOverlay";
 import useDialog from "../hooks/useDialog";
 import {
   User,
@@ -47,6 +49,8 @@ const menuItemClass =
 const Navbar = ({ isLoggedIn, user, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const logoutInProgress = useRef(false);
   const { showConfirm } = useDialog();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -159,26 +163,37 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
 
   // Shows a "Logging out…" screen for PAGE_LOADING_MS, then logs out
   const handleLogout = async () => {
+    if (logoutInProgress.current) return;
+    logoutInProgress.current = true;
     closeMenus();
 
-    const confirmed = await showConfirm({
-      title: "Log out",
-      message:
-        "Are you sure you want to log out?\nYou will need to log in again to access your account",
-      confirmLabel: "Log out",
-      danger: true,
-    });
+    try {
+      const confirmed = await showConfirm({
+        title: "Log out",
+        message:
+          "Are you sure you want to log out?\nYou will need to log in again to access your account",
+        confirmLabel: "Log out",
+        danger: true,
+      });
 
-    if (!confirmed) {
-      return;
+      if (!confirmed) return;
+
+      setIsLoggingOut(true);
+      await new Promise((resolve) => setTimeout(resolve, PAGE_LOADING_MS));
+      await onLogout();
+      navigate("/");
+    } finally {
+      setIsLoggingOut(false);
+      logoutInProgress.current = false;
     }
-
-    onLogout();
-    navigate("/");
   };
 
   return (
-    <nav className="sticky top-0 z-60 border-b border-line bg-surface">
+    <nav
+      className="sticky top-0 z-60 border-b border-line bg-surface"
+      aria-busy={isLoggingOut}
+    >
+      {isLoggingOut && <SavingOverlay label="Logging out…" />}
       <div className="ks-container flex h-16 items-center gap-2 sm:gap-4 lg:h-18">
         <Link to="/" className="flex shrink-0 items-center rounded-control">
           <img
@@ -229,6 +244,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
               <button
                 ref={profileButtonRef}
                 type="button"
+                disabled={isLoggingOut}
                 aria-label={
                   isMenuOpen ? "Close profile menu" : "Open profile menu"
                 }
@@ -360,6 +376,7 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
                   <button
                     type="button"
                     onClick={handleLogout}
+                    disabled={isLoggingOut}
                     className="flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm font-medium text-ink transition-colors hover:bg-danger-soft hover:text-danger"
                   >
                     <LogOut size={18} strokeWidth={1.8} aria-hidden="true" />

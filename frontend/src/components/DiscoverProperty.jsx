@@ -11,7 +11,6 @@ const DiscoverProperty = ({ properties: visibleProperties, favorites, onToggleFa
     );
     return (
         <div>
-            <h3 className="text-sm text-[#08243f] dark:text-gray-200">Discover properties</h3>
             <div className="discover-property">
                 <div className="propertyTabs mt-2 mb-4">
                     <PropertyTabs activeTab={activeTab} onChange={setActiveTab} />

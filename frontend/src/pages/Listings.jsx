@@ -9,10 +9,13 @@ import {
 import { toPropertyImages } from "../utils/imageUtils";
 import PhotoManager from "../components/PhotoManager";
 import SavingOverlay from "../components/SavingOverlay";
+import PageLoader from "../components/PageLoader";
+import useMinimumDuration, { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 // import { Calculator } from "lucide-react";
 
 const Listings = () => {
   const { showAlert } = useDialog();
+  const hasMinimumLoadingElapsed = useMinimumDuration(PAGE_LOADING_MS);
   const [listingType, setListingType] = useState("");
   const [formMessage, setFormMessage] = useState("");
   const [formError, setFormError] = useState("");
@@ -99,6 +102,8 @@ const Listings = () => {
   };
 
   const addListing = async () => {
+    if (isSubmitting) return;
+
     setFormError("");
     setFormMessage("");
 
@@ -115,6 +120,9 @@ const Listings = () => {
     propertyData.images = toPropertyImages(photos, newListing.title);
 
     setIsSubmitting(true);
+    const minimumLoading = new Promise((resolve) =>
+      setTimeout(resolve, PAGE_LOADING_MS),
+    );
 
     try {
       const createdProperty = await apiRequest("/properties", {
@@ -122,6 +130,7 @@ const Listings = () => {
         body: JSON.stringify(propertyData),
       });
 
+      await minimumLoading;
       setFormMessage(
         createdProperty.moderation.status === "approved"
           ? "Listing published successfully."
@@ -132,6 +141,7 @@ const Listings = () => {
       setNewListing(createEmptyListing());
       setListingType("");
     } catch (error) {
+      await minimumLoading;
       setFormError(error.message);
     } finally {
       setIsSubmitting(false);
@@ -141,6 +151,10 @@ const Listings = () => {
   const handleListingType = (event) => {
     setListingType(event.target.value);
   };
+
+  if (!hasMinimumLoadingElapsed) {
+    return <PageLoader label="Loading create listing…" fullPage variant="spinner" />;
+  }
 
   return (
     <div

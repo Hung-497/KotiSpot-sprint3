@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "../services/api";
 import useDialog from "../hooks/useDialog";
 import houseImage from "../assets/house1.jpg";
 import PhotoManager from "../components/PhotoManager";
 import PageLoader from "../components/PageLoader";
 import SavingOverlay from "../components/SavingOverlay";
+import { PAGE_LOADING_MS } from "../hooks/useMinimumDuration";
 // import { Calculator } from "lucide-react";
 import {
   toEditablePhotos,
@@ -25,6 +26,8 @@ const MyListings = ({ onListingUpdated }) => {
   const { showAlert, showConfirm } = useDialog();
   const [listings, setListings] = useState([]);
   const [editingListing, setEditingListing] = useState(null);
+  const [isOpeningEditor, setIsOpeningEditor] = useState(false);
+  const editLoadingTimer = useRef(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
@@ -39,6 +42,8 @@ const MyListings = ({ onListingUpdated }) => {
     "rooms",
     "buildingYear",
   ];
+
+  useEffect(() => () => clearTimeout(editLoadingTimer.current), []);
 
   useEffect(() => {
     const loadListings = async () => {
@@ -56,6 +61,8 @@ const MyListings = ({ onListingUpdated }) => {
   }, []);
 
   const startEdit = (listing) => {
+    clearTimeout(editLoadingTimer.current);
+    setIsOpeningEditor(true);
     setEditingListing({
       ...listing,
       features: {
@@ -71,6 +78,10 @@ const MyListings = ({ onListingUpdated }) => {
     setError("");
     setEstimate(0);
     setGrowth(0);
+    editLoadingTimer.current = setTimeout(() => {
+      setIsOpeningEditor(false);
+      editLoadingTimer.current = null;
+    }, PAGE_LOADING_MS);
   };
 
   const handleChange = (event) => {
@@ -146,6 +157,8 @@ const MyListings = ({ onListingUpdated }) => {
     }));
   };
   const saveEdit = async () => {
+    if (isSaving) return;
+
     setError("");
 
     if (
@@ -227,6 +240,9 @@ const MyListings = ({ onListingUpdated }) => {
     }
 
     setIsSaving(true);
+    const minimumLoading = new Promise((resolve) =>
+      setTimeout(resolve, PAGE_LOADING_MS),
+    );
 
     try {
       const updatedListing = await apiRequest(
@@ -237,6 +253,7 @@ const MyListings = ({ onListingUpdated }) => {
         },
       );
 
+      await minimumLoading;
       setListings((current) =>
         current.map((listing) =>
           listing.id === updatedListing.id ? updatedListing : listing,
@@ -246,6 +263,7 @@ const MyListings = ({ onListingUpdated }) => {
       onListingUpdated(updatedListing);
       setEditingListing(null);
     } catch (error) {
+      await minimumLoading;
       setError(error.message);
     } finally {
       setIsSaving(false);
@@ -283,6 +301,10 @@ const MyListings = ({ onListingUpdated }) => {
   }
 
   if (editingListing) {
+    if (isOpeningEditor) {
+      return <PageLoader label="Loading edit listing…" fullPage variant="spinner" />;
+    }
+
     return (
       <div
         className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10"
