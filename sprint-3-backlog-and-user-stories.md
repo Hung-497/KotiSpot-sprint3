@@ -18,7 +18,7 @@ Deliver an integrated KotiSpot application that uses persisted backend data for 
 
 ## Product Backlog Progress
 
-**Implemented:** 22 / 30 PBIs
+**Implemented:** 26 / 30 PBIs
 
 **Fully DoD-verified:** 0 / 30 PBIs
 
@@ -26,40 +26,40 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 
 ### Identity & Account Management
 
-| Implemented | PBI    | Product Backlog Item                    | Sprint Scope                           | Implementation | DoD                |
-| ----------- | ------ | --------------------------------------- | -------------------------------------- | -------------- | ------------------ |
-| [x]         | PBI-06 | Sign up and log in                      | Selected                               | Implemented    | Needs verification |
-| [x]         | PBI-07 | User roles and permissions              | Selected                               | Implemented    | Needs verification |
+| Implemented | PBI    | Product Backlog Item                     | Sprint Scope                          | Implementation | DoD                |
+| ----------- | ------ | ---------------------------------------- | ------------------------------------- | -------------- | ------------------ |
+| [x]         | PBI-06 | Sign up and log in                       | Selected                              | Implemented    | Needs verification |
+| [x]         | PBI-07 | User roles and permissions               | Selected                              | Implemented    | Needs verification |
 | [x]         | PBI-12 | Security, validation, and error handling | Selected — cross-cutting and S3-US-03 | Implemented    | Needs verification |
-| [x]         | PBI-28 | Manage account settings                 | Selected                               | Implemented        | Needs verification |
-| [x]         | PBI-30 | View and update profile information     | Selected                               | Implemented    | Needs verification |
+| [x]         | PBI-28 | Manage account settings                  | Selected                              | Implemented    | Needs verification |
+| [x]         | PBI-30 | View and update profile information      | Selected                              | Implemented    | Needs verification |
 
 **Progress:** 5 / 5 implemented
 
 ### Property Discovery & Decision Tools
 
-| Implemented | PBI    | Product Backlog Item                      | Sprint Scope | Implementation | DoD                |
-| ----------- | ------ | ----------------------------------------- | ------------ | -------------- | ------------------ |
-| [x]         | PBI-01 | Browse active properties for sale or rent | Selected     | Implemented    | Needs verification |
-| [ ]         | PBI-02 | View complete property details            | Selected     | Partial        | Needs verification |
-| [x]         | PBI-03 | Search properties by location or keyword  | Selected     | Implemented    | Needs verification |
-| [x]         | PBI-04 | Filter and sort properties                | Selected     | Implemented        | Needs verification |
-| [ ]         | PBI-15 | Display properties on a map               | Selected     | Ongoing        | Needs verification |
-| [ ]         | PBI-19 | Compare selected properties               | Selected     | Ongoing        | Needs verification |
-| [ ]         | PBI-20 | Mortgage and affordability calculator     | Deferred     | Deferred — required data unavailable    | Not applicable     |
-| [ ]         | PBI-22 | Real-estate market dashboard              | Deferred     | Deferred — required data unavailable    | Not applicable     |
-| [x]         | PBI-25 | View rental-specific terms                | Selected     | Implemented    | Needs verification |
+| Implemented | PBI    | Product Backlog Item                      | Sprint Scope | Implementation                       | DoD                |
+| ----------- | ------ | ----------------------------------------- | ------------ | ------------------------------------ | ------------------ |
+| [x]         | PBI-01 | Browse active properties for sale or rent | Selected     | Implemented                          | Needs verification |
+| [x]         | PBI-02 | View complete property details            | Selected     | Implemented                          | Needs verification |
+| [x]         | PBI-03 | Search properties by location or keyword  | Selected     | Implemented                          | Needs verification |
+| [x]         | PBI-04 | Filter and sort properties                | Selected     | Implemented                          | Needs verification |
+| [x]         | PBI-15 | Display properties on a map               | Selected     | Implemented                          | Needs verification |
+| [x]         | PBI-19 | Compare selected properties               | Selected     | Implemented                          | Needs verification |
+| [ ]         | PBI-20 | Mortgage and affordability calculator     | Deferred     | Deferred — required data unavailable | Not applicable     |
+| [ ]         | PBI-22 | Real-estate market dashboard              | Deferred     | Deferred — required data unavailable | Not applicable     |
+| [x]         | PBI-25 | View rental-specific terms                | Selected     | Implemented                          | Needs verification |
 
-**Progress:** 4 / 9 implemented, 2 ongoing
+**Progress:** 7 / 9 implemented, 2 deferred
 
 ### Engagement & Communication
 
 | Implemented | PBI    | Product Backlog Item                                     | Sprint Scope | Implementation | DoD                |
 | ----------- | ------ | -------------------------------------------------------- | ------------ | -------------- | ------------------ |
 | [x]         | PBI-05 | Contact a seller or agent, including arranging a viewing | Selected     | Implemented    | Needs verification |
-| [x]         | PBI-13 | Save favourite properties                               | Selected     | Implemented    | Needs verification |
-| [x]         | PBI-18 | Inquiry notifications                                   | Selected     | Implemented        | Needs verification |
-| [x]         | PBI-29 | Contact KotiSpot support                                | Selected     | Implemented    | Needs verification |
+| [x]         | PBI-13 | Save favourite properties                                | Selected     | Implemented    | Needs verification |
+| [x]         | PBI-18 | Inquiry notifications                                    | Selected     | Implemented    | Needs verification |
+| [x]         | PBI-29 | Contact KotiSpot support                                 | Selected     | Implemented    | Needs verification |
 
 **Progress:** 4 / 4 implemented
 
@@ -68,46 +68,46 @@ This reference lists Product Backlog Items selected for, deferred from, or other
 | Implemented | PBI    | Product Backlog Item                           | Sprint Scope         | Implementation | DoD                |
 | ----------- | ------ | ---------------------------------------------- | -------------------- | -------------- | ------------------ |
 | [x]         | PBI-08 | Create a property listing for sale or rent     | Selected             | Implemented    | Needs verification |
-| [x]         | PBI-09 | Upload and manage property images              | Optional future work | Implemented       | Needs verification     |
-| [x]         | PBI-10 | Edit, deactivate, and delete property listings | Selected             | Implemented        | Needs verification |
-| [x]         | PBI-16 | Admin listing moderation                      | Selected             | Implemented    | Needs verification |
-| [x]         | PBI-17 | Report suspicious listings                    | Selected             | Not started    | Not applicable     |
-| [ ]         | PBI-21 | Listing analytics for sellers and agents      | Deferred             | Deferred       | Not applicable     |
-| [x]         | PBI-26 | Manage rental-specific terms                  | Selected             | Implemented    | Needs verification |
-| [x]         | PBI-27 | Verify seller and agent accounts              | Selected             | Implemented        | Needs verification |
+| [x]         | PBI-09 | Upload and manage property images              | Optional future work | Implemented    | Needs verification |
+| [x]         | PBI-10 | Edit, deactivate, and delete property listings | Selected             | Implemented    | Needs verification |
+| [x]         | PBI-16 | Admin listing moderation                       | Selected             | Implemented    | Needs verification |
+| [x]         | PBI-17 | Report suspicious listings                     | Selected             | Implemented    | Needs verification |
+| [ ]         | PBI-21 | Listing analytics for sellers and agents       | Deferred             | Deferred       | Not applicable     |
+| [x]         | PBI-26 | Manage rental-specific terms                   | Selected             | Implemented    | Needs verification |
+| [x]         | PBI-27 | Verify seller and agent accounts               | Selected             | Implemented    | Needs verification |
 
-**Progress:** 7 / 8 implemented
+**Progress:** 7 / 8 implemented, 1 deferred
 
 ### AI Property Intelligence
 
-| Implemented | PBI    | Product Backlog Item                | Sprint Scope | Implementation | DoD            |
-| ----------- | ------ | ----------------------------------- | ------------ | -------------- | -------------- |
-| [x]         | PBI-23 | AI property-price estimate          | Selected     | Ongoing        | Needs verification |
-| [x]         | PBI-24 | AI future property-price prediction | Selected     | Ongoing        | Needs verification |
-| [ ]         | PBI-31 | AI-assisted support chatbot         | Deferred     | Deferred       | Not applicable |
+| Implemented | PBI    | Product Backlog Item                | Sprint Scope | Implementation | DoD                |
+| ----------- | ------ | ----------------------------------- | ------------ | -------------- | ------------------ |
+| [x]         | PBI-23 | AI property-price estimate          | Selected     | Implemented    | Needs verification |
+| [x]         | PBI-24 | AI future property-price prediction | Selected     | Implemented    | Needs verification |
+| [ ]         | PBI-31 | AI-assisted support chatbot         | Deferred     | Deferred       | Not applicable     |
 
-**Progress:** 2 / 3 implemented,
+**Progress:** 2 / 3 implemented, 1 deferred
 
 ### Cross-cutting Quality
 
 | Implemented | PBI    | Product Backlog Item                | Sprint Scope                                        | Implementation | DoD                |
 | ----------- | ------ | ----------------------------------- | --------------------------------------------------- | -------------- | ------------------ |
-| [ ]         | PBI-11 | Responsive and accessible interface | Selected — cross-cutting through Definition of Done | Partial        | Needs verification |
+| [x]         | PBI-11 | Responsive and accessible interface | Selected — cross-cutting through Definition of Done | Implemented    | Needs verification |
 
-**Progress:** 0 / 1 implemented
+**Progress:** 1 / 1 implemented
 
 ## Sprint Summary
 
-| Category | Stories | Points |
-| --- | ---: | ---: |
-| Identity & Account Management | 4 | 23 |
-| Property Discovery & Decision Tools | 5 | 37 |
-| Engagement & Communication | 4 | 14 |
-| Listing Management & Platform Safety | 3 | 16 |
-| AI Property Intelligence | 2 | 16 |
-| **Total** | **18** | **106** |
+| Category                             | Stories | Points |
+| ------------------------------------ | ------: | -----: |
+| Identity & Account Management        |       4 |     23 |
+| Property Discovery & Decision Tools  |       3 |     21 |
+| Engagement & Communication           |       4 |     14 |
+| Listing Management & Platform Safety |       3 |     16 |
+| AI Property Intelligence             |       2 |     16 |
+| **Total**                            |  **16** | **90** |
 
-The total excludes the removed 8-point S3-US-07 and deferred PBI-21 and PBI-31. The estimates for S3-US-16 and S3-US-17 remain preliminary until the team confirms the data sources and technical approach.
+The total excludes the removed 8-point S3-US-07 and deferred PBI-20, PBI-21, PBI-22, and PBI-31. The estimates for S3-US-16 and S3-US-17 are retained from sprint planning.
 
 ## 1. Identity & Account Management
 
@@ -131,7 +131,7 @@ so that I can access my account without a password.
 - Invalid, expired, used, or superseded codes return an error that does not reveal whether an account exists.
 - Successful verification establishes the authenticated state; refresh and logout follow the documented session design without creating a false authenticated state.
 
-**Needs product clarification:** Which authenticated-session mechanism will Sprint 3 use, and what persistence and invalidation behavior must it provide?
+**Implementation decision:** Successful OTP verification issues a JWT used as a Bearer token. The frontend persists the authenticated session in localStorage and clears it on logout.
 
 ### S3-US-03: Enforce role, permission, and ownership rules
 
@@ -209,7 +209,7 @@ so that I can find a suitable home.
 
 **Browse and search**
 
-- Property discovery uses properties with an active listing status and approved moderation status from the backend instead of the static frontend dataset.
+- Property discovery uses properties with an active listing status and an approved or flagged moderation status from the backend instead of the static frontend dataset.
 - Users can browse sale and rental listings and open the matching details page by its backend property identifier.
 - Keyword search trims input, ignores letter case, searches title, description, city, and address, and can be limited to sale or rental listings.
 
@@ -237,15 +237,19 @@ so that I can understand their locations and explore suitable areas.
 
 **Acceptance Criteria**
 
-- Properties with an active listing status, approved moderation status, and valid coordinates appear as markers using backend property data.
-- Selecting a marker identifies the property, distinguishes a sale price from monthly rent, and links to the matching property details page.
-- When the list and map appear together, selecting or focusing a property card highlights its marker.
-- Search and filter changes update both the result list and displayed markers.
-- A property with missing or invalid coordinates remains available in the result list and does not prevent the map from loading.
-- Public map data does not expose private or unnecessarily precise location information.
-- Map-service failure and no-result states leave the property list usable and explain why the map is unavailable or empty.
+- A publicly visible property can display an interactive map on its property-details page.
+- The backend derives coordinates from the persisted property address through geocoding.
+- The selected property is shown with a marker, and the map can be opened in fullscreen.
+- Nearby cafes, restaurants, schools, hospitals, pharmacies, supermarkets, parks, and bus stops can be displayed around the property.
+- Nearby-place requests go through the KotiSpot backend, which caches results and falls back between public Overpass servers.
+- If nearby places cannot be loaded, the property map remains usable and displays an unavailable-state message.
+- Public map responses do not expose private account data.
 
-**Needs product clarification:** How will property coordinates be obtained, persisted, and reduced to an approved public precision? Persisted property records do not yet define coordinate fields.
+**Implementation decision:** Sprint 3 displays the selected property on an
+interactive map on the property-details page, together with nearby points of
+interest. Coordinates are obtained through backend geocoding, and nearby-place
+requests are proxied through the backend. A synchronized multi-property search
+results map is outside the implemented Sprint 3 scope.
 
 ### S3-US-12: Compare selected properties
 
@@ -259,13 +263,15 @@ so that I can understand their important differences.
 
 **Acceptance Criteria**
 
-- A user can add available properties to a comparison up to a documented maximum and remove any selected property.
+- A user can select between two and six available residential properties for comparison.
 - The same property cannot appear more than once.
-- The comparison displays price, listing purpose, location, property type, size, bedrooms, and available rental terms side by side.
+- The comparison displays price, listing purpose, location, residential property subtype, size, rooms, bedrooms, bathrooms, and supported features side by side.
 - Sale prices and monthly rents use distinct labels and are not presented as equivalent values.
 - Missing optional values use a consistent placeholder, while deleted or unavailable properties are identified without breaking the comparison.
+- The comparison remains usable on smaller screens through horizontal scrolling.
 
-**Needs product clarification:** What is the maximum number of properties that a user may compare at once?
+**Implementation decision:** Users can compare up to 6 residential properties.
+The comparison uses the residential property subtype.
 
 ### S3-US-13: Estimate mortgage costs and affordability
 
@@ -419,7 +425,7 @@ so that public property information remains accurate.
 - An owner can edit a listing and change its listing status among active, inactive, sold, and rented; changes remain visible after refresh.
 - Deletion requires confirmation and removes the listing from public discovery.
 - A user cannot update or delete a listing owned by another user.
-- Existing image references and metadata can be managed without adding file upload or storage to the committed scope.
+- An owner can add, remove, and describe property photos and select one as the main photo; supported image data persists with the listing.
 
 ### S3-US-08: Review verification applications and moderate listings
 
@@ -443,7 +449,7 @@ so that privileged publishing and public content remain controlled.
 **Moderation**
 
 - An authenticated administrator can retrieve moderation candidates, including listings with an unreviewed moderation status, and set the moderation status to flagged, approved, or removed with a required reason.
-- A flagged moderation status means that a listing is under administrator investigation; listings with a flagged or removed moderati- A flagged moderation status means that a listing is under administrator investigation and remains visible in public discovery; removed listings do not appear in public discovery.on status do not appear in public discovery.
+- A flagged moderation status means that a listing is under administrator investigation and remains visible in public discovery; removed listings do not appear in public discovery.
 - Non-administrators cannot retrieve private review data or perform verification or moderation actions.
 
 ### S3-US-10: Report a suspicious listing
@@ -482,14 +488,16 @@ so that I can choose a realistic asking price.
 
 **Acceptance Criteria**
 
-- Only a verified seller or agent can request an estimate for a property they own or manage.
+- Only an authenticated, verified seller or agent can request a price estimate.
 - The estimate uses the property fields and market-data source approved before implementation.
 - The result provides a price range, is labelled as AI-generated, and explains its inputs, limitations.
 - The estimate remains private unless the owner explicitly applies it to the listing price.
 - Missing input data, an unavailable AI service or an invalid response produce a fallback state without changing the listing.
 - No secret, private account data, or personal data unnecessary for the estimate is sent to the AI service.
 
-**Needs product clarification:** Which property fields, market-data source, AI service, retention rules, and rate limits are approved for the estimate?
+**Implementation decision:** The price estimate uses a local LightGBM model with
+postal code, size, rooms, building year, and residential building type. The UI
+shows an AI-powered estimated price range of ±7.5%.
 
 ### S3-US-17: Generate a private AI future-price prediction
 
@@ -503,14 +511,15 @@ so that I can understand its possible price direction.
 
 **Acceptance Criteria**
 
-- Only a verified seller or agent can request a prediction for a property they own or manage.
+- Only an authenticated, verified seller or agent can request a future-price prediction.
 - The prediction uses the historical regional market-data source approved before implementation.
 - The result shows its time horizon, expected direction, possible price range and is labelled as AI-generated.
 - The prediction remains private to authorized users and is not presented as financial or professional property advice.
 - Insufficient data, an unavailable service or an invalid response produce a fallback state without changing the listing.
 - No secret, private account data, or personal data unnecessary for the prediction is sent to the AI service.
 
-**Needs product clarification:** Which historical data source, prediction horizon, AI service, retention rules, and rate limits are approved for the prediction?
+**Implementation decision:** Future-price prediction uses a local LightGBM model
+with historical postal-code price data and produces a five-year forecast.
 
 ## Definition of Done
 
@@ -529,8 +538,10 @@ A Sprint 3 user story is Done when all applicable conditions are met:
 
 ## Deferred and Optional Product Backlog Items
 
-| PBI | Item | Decision |
-| --- | --- | --- |
+| PBI    | Item                                     | Decision                                                                     |
+| ------ | ---------------------------------------- | ---------------------------------------------------------------------------- |
+| PBI-20 | Mortgage and affordability calculator    | Deferred; required data unavailable and excluded from the Sprint point total |
 | PBI-21 | Listing analytics for sellers and agents | Deferred; not selected for Sprint 3 and excluded from the Sprint point total |
-| PBI-31 | AI-assisted support chatbot | Deferred; not selected for Sprint 3 and excluded from the Sprint point total |
-| PBI-09 | Upload and manage property images | Optional expansion; implemented during Sprint 3 |
+| PBI-22 | Real-estate market dashboard             | Deferred; required data unavailable and excluded from the Sprint point total |
+| PBI-31 | AI-assisted support chatbot              | Deferred; not selected for Sprint 3 and excluded from the Sprint point total |
+| PBI-09 | Upload and manage property images        | Optional expansion; implemented during Sprint 3                              |
