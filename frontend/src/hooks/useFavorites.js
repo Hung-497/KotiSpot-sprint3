@@ -4,14 +4,18 @@ import useDialog from "./useDialog";
 
 const useFavorites = (authToken, isLoggedIn) => {
   const [favorites, setFavorites] = useState([]);
+  const [isLoading, setIsLoading] = useState(Boolean(authToken));
   const { showAlert } = useDialog();
 
   useEffect(() => {
     const loadFavorites = async () => {
       if (!authToken) {
         setFavorites([]);
+        setIsLoading(false);
         return;
       }
+
+      setIsLoading(true);
 
       try {
         const data = await apiRequest("/favourites");
@@ -23,6 +27,8 @@ const useFavorites = (authToken, isLoggedIn) => {
       } catch (error) {
         console.error("Failed to load favorites:", error);
         setFavorites([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -56,7 +62,12 @@ const useFavorites = (authToken, isLoggedIn) => {
     setFavorites([]);
   };
 
-  return { favorites, toggleFavourite, resetFavorites };
+  return {
+    favorites,
+    isLoading: Boolean(authToken) && isLoading,
+    toggleFavourite,
+    resetFavorites,
+  };
 };
 
 export default useFavorites;

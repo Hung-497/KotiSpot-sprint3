@@ -306,7 +306,7 @@ const MyListings = ({ onListingUpdated }) => {
             <div className="grid gap-5 md:grid-cols-2">
               {/* <div className="md:col-span-2"> */}
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Listing status
                 </label>
 
@@ -323,7 +323,7 @@ const MyListings = ({ onListingUpdated }) => {
                 </select>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Property type
                 </label>
 
@@ -346,7 +346,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium">Title</label>
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">Title</label>
 
                 <input
                   name="title"
@@ -356,7 +356,7 @@ const MyListings = ({ onListingUpdated }) => {
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Price (€)
                 </label>
 
@@ -437,7 +437,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">City</label>
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">City</label>
 
                 <input
                   name="city"
@@ -448,7 +448,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Address
                 </label>
 
@@ -461,7 +461,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Postal code
                 </label>
 
@@ -474,7 +474,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Size (m²)
                 </label>
 
@@ -489,7 +489,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">Rooms</label>
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">Rooms</label>
 
                 <input
                   name="rooms"
@@ -519,7 +519,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Bedrooms
                 </label>
 
@@ -535,7 +535,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Bathrooms
                 </label>
 
@@ -551,7 +551,7 @@ const MyListings = ({ onListingUpdated }) => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                   Description
                 </label>
 
@@ -577,7 +577,7 @@ const MyListings = ({ onListingUpdated }) => {
                   ["petsAllowed", "Pets allowed"],
                   ["sauna", "Sauna"],
                 ].map(([name, label]) => (
-                  <label key={name} className="flex items-center gap-2 text-sm">
+                  <label key={name} className="flex items-center gap-2 text-sm dark:text-[#d7e1e7]">
                     <input
                       type="checkbox"
                       name={name}
@@ -600,7 +600,7 @@ const MyListings = ({ onListingUpdated }) => {
 
                 <div className="grid gap-5 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium">
+                    <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                       Available from
                     </label>
 
@@ -614,7 +614,7 @@ const MyListings = ({ onListingUpdated }) => {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium">
+                    <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                       Minimum rental period
                     </label>
 
@@ -632,7 +632,7 @@ const MyListings = ({ onListingUpdated }) => {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium">
+                    <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                       Deposit (€)
                     </label>
 
@@ -647,7 +647,7 @@ const MyListings = ({ onListingUpdated }) => {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-medium">
+                    <label className="mb-2 block text-sm font-medium dark:text-[#d7e1e7]">
                       Additional costs
                     </label>
 
@@ -754,17 +754,23 @@ const MyListings = ({ onListingUpdated }) => {
                       {listing.address}, {listing.city}
                     </p>
 
-                    <p className="mt-2 font-semibold">
+                    <p className="mt-2 font-semibold dark:text-[#55d4aa]">
                       {listing.price} €
                       {listing.listingType === "rent" ? " / month" : ""}
                     </p>
 
                     <p className="mt-1 text-sm capitalize text-ink-muted">
-                      Status: {listing.status}
+                      Status:{" "}
+                      <span className="dark:text-[#d7e1e7]">
+                        {listing.status}
+                      </span>
                     </p>
 
                     <p className="mt-1 text-sm capitalize text-ink-muted">
-                      Moderation: {listing.moderation?.status}
+                      Moderation:{" "}
+                      <span className="dark:text-[#d7e1e7]">
+                        {listing.moderation?.status}
+                      </span>
                     </p>
 
                     <div className="mt-4 flex gap-2">

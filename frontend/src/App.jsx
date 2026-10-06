@@ -54,10 +54,12 @@ function App() {
   const { properties, isLoading: propertiesLoading, syncModeratedProperty } =
     useProperties(auth?.user?._id);
 
-  const { favorites, toggleFavourite, resetFavorites } = useFavorites(
-    auth?.token,
-    isLoggedIn,
-  );
+  const {
+    favorites,
+    isLoading: favoritesLoading,
+    toggleFavourite,
+    resetFavorites,
+  } = useFavorites(auth?.token, isLoggedIn);
 
   const logOut = () => {
     authLogOut();
@@ -87,7 +89,7 @@ function App() {
             element={
               isLoggedIn ? (
                 <Favorites
-                  isLoading={propertiesLoading}
+                  isLoading={propertiesLoading || favoritesLoading}
                   properties={properties}
                   favorites={favorites}
                   onToggleFavorite={toggleFavourite}
