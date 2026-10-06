@@ -6,7 +6,7 @@ POST /predict-growth   -> 5-year growth forecast for a postal code
 """                                                                                                                                                                                                                                         
                                                                                                                                                                                                                                             
 import json                                                                                                                                                                                                                                 
-import os
+from pathlib import Path
 from math import trunc                                                                                                                                                                                                                                   
                                                                                                                                                                                                                                             
 from flask import Flask, request, jsonify                                                                                                                                                                                                   
@@ -17,17 +17,19 @@ import pandas as pd
 app = Flask(__name__)                                                                                                                                                                                                                       
                                                                                                                                                                                                                                             
 CURRENT_YEAR = 2026                                                                                                                                                                                                                         
-HORIZON = 5                                                                                                                                                                                                                                 
+HORIZON = 5
+MODEL_DIR = Path(__file__).resolve().parent / "utils" / "estimation_models"
                                                                                                                                                                                                                                             
 # ---------------------------------------------------------------------------                                                                                                                                                               
 # Load price model + its postal code encoding                                                                                                                                                                                               
 # ---------------------------------------------------------------------------                                                                                                                                                               
-price_model = lgb.Booster(model_file="./utils/estimation_models/model.txt")                                                                                                                                                                                           
+# Normalize Windows CRLF to LF before LightGBM reads tree byte offsets.
+price_model = lgb.Booster(model_str=(MODEL_DIR / "model.txt").read_text(encoding="utf-8"))
                                                                                                                                                                                                                                             
-if not os.path.exists("./utils/estimation_models/data/postal_code_ppsm.json"):                                                                                                                                                                                             
+if not (MODEL_DIR / "data" / "postal_code_ppsm.json").is_file():
     raise RuntimeError("postal_code_ppsm.json not found. Run: python train_model.py")                                                                                                                                                       
                                                                                                                                                                                                                                             
-with open("./utils/estimation_models/data/postal_code_ppsm.json") as f:                                                                                                                                                                                                    
+with (MODEL_DIR / "data" / "postal_code_ppsm.json").open(encoding="utf-8") as f:
     ppsm_encoding = json.load(f)                                                                                                                                                                                                            
 POSTAL_PPSM = ppsm_encoding["postalCodes"]                                                                                                                                                                                                  
 GLOBAL_MEAN_PPSM = ppsm_encoding["globalMean"]                                                                                                                                                                                              
@@ -42,20 +44,20 @@ VALID_BUILDING_TYPES = {
 # ---------------------------------------------------------------------------                                                                                                                                                               
 # Load growth model + its postal code encoding + price history                                                                                                                                                                              
 # ---------------------------------------------------------------------------                                                                                                                                                               
-growth_model = lgb.Booster(model_file="./utils/estimation_models/model_growth.txt")                                                                                                                                                                                   
+growth_model = lgb.Booster(model_str=(MODEL_DIR / "model_growth.txt").read_text(encoding="utf-8"))
                                                                                                                                                                                                                                             
-if not os.path.exists("./utils/estimation_models/data/postal_code_growth.json"):                                                                                                                                                                                           
+if not (MODEL_DIR / "data" / "postal_code_growth.json").is_file():
     raise RuntimeError(                                                                                                                                                                                                                     
         "postal_code_growth.json not found. Run: python train_growth.py"                                                                                                                                                                    
     )                                                                                                                                                                                                                                       
                                                                                                                                                                                                                                             
-with open("./utils/estimation_models/data/postal_code_growth.json") as f:                                                                                                                                                                                                  
+with (MODEL_DIR / "data" / "postal_code_growth.json").open(encoding="utf-8") as f:
     growth_encoding = json.load(f)                                                                                                                                                                                                          
 POSTAL_GROWTH = growth_encoding["postalCodes"]                                                                                                                                                                                              
 GLOBAL_MEAN_GROWTH = growth_encoding["globalMean"]                                                                                                                                                                                          
                                                                                                                                                                                                                                             
 # IMPORTANT: read postalCode as string so "05500" doesn't become 5500.                                                                                                                                                                      
-history = pd.read_csv("./utils/estimation_models/data/price_growth.csv", dtype={"postalCode": str})                                                                                                                                                                   
+history = pd.read_csv(MODEL_DIR / "data" / "price_growth.csv", dtype={"postalCode": str})
 HISTORY_MAX_YEAR = int(history["year"].max())                                                                                                                                                                                               
                                                                                                                                                                                                                                             
                                                                                                                                                                                                                                             
