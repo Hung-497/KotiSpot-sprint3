@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require('path');
 const { unknownEndpoint, errorHandler } = require("./middleware/customMiddleware");
 const propertyRouter = require("./routes/propertyRouter");
 const favouritesRouter = require("./routes/favouritesRouter");
@@ -26,7 +27,14 @@ app.use("/api/inquiries", inquiryRouter);
 app.use("/api/contact-messages", contactRouter);
 app.use("/api/estimate", estimateRouter);
 
-app.use(unknownEndpoint);
+app.use(express.static(path.join(__dirname, 'view')));
+
+app.use('/api', unknownEndpoint);
 app.use(errorHandler);
+
+
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'view', 'index.html'));
+});
 
 module.exports = app;
