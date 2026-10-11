@@ -10,6 +10,8 @@ const verificationRouter = require("./routes/verificationRouter");
 const inquiryRouter = require("./routes/inquiryRouter");
 const contactRouter = require("./routes/contactRouter");
 const estimateRouter = require("./routes/estimationRouter");
+const swaggerUI = require("swagger-ui-express");
+const swaggerSpec = require("./swagger.json");  // Assuming swagger.json is in the same directory
 
 const app = express();
 
@@ -25,6 +27,7 @@ app.use("/api/verifications", verificationRouter);
 app.use("/api/inquiries", inquiryRouter);
 app.use("/api/contact-messages", contactRouter);
 app.use("/api/estimate", estimateRouter);
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 app.use(unknownEndpoint);
 app.use(errorHandler);

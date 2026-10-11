@@ -1,0 +1,1485 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "KotiSpot Real Estate API",
+    "description": "API for property listings, favourites, inquiries, contact messages, moderation, verification, and price estimation.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+			"url": "https://kotispot.onrender.com/api",
+			"description": "Deployed API"
+		},
+		{
+			"url": "http://localhost:4000/api",
+			"description": "Local development server"
+		}
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "phone": { "type": "string" },
+          "bio": { "type": "string", "maxLength": 500 },
+          "role": { "type": "string", "enum": ["visitor", "buyer", "renter", "seller", "agent", "administrator"] },
+          "verifiedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "preferences": { "$ref": "#/components/schemas/UserPreferences" }
+        }
+      },
+      "UserPreferences": {
+        "type": "object",
+        "properties": {
+          "theme": { "type": "string", "enum": ["light", "dark", "system"] },
+          "emailNotifications": { "type": "boolean" },
+          "marketingEmails": { "type": "boolean" },
+          "smsNotifications": { "type": "boolean" }
+        }
+      },
+      "PropertyImage": {
+        "type": "object",
+        "required": ["id", "url", "description", "isMain"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 1 },
+          "url": { "type": "string", "description": "JPEG/PNG/WebP data URL or http(s) image link" },
+          "description": { "type": "string", "maxLength": 200 },
+          "isMain": { "type": "boolean" }
+        }
+      },
+      "PropertyFeatures": {
+        "type": "object",
+        "properties": {
+          "balcony": { "type": "boolean" },
+          "elevator": { "type": "boolean" },
+          "parking": { "type": "boolean" },
+          "furnished": { "type": "boolean" },
+          "petsAllowed": { "type": "boolean" },
+          "sauna": { "type": "boolean" }
+        }
+      },
+      "RentalDetails": {
+        "type": "object",
+        "required": ["availableFrom", "minimumRentalPeriod"],
+        "properties": {
+          "availableFrom": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "deposit": { "type": "number", "minimum": 0 },
+          "minimumRentalPeriod": { "type": "integer", "minimum": 1 },
+          "additionalCosts": { "type": "string" }
+        }
+      },
+      "Moderation": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["unreviewed", "flagged", "approved", "removed"] },
+          "reason": { "type": "string" },
+          "moderatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Property": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "owner": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "listingType": { "type": "string", "enum": ["sale", "rent"] },
+          "propertyType": { "type": "string" },
+          "propertySubType": { "type": "string" },
+          "price": { "type": "number", "exclusiveMinimum": 0 },
+          "currency": { "type": "string" },
+          "city": { "type": "string" },
+          "address": { "type": "string" },
+          "postalCode": { "type": "string" },
+          "rooms": { "type": "integer", "minimum": 1 },
+          "bedrooms": { "type": "integer", "minimum": 0 },
+          "bathrooms": { "type": "integer", "minimum": 0 },
+          "size": { "type": "number", "exclusiveMinimum": 0 },
+          "buildingYear": { "type": "integer", "minimum": 0, "maximum": 2026 },
+          "features": { "$ref": "#/components/schemas/PropertyFeatures" },
+          "rentalDetails": { "$ref": "#/components/schemas/RentalDetails" },
+          "images": {
+            "type": "array",
+            "maxItems": 8,
+            "items": { "$ref": "#/components/schemas/PropertyImage" }
+          },
+          "moderation": { "$ref": "#/components/schemas/Moderation" },
+          "status": { "type": "string", "enum": ["active", "inactive", "sold", "rented"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Favourite": {
+        "type": "object",
+        "properties": {
+          "favouriteId": { "type": "string" },
+          "user": { "type": "string" },
+          "available": { "type": "boolean" },
+          "property": { "$ref": "#/components/schemas/Property" }
+        }
+      },
+      "InquiryReply": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "enum": ["owner", "sender"] },
+          "text": { "type": "string", "maxLength": 1000 },
+          "sentAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Inquiry": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "propertyId": { "type": "string" },
+          "name": { "type": "string", "maxLength": 100 },
+          "email": { "type": "string", "format": "email" },
+          "message": { "type": "string", "maxLength": 1000 },
+          "owner": { "type": "string" },
+          "sender": { "type": "string", "nullable": true },
+          "replies": { "type": "array", "items": { "$ref": "#/components/schemas/InquiryReply" } },
+          "readByOwner": { "type": "boolean" },
+          "readBySender": { "type": "boolean" },
+          "submittedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ContactReply": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "enum": ["admin", "user"] },
+          "text": { "type": "string", "maxLength": 1000 },
+          "sentAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ContactMessage": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "fullName": { "type": "string", "maxLength": 100 },
+          "email": { "type": "string", "format": "email" },
+          "subject": { "type": "string" },
+          "message": { "type": "string", "maxLength": 1000 },
+          "user": { "type": "string", "nullable": true },
+          "replies": { "type": "array", "items": { "$ref": "#/components/schemas/ContactReply" } },
+          "readByUser": { "type": "boolean" },
+          "readByAdmin": { "type": "boolean" },
+          "submittedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Report": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "reporter": { "$ref": "#/components/schemas/User" },
+          "property": { "$ref": "#/components/schemas/Property" },
+          "reason": { "type": "string", "maxLength": 500 },
+          "status": { "type": "string", "enum": ["open", "resolved"] },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Verification": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "user": { "type": "string" },
+          "role": { "type": "string", "enum": ["seller", "agent"] },
+          "fullName": { "type": "string", "maxLength": 100 },
+          "companyName": { "type": "string", "maxLength": 100 },
+          "phone": { "type": "string", "maxLength": 40 },
+          "email": { "type": "string", "format": "email" },
+          "areas": { "type": "string", "maxLength": 300 },
+          "yearsExperience": { "type": "number", "minimum": 0, "maximum": 80 },
+          "licenseNumber": { "type": "string", "maxLength": 100 },
+          "bio": { "type": "string", "maxLength": 1000 },
+          "idDocument": { "type": "string" },
+          "licenseDocument": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+          "reviewedBy": { "type": "string" },
+          "reviewNote": { "type": "string", "maxLength": 500 },
+          "reviewReason": { "type": "string", "maxLength": 500 },
+          "rejectionReason": { "type": "string", "maxLength": 500 },
+          "reviewedAt": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "EstimateResult": {
+        "type": "object",
+        "properties": {
+          "estimate": { "type": "number" }
+        }
+      },
+      "GrowthResult": {
+        "type": "object",
+        "properties": {
+          "postalCode": { "type": "string" },
+          "currentPpsm": { "type": "number" },
+          "annualGrowthPct": { "type": "number" },
+          "forecast": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "year": { "type": "integer" },
+                "ppsm": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Unauthorized": {
+        "description": "Authentication required",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Forbidden": {
+        "description": "Access denied",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "ServerError": {
+        "description": "Internal server error",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    },
+    "parameters": {
+      "propertyId": {
+        "name": "propertyId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "MongoDB ObjectId of the property"
+      },
+      "inquiryId": {
+        "name": "inquiryId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "MongoDB ObjectId of the inquiry"
+      },
+      "messageId": {
+        "name": "messageId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "MongoDB ObjectId of the contact message"
+      },
+      "applicationId": {
+        "name": "applicationId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "MongoDB ObjectId of the verification application"
+      }
+    }
+  },
+  "paths": {
+    "/account/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Simulated login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": { "email": { "type": "string", "format": "email" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful (simulated)" },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/account/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Simulated registration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": { "email": { "type": "string", "format": "email" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Registration successful (simulated)" },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/account/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Simulated logout",
+        "responses": {
+          "200": { "description": "Logout successful (simulated)" }
+        }
+      }
+    },
+    "/account/request-code": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Request a 6-digit login code by email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "mode"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "mode": { "type": "string", "enum": ["login", "register"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login code sent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "description": "No account found (login mode)" },
+          "409": { "description": "Account already exists (register mode)" },
+          "429": { "description": "Too many requests / resend cooldown" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/account/verify-code": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Verify a login code and receive a JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "code"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "code": { "type": "string", "pattern": "^\\d{6}$" },
+                  "mode": { "type": "string", "enum": ["login", "register"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Code verified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" },
+                    "token": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid or expired login code" },
+          "404": { "description": "No account found (login mode)" },
+          "429": { "description": "Too many attempts" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/account/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get the currently authenticated user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Current user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "user": { "$ref": "#/components/schemas/User" } }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of users with permitted actions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "user": { "$ref": "#/components/schemas/User" },
+                      "permittedActions": { "type": "array", "items": { "type": "string" } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get current user profile",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Current user with permitted actions" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Update current user profile",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "minProperties": 1,
+                "properties": {
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" },
+                  "phone": { "type": "string" },
+                  "bio": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User updated" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete current user account",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "User deleted successfully" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/users/me/preferences": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get current user preferences",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User preferences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "preferences": { "$ref": "#/components/schemas/UserPreferences" } }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Update current user preferences",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserPreferences" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Preferences updated" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/properties": {
+      "get": {
+        "tags": ["Properties"],
+        "summary": "Get active, publicly visible properties",
+        "responses": {
+          "200": {
+            "description": "List of active properties",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Property" } }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "post": {
+        "tags": ["Properties"],
+        "summary": "Create a property (verified seller/agent or admin)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Property" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Property created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Property" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/properties/all": {
+      "get": {
+        "tags": ["Properties"],
+        "summary": "Get all properties (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of all properties",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Property" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/properties/mine": {
+      "get": {
+        "tags": ["Properties"],
+        "summary": "Get properties owned by the current user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of the user's properties",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Property" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/properties/filter": {
+      "get": {
+        "tags": ["Properties"],
+        "summary": "Filter properties",
+        "parameters": [
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["price-asc", "price-desc", "newest"] } },
+          { "name": "listingType", "in": "query", "schema": { "type": "string", "enum": ["sale", "rent", "any"] } },
+          { "name": "propertyType", "in": "query", "schema": { "type": "string", "enum": ["residential", "any"] } },
+          { "name": "propertySubType", "in": "query", "schema": { "type": "string", "enum": ["apartment", "detached-house", "semi-detached-house", "terraced-house", "any"] } },
+          { "name": "minPrice", "in": "query", "schema": { "type": "number" } },
+          { "name": "maxPrice", "in": "query", "schema": { "type": "number" } },
+          { "name": "minRooms", "in": "query", "schema": { "type": "number" } },
+          { "name": "maxRooms", "in": "query", "schema": { "type": "number" } },
+          { "name": "minBedrooms", "in": "query", "schema": { "type": "number" } },
+          { "name": "maxBedrooms", "in": "query", "schema": { "type": "number" } },
+          { "name": "minBathrooms", "in": "query", "schema": { "type": "number" } },
+          { "name": "maxBathrooms", "in": "query", "schema": { "type": "number" } },
+          { "name": "minSize", "in": "query", "schema": { "type": "number" } },
+          { "name": "maxSize", "in": "query", "schema": { "type": "number" } },
+          { "name": "minYear", "in": "query", "schema": { "type": "integer" } },
+          { "name": "maxYear", "in": "query", "schema": { "type": "integer" } },
+          { "name": "balcony", "in": "query", "schema": { "type": "string", "enum": ["true", "false"] } },
+          { "name": "elevator", "in": "query", "schema": { "type": "string", "enum": ["true", "false"] } },
+          { "name": "parking", "in": "query", "schema": { "type": "string", "enum": ["true", "false"] } },
+          { "name": "furnished", "in": "query", "schema": { "type": "string", "enum": ["true", "false"] } },
+          { "name": "petsAllowed", "in": "query", "schema": { "type": "string", "enum": ["true", "false"] } },
+          { "name": "sauna", "in": "query", "schema": { "type": "string", "enum": ["true", "false"] } },
+          { "name": "currency", "in": "query", "schema": { "type": "string" } },
+          { "name": "keyword", "in": "query", "schema": { "type": "string" } },
+          { "name": "city", "in": "query", "schema": { "type": "string" } },
+          { "name": "postalCode", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filtered properties",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Property" } }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/properties/search": {
+      "get": {
+        "tags": ["Properties"],
+        "summary": "Search properties by keyword",
+        "parameters": [
+          { "name": "keyword", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "listingType", "in": "query", "schema": { "type": "string", "enum": ["sale", "rent", "any"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching properties",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Property" } }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/properties/nearby": {
+      "get": {
+        "tags": ["Properties"],
+        "summary": "Get nearby places by coordinates",
+        "parameters": [
+          { "name": "lat", "in": "query", "required": true, "schema": { "type": "number" } },
+          { "name": "lon", "in": "query", "required": true, "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nearby places (empty list with unavailable=true when the service is down)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "places": { "type": "array", "items": { "type": "object" } },
+                    "unavailable": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/properties/geocode/{propertyId}": {
+      "get": {
+        "tags": ["Properties"],
+        "summary": "Get longitude/latitude for a property",
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "responses": {
+          "200": {
+            "description": "Coordinates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "latitude": { "type": "string" },
+                    "longitude": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/properties/{propertyId}": {
+      "get": {
+        "tags": ["Properties"],
+        "summary": "Get a publicly visible property by ID",
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "responses": {
+          "200": {
+            "description": "Property details",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Property" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "patch": {
+        "tags": ["Properties"],
+        "summary": "Update a property (owner, verified seller/agent or admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Property" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated property",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Property" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Properties"],
+        "summary": "Delete a property (owner, verified seller/agent or admin)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "responses": {
+          "200": { "description": "Property deleted successfully" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/properties/{propertyId}/report": {
+      "post": {
+        "tags": ["Moderation"],
+        "summary": "Report a public listing (non-admin users, once per listing)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["reason"],
+                "properties": {
+                  "reason": { "type": "string", "maxLength": 500 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Report submitted" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "description": "Admins cannot report; owners cannot report their own listing" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "description": "Listing already reported by this user" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/favourites": {
+      "get": {
+        "tags": ["Favourites"],
+        "summary": "Get the current user's favourites",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of favourites",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Favourite" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/favourites/{propertyId}": {
+      "post": {
+        "tags": ["Favourites"],
+        "summary": "Add a property to favourites",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "responses": {
+          "201": { "description": "Favourite created" },
+          "400": { "description": "Invalid ID or already favourited" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "description": "Property not found" },
+          "409": { "description": "Property already favourited" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "delete": {
+        "tags": ["Favourites"],
+        "summary": "Remove a property from favourites",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "responses": {
+          "200": { "description": "Favourite deleted successfully" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "description": "Favourite not found" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/inquiries/mine": {
+      "get": {
+        "tags": ["Inquiries"],
+        "summary": "Get inquiries about the current user's listings",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of received inquiries",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Inquiry" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/inquiries/sent": {
+      "get": {
+        "tags": ["Inquiries"],
+        "summary": "Get inquiries I sent that have been answered",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of answered sent inquiries",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Inquiry" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/inquiries/{inquiryId}/replies": {
+      "post": {
+        "tags": ["Inquiries"],
+        "summary": "Add a reply to an inquiry (owner or sender)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/inquiryId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": { "text": { "type": "string", "maxLength": 1000 } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Reply added" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/inquiries/{inquiryId}/read": {
+      "patch": {
+        "tags": ["Inquiries"],
+        "summary": "Mark an inquiry notification as read",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/inquiryId" }],
+        "responses": {
+          "200": { "description": "Notification marked as read" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/inquiries/{inquiryId}": {
+      "delete": {
+        "tags": ["Inquiries"],
+        "summary": "Remove an inquiry from my notifications",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/inquiryId" }],
+        "responses": {
+          "200": { "description": "Notification deleted" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/inquiries/{propertyId}": {
+      "post": {
+        "tags": ["Inquiries"],
+        "summary": "Create an inquiry about a public listing (guests allowed)",
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "message"],
+                "properties": {
+                  "name": { "type": "string", "maxLength": 100 },
+                  "email": { "type": "string", "format": "email" },
+                  "message": { "type": "string", "maxLength": 1000 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Inquiry created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Inquiry" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/contact-messages": {
+      "post": {
+        "tags": ["Contact"],
+        "summary": "Submit a contact message (guests allowed)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["fullName", "email", "subject", "message"],
+                "properties": {
+                  "fullName": { "type": "string", "maxLength": 100 },
+                  "email": { "type": "string", "format": "email" },
+                  "subject": { "type": "string" },
+                  "message": { "type": "string", "maxLength": 1000 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contact message created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ContactMessage" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "get": {
+        "tags": ["Contact"],
+        "summary": "Get all contact messages (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of contact messages",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ContactMessage" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/contact-messages/mine": {
+      "get": {
+        "tags": ["Contact"],
+        "summary": "Get my contact messages that the admin has answered",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of my answered messages",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ContactMessage" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/contact-messages/{messageId}/replies": {
+      "post": {
+        "tags": ["Contact"],
+        "summary": "Add a reply to a contact message (admin or sender)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/messageId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": { "text": { "type": "string", "maxLength": 1000 } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Reply added" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/contact-messages/{messageId}/read": {
+      "patch": {
+        "tags": ["Contact"],
+        "summary": "User marks a contact message notification as read",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/messageId" }],
+        "responses": {
+          "200": { "description": "Notification marked as read" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/contact-messages/{messageId}/admin/read": {
+      "patch": {
+        "tags": ["Contact"],
+        "summary": "Admin marks a contact message notification as read",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/messageId" }],
+        "responses": {
+          "200": { "description": "Notification marked as read" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/contact-messages/{messageId}": {
+      "delete": {
+        "tags": ["Contact"],
+        "summary": "User removes a contact message from their notifications",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/messageId" }],
+        "responses": {
+          "200": { "description": "Notification deleted" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/contact-messages/{messageId}/admin": {
+      "delete": {
+        "tags": ["Contact"],
+        "summary": "Admin removes a contact message from their notifications",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/messageId" }],
+        "responses": {
+          "200": { "description": "Notification deleted" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/moderation/properties": {
+      "get": {
+        "tags": ["Moderation"],
+        "summary": "Get moderation candidate properties (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "listingStatus", "in": "query", "schema": { "type": "string", "enum": ["active", "inactive", "sold", "rented"] } },
+          { "name": "moderationStatus", "in": "query", "schema": { "type": "string", "enum": ["unreviewed", "flagged", "approved", "removed"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of moderation candidates",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Property" } }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/moderation/properties/{propertyId}": {
+      "patch": {
+        "tags": ["Moderation"],
+        "summary": "Update a property's moderation status (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/propertyId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status", "reason"],
+                "additionalProperties": false,
+                "properties": {
+                  "status": { "type": "string", "enum": ["flagged", "approved", "removed"] },
+                  "reason": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated property",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Property" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/moderation/reports": {
+      "get": {
+        "tags": ["Moderation"],
+        "summary": "Get listing reports (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["open", "resolved"] } },
+          { "name": "propertyId", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of reports (newest first)",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Report" } }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/verifications": {
+      "post": {
+        "tags": ["Verification"],
+        "summary": "Create a verification request (buyer/renter to seller/agent, seller to agent)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["role", "idDocument"],
+                "properties": {
+                  "role": { "type": "string", "enum": ["seller", "agent"] },
+                  "fullName": { "type": "string", "maxLength": 100 },
+                  "companyName": { "type": "string", "maxLength": 100 },
+                  "phone": { "type": "string", "maxLength": 40 },
+                  "email": { "type": "string", "format": "email" },
+                  "areas": { "type": "string", "maxLength": 300 },
+                  "yearsExperience": { "type": "number", "minimum": 0, "maximum": 80 },
+                  "licenseNumber": { "type": "string", "maxLength": 100 },
+                  "bio": { "type": "string", "maxLength": 1000 },
+                  "idDocument": { "type": "string" },
+                  "licenseDocument": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Verification request created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Verification" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "409": { "description": "A pending verification request already exists" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "get": {
+        "tags": ["Verification"],
+        "summary": "Get all verification applications (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["pending", "approved", "rejected"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of applications",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Verification" } }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/verifications/me": {
+      "get": {
+        "tags": ["Verification"],
+        "summary": "Get the current user's latest verification request",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Verification request",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Verification" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/verifications/{applicationId}": {
+      "patch": {
+        "tags": ["Verification"],
+        "summary": "Review a verification application (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/applicationId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status", "reviewReason"],
+                "properties": {
+                  "status": { "type": "string", "enum": ["approved", "rejected"] },
+                  "reviewReason": { "type": "string", "maxLength": 500 },
+                  "rejectionReason": { "type": "string", "description": "Deprecated alias of reviewReason" },
+                  "reviewNote": { "type": "string", "maxLength": 500 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reviewed application",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Verification" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "description": "Application already reviewed" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "delete": {
+        "tags": ["Verification"],
+        "summary": "Admin removes a reviewed application from notifications",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/applicationId" }],
+        "responses": {
+          "200": { "description": "Notification deleted" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "description": "Application must be reviewed before deletion" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/verifications/{applicationId}/read": {
+      "patch": {
+        "tags": ["Verification"],
+        "summary": "Admin marks an application notification as read",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/applicationId" }],
+        "responses": {
+          "200": { "description": "Notification marked as read" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/estimate": {
+      "post": {
+        "tags": ["Estimation"],
+        "summary": "Estimate a property price (verified seller/agent or admin)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["postalCode", "size", "buildingYear", "buildingType"],
+                "properties": {
+                  "postalCode": { "type": "string", "pattern": "^\\d{5}$" },
+                  "size": { "type": "number", "exclusiveMinimum": 0 },
+                  "rooms": { "type": "number" },
+                  "buildingYear": { "type": "integer", "minimum": 1800, "maximum": 2026 },
+                  "buildingType": { "type": "string", "enum": ["apartment", "detached-house", "semi-detached-house", "terraced-house"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Price estimate",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EstimateResult" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/estimate/growth": {
+      "post": {
+        "tags": ["Estimation"],
+        "summary": "Predict price growth for a postal code (verified seller/agent or admin)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["postalCode"],
+                "properties": {
+                  "postalCode": { "type": "string", "pattern": "^\\d{5}$" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Growth prediction",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GrowthResult" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    }
+  }
+}

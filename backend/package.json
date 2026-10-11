@@ -24,7 +24,8 @@
     "mongodb": "^7.6.0",
     "mongoose": "^9.9.5",
     "node-geocoder": "^4.4.1",
-    "nodemailer": "^10.0.10"
+    "nodemailer": "^10.0.10",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
